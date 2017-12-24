@@ -11,7 +11,7 @@ impl RangeMinimumQuery {
     pub fn new(size: usize) -> RangeMinimumQuery {
         let mut m = 1;
         while m <= size {
-            m *= 2;
+            m <<= 1;
         }
         RangeMinimumQuery {
             seg: vec![MAX; m * 2],
@@ -23,7 +23,7 @@ impl RangeMinimumQuery {
         k += self.n - 1;
         self.seg[k] = value;
         while k > 0 {
-            k = (k - 1) / 2;
+            k = (k - 1) >> 1;
             self.seg[k] = cmp::min(self.seg[k * 2 + 1], self.seg[k * 2 + 2]);
         }
     }
@@ -45,12 +45,11 @@ impl RangeMinimumQuery {
         if a <= l && r <= b {
             return self.seg[k];
         }
-        let x = self.query_range(a, b, k * 2 + 1, l, (l + r) / 2);
-        let y = self.query_range(a, b, k * 2 + 2, (l + r) / 2, r);
+        let x = self.query_range(a, b, k * 2 + 1, l, (l + r) >> 1);
+        let y = self.query_range(a, b, k * 2 + 2, (l + r) >> 1, r);
         cmp::min(x, y)
     }
 }
-
 
 #[cfg(test)]
 mod test {
@@ -58,6 +57,7 @@ mod test {
 
     use super::*;
     use self::rand::Rng;
+    use test::Bencher;
 
     #[test]
     fn random_array() {
@@ -97,5 +97,20 @@ mod test {
             }
             assert_eq!(seg.query(0, n), minimum);
         }
+    }
+
+    #[bench]
+    fn bench(b: &mut Bencher) {
+        b.iter(|| {
+            let n = 100000;
+
+            let mut seg = RangeMinimumQuery::new(n);
+
+            for _ in 0..n {
+                let value = rand::thread_rng().gen::<i64>();
+                let k = rand::thread_rng().gen_range(0, n);
+                seg.update(k, value);
+            }
+        });
     }
 }
