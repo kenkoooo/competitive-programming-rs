@@ -1,30 +1,31 @@
-use std::cmp;
-use std::i64::MAX;
-
 /// Segment Tree for range minimum queries
-pub struct RangeMinimumQuery {
-    seg: Vec<i64>,
+pub struct SegmentTree<T, F> {
+    seg: Vec<T>,
     n: usize,
+    f: F,
+    initial_value: T,
 }
 
-impl RangeMinimumQuery {
-    pub fn new(size: usize) -> RangeMinimumQuery {
+impl<T: Clone, F> SegmentTree<T, F> where F: Fn(T, T) -> T {
+    pub fn new(size: usize, initial_value: T, f: F) -> SegmentTree<T, F> {
         let mut m = 1;
         while m <= size {
             m <<= 1;
         }
-        RangeMinimumQuery {
-            seg: vec![MAX; m * 2],
+        SegmentTree {
+            seg: vec![initial_value.clone(); m * 2],
             n: m,
+            f: f,
+            initial_value: initial_value.clone(),
         }
     }
 
-    pub fn update(&mut self, mut k: usize, value: i64) {
+    pub fn update(&mut self, mut k: usize, value: T) {
         k += self.n - 1;
         self.seg[k] = value;
         while k > 0 {
             k = (k - 1) >> 1;
-            self.seg[k] = cmp::min(self.seg[k * 2 + 1], self.seg[k * 2 + 2]);
+            self.seg[k] = (self.f)(self.seg[k * 2 + 1].clone(), self.seg[k * 2 + 2].clone());
         }
     }
 
@@ -33,21 +34,21 @@ impl RangeMinimumQuery {
     /// # Panics
     ///
     /// Panics if `a >= b`.
-    pub fn query(&self, a: usize, b: usize) -> i64 {
+    pub fn query(&self, a: usize, b: usize) -> T {
         assert!(a < b);
         return self.query_range(a, b, 0, 0, self.n);
     }
 
-    pub fn query_range(&self, a: usize, b: usize, k: usize, l: usize, r: usize) -> i64 {
+    pub fn query_range(&self, a: usize, b: usize, k: usize, l: usize, r: usize) -> T {
         if r <= a || b <= l {
-            return MAX;
+            return self.initial_value.clone();
         }
         if a <= l && r <= b {
-            return self.seg[k];
+            return self.seg[k].clone();
         }
         let x = self.query_range(a, b, k * 2 + 1, l, (l + r) >> 1);
         let y = self.query_range(a, b, k * 2 + 2, (l + r) >> 1, r);
-        cmp::min(x, y)
+        (self.f)(x, y)
     }
 }
 
@@ -58,6 +59,8 @@ mod test {
     use super::*;
     use self::rand::Rng;
     use test::Bencher;
+    use std::i64::MAX;
+    use std::cmp;
 
     #[test]
     fn random_array() {
@@ -66,7 +69,7 @@ mod test {
             return rand::thread_rng().gen::<i64>();
         }).collect::<Vec<_>>();
 
-        let mut seg = RangeMinimumQuery::new(n);
+        let mut seg = SegmentTree::new(n, MAX, |a, b| cmp::min(a, b));
         for i in 0..n {
             let mut minimum = MAX;
             for j in 0..(i + 1) {
@@ -83,7 +86,7 @@ mod test {
         let n = 1000;
 
         let mut arr = vec![MAX; n];
-        let mut seg = RangeMinimumQuery::new(n);
+        let mut seg = SegmentTree::new(n, MAX, |a, b| cmp::min(a, b));
 
         for _ in 0..n {
             let value = rand::thread_rng().gen::<i64>();
@@ -104,7 +107,7 @@ mod test {
         b.iter(|| {
             let n = 100000;
 
-            let mut seg = RangeMinimumQuery::new(n);
+            let mut seg = SegmentTree::new(n, MAX, |a, b| cmp::min(a, b));
 
             for _ in 0..n {
                 let value = rand::thread_rng().gen::<i64>();
