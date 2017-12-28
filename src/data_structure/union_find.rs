@@ -56,16 +56,16 @@ mod test {
         for i in 1..33 {
             let input_file: String = format!("./assets/DSL_1_A/DSL_1_A_{}.in", i);
             let output_file: String = format!("./assets/DSL_1_A/DSL_1_A_{}.out", i);
-            let mut input = load_test_cases(&input_file);
-            let mut output = load_test_cases(&output_file);
+            let mut input = load_test_cases::<usize>(&input_file);
+            let mut output = load_test_cases::<usize>(&output_file);
 
-            let n = input.pop_front().unwrap() as usize;
-            let q = input.pop_front().unwrap() as usize;
+            let n = input.pop_front().unwrap();
+            let q = input.pop_front().unwrap();
             let mut uf = UnionFind::new(n);
             for _ in 0..q {
                 let com = input.pop_front().unwrap();
-                let x = input.pop_front().unwrap() as usize;
-                let y = input.pop_front().unwrap() as usize;
+                let x = input.pop_front().unwrap();
+                let y = input.pop_front().unwrap();
                 if com == 0 {
                     uf.unite(x, y);
                 } else {
