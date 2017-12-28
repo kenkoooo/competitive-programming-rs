@@ -1,11 +1,13 @@
 use std::io::Read;
 use std::str;
+use std::fmt;
 use std::collections::vec_deque::VecDeque;
 use std::error::Error;
 use std::fs::File;
 use std::path::Path;
 
-pub fn load_test_cases(filepath: &str) -> VecDeque<i64> {
+pub fn load_test_cases<T>(filepath: &str) -> VecDeque<T>
+    where T: str::FromStr, T::Err: fmt::Debug {
     let path = Path::new(filepath);
     let display = path.display();
 
@@ -15,7 +17,7 @@ pub fn load_test_cases(filepath: &str) -> VecDeque<i64> {
     };
 
     let mut s = String::new();
-    let mut deque: VecDeque<i64> = VecDeque::new();
+    let mut deque = VecDeque::new();
     match file.read_to_string(&mut s) {
         Err(why) => panic!("couldn't read {}: {}", display, Error::description(&why)),
         Ok(_) => {
