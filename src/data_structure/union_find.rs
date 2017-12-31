@@ -24,21 +24,21 @@ impl UnionFind {
     }
 
     fn unite(&mut self, x: usize, y: usize) -> bool {
-        let fx = self.find(x);
-        let fy = self.find(y);
-        if fx == fy {
+        let parent_x = self.find(x);
+        let parent_y = self.find(y);
+        if parent_x == parent_y {
             return false;
         }
 
-        let (tx, ty) = if self.sizes[fx] < self.sizes[fy] {
-            (fy, fx)
+        let (large, small) = if self.sizes[parent_x] < self.sizes[parent_y] {
+            (parent_y, parent_x)
         } else {
-            (fx, fy)
+            (parent_x, parent_y)
         };
 
-        self.parent[ty] = tx;
-        self.sizes[tx] += self.sizes[ty];
-        self.sizes[ty] = 0;
+        self.parent[small] = large;
+        self.sizes[large] += self.sizes[small];
+        self.sizes[small] = 0;
         self.size -= 1;
         return true;
     }
