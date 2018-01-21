@@ -36,7 +36,6 @@ mod test {
     use super::*;
     use self::rand::Rng;
     use self::rand::distributions::{IndependentSample, Range};
-    use std::cmp;
 
     #[test]
     fn random_array() {

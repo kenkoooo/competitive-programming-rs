@@ -20,7 +20,7 @@ fn compare_node(i: usize, j: usize, k: usize, rank: &Vec<i32>) -> Ordering {
 }
 
 impl SuffixArray {
-    pub fn new(s: Vec<u8>) -> SuffixArray {
+    pub fn new(s: &Vec<u8>) -> SuffixArray {
         let n = s.len();
         let mut rank = vec![0; n + 1];
         let mut array = vec![0; n + 1];
@@ -45,7 +45,7 @@ impl SuffixArray {
             k *= 2;
         }
 
-        SuffixArray { n: n, rank: rank, array: array, s: s }
+        SuffixArray { n: n, rank: rank, array: array, s: s.clone() }
     }
 
     pub fn contains(&self, t: &Vec<u8>) -> bool {
@@ -98,7 +98,7 @@ mod test {
     #[test]
     fn small_test() {
         let string = "abcdeabcde".to_owned().bytes().collect();
-        let sa = SuffixArray::new(string);
+        let sa = SuffixArray::new(&string);
         assert_eq!(sa.lower_bound(&"a".to_owned().bytes().collect()), 1);
         assert_eq!(sa.upper_bound(&"a".to_owned().bytes().collect()), 3);
 
@@ -109,7 +109,7 @@ mod test {
     #[test]
     fn corner_case() {
         let string = "cba".to_owned().bytes().collect();
-        let sa = SuffixArray::new(string);
+        let sa = SuffixArray::new(&string);
         assert_eq!(sa.lower_bound(&"c".to_owned().bytes().collect()), 3);
         assert_eq!(sa.upper_bound(&"c".to_owned().bytes().collect()), 4);
     }
@@ -132,8 +132,8 @@ mod test {
                 r
             };
 
-            let sa = SuffixArray::new(s);
-            let reverse_sa = SuffixArray::new(reverse_s);
+            let sa = SuffixArray::new(&s);
+            let reverse_sa = SuffixArray::new(&reverse_s);
 
             let mut rmq = SegmentTree::new(n + 1, MAX, |a, b| cmp::min(a, b));
             let mut reverse_rmq = SegmentTree::new(n + 1, MAX, |a, b| cmp::min(a, b));
