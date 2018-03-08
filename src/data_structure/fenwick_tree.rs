@@ -1,10 +1,14 @@
+/// `FenwickTree` is a data structure that can efficiently update elements
+/// and calculate prefix sums in a table of numbers.
+/// [https://en.wikipedia.org/wiki/Fenwick_tree](https://en.wikipedia.org/wiki/Fenwick_tree)
 pub struct FenwickTree {
     n: usize,
     data: Vec<usize>,
 }
 
 impl FenwickTree {
-    fn new(size: usize) -> FenwickTree {
+    /// Constructs a new `FenwickTree`. The size of `FenwickTree` should be specified by `size`.
+    pub fn new(size: usize) -> FenwickTree {
         FenwickTree { n: size + 1, data: vec![0; size + 1] }
     }
 
@@ -16,13 +20,13 @@ impl FenwickTree {
         }
     }
 
-    /// returns sum of [l, r)
-    fn sum(&self, l: usize, r: usize) -> usize {
+    /// Returns a sum of range `[l, r)`
+    pub fn sum(&self, l: usize, r: usize) -> usize {
         return self.sum_one(r) - self.sum_one(l);
     }
 
-    /// returns sum of [0, k)
-    fn sum_one(&self, k: usize) -> usize {
+    /// Returns a sum of range `[0, k)`
+    pub fn sum_one(&self, k: usize) -> usize {
         if k >= self.n {
             panic!("");
         }
