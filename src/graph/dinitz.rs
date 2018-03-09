@@ -1,7 +1,7 @@
 use std::usize;
 use std::cmp;
-use std::collections::vec_deque::VecDeque;
-use std::i64::MAX;
+use std::collections::VecDeque;
+use std::i64;
 
 struct Edge {
     pub to: usize,
@@ -23,8 +23,8 @@ impl Dinitz {
         }
         Dinitz {
             g: g,
-            level: vec![0;v],
-            iter: vec![0;v],
+            level: vec![0; v],
+            iter: vec![0; v],
         }
     }
 
@@ -48,7 +48,6 @@ impl Dinitz {
             return f;
         }
         while self.iter[v] < self.g[v].len() {
-
             let (e_cap, e_to, e_rev);
             {
                 let ref e = self.g[v][self.iter[v]];
@@ -78,7 +77,7 @@ impl Dinitz {
 
     fn bfs(&mut self, s: usize) {
         let v = self.level.len();
-        self.level = vec![-1;v];
+        self.level = vec![-1; v];
         self.level[s] = 0;
         let mut deque = VecDeque::new();
         deque.push_back(s);
@@ -101,9 +100,9 @@ impl Dinitz {
             if self.level[t] < 0 {
                 return flow;
             }
-            self.iter = vec![0;v];
+            self.iter = vec![0; v];
             loop {
-                let f = self.dfs(s, t, MAX);
+                let f = self.dfs(s, t, i64::MAX);
                 if f == 0 {
                     break;
                 }
