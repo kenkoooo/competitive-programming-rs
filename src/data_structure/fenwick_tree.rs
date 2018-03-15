@@ -16,7 +16,7 @@ impl FenwickTree {
         let mut x = k;
         while x < self.n {
             self.data[x] += value;
-            x |= (x + 1);
+            x |= x + 1;
         }
     }
 

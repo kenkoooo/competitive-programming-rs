@@ -34,7 +34,6 @@ mod test {
     extern crate rand;
 
     use super::*;
-    use self::rand::Rng;
     use self::rand::distributions::{IndependentSample, Range};
 
     #[test]

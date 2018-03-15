@@ -33,15 +33,12 @@ mod test {
     extern crate rand;
 
     use super::*;
-    use self::rand::Rng;
-    use self::rand::distributions::{IndependentSample, Range};
 
     fn gcd(a: usize, b: usize) -> usize { if b == 0 { a } else { gcd(b, a % b) } }
 
     #[test]
     fn random_combination() {
         let modulo = 1_000_000_007;
-        let mut rng = rand::thread_rng();
 
         for n in 100..200 {
             let comb = Combination::new(n, modulo);
