@@ -1,7 +1,7 @@
 [package]
 name = "competitive-programming-rs"
-version = "0.1.1"
-authors = ["kenkou.n@smail.com"]
+version = "0.1.2"
+authors = ["kenkoooo"]
 description = "Competitive Programming Library in Rust"
 license = "MIT"
 license-file = "LICENSE"
