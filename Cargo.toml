@@ -12,4 +12,4 @@ homepage = "https://github.com/kenkoooo/competitive-programming-rs"
 exclude = ["assets/*"]
 
 [dependencies]
-rand = "0.3.18"
+rand = "0.4.2"
