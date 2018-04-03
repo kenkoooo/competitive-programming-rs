@@ -3,7 +3,6 @@ name = "competitive-programming-rs"
 version = "0.1.3"
 authors = ["kenkoooo"]
 description = "Competitive Programming Library in Rust"
-license = "MIT"
 license-file = "LICENSE"
 readme = "README.md"
 repository = "https://github.com/kenkoooo/competitive-programming-rs"
