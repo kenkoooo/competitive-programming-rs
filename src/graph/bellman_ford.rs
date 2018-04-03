@@ -52,16 +52,10 @@ mod tests {
 
     #[test]
     fn solve_grl_1_b() {
-        let mut input_files = fs::read_dir("./assets/GRL_1_B/in/").unwrap().map(|result| { result.unwrap().path().display().to_string() }).collect::<Vec<_>>();
-        let mut output_files = fs::read_dir("./assets/GRL_1_B/out/").unwrap().map(|result| { result.unwrap().path().display().to_string() }).collect::<Vec<_>>();
+        let mut input = TestCaseProducer::new_from_directory("./assets/GRL_1_B/in/");
+        let mut output = TestCaseProducer::new_from_directory("./assets/GRL_1_B/out/");
 
-        input_files.sort();
-        output_files.sort();
-
-        for i in 0..input_files.len() {
-            let mut input = TestCaseProducer::new(&input_files[i]);
-            let mut output = TestCaseProducer::new(&output_files[i]);
-
+        while !input.is_empty() {
             let v: usize = input.next();
             let e: usize = input.next();
             let r: usize = input.next();

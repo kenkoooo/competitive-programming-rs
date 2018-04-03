@@ -48,24 +48,22 @@ impl UnionFind {
 #[cfg(test)]
 mod test {
     use super::*;
-    use test_helper::load_test_cases;
+    use test_helper::TestCaseProducer;
 
     /// Solve http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_1_A
     #[test]
     fn solve_dsl_1_a() {
-        for i in 1..33 {
-            let input_file: String = format!("./assets/DSL_1_A/DSL_1_A_{}.in", i);
-            let output_file: String = format!("./assets/DSL_1_A/DSL_1_A_{}.out", i);
-            let mut input = load_test_cases::<usize>(&input_file);
-            let mut output = load_test_cases::<usize>(&output_file);
+        let mut input = TestCaseProducer::new_from_directory("./assets/DSL_1_A/in/");
+        let mut output = TestCaseProducer::new_from_directory("./assets/DSL_1_A/out/");
 
-            let n = input.pop_front().unwrap();
-            let q = input.pop_front().unwrap();
+        while !input.is_empty() {
+            let n = input.next();
+            let q = input.next();
             let mut uf = UnionFind::new(n);
             for _ in 0..q {
-                let com = input.pop_front().unwrap();
-                let x = input.pop_front().unwrap();
-                let y = input.pop_front().unwrap();
+                let com: usize = input.next();
+                let x = input.next();
+                let y = input.next();
                 if com == 0 {
                     uf.unite(x, y);
                 } else {
@@ -74,7 +72,7 @@ mod test {
                     } else {
                         0
                     };
-                    assert_eq!(ans, output.pop_front().unwrap());
+                    assert_eq!(ans, output.next());
                 }
             }
         }

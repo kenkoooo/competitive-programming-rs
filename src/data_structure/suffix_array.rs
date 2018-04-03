@@ -91,9 +91,9 @@ impl SuffixArray {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std;
     use data_structure::segment_tree::SegmentTree;
-    use std::i64::MAX;
-    use test_helper::load_test_cases;
+    use test_helper::TestCaseProducer;
 
     #[test]
     fn small_test() {
@@ -116,15 +116,11 @@ mod test {
 
     #[test]
     fn jag2014summer_day4_f() {
-        let input_files = fs::read_dir("./assets/jag2014summer-day4/F/in/").unwrap().map(|result| { result.unwrap().path().display().to_string() }).collect::<Vec<_>>();
-        let output_files = fs::read_dir("./assets/jag2014summer-day4/F/out/").unwrap().map(|result| { result.unwrap().path().display().to_string() }).collect::<Vec<_>>();
+        let mut input = TestCaseProducer::new_from_directory("./assets/jag2014summer-day4/F/in/");
+        let mut output = TestCaseProducer::new_from_directory("./assets/jag2014summer-day4/F/out/");
 
-        for i in 0..input_files.len() {
-            let mut input = load_test_cases::<String>(&input_files[i]);
-            let mut output = load_test_cases::<String>(&output_files[i]);
-            println!("{}", input_files[i]);
-
-            let s = input.pop_front().unwrap().to_owned().bytes().collect::<Vec<_>>();
+        while !input.is_empty() {
+            let s: Vec<u8> = input.next::<String>().bytes().collect();
             let n = s.len();
             let reverse_s = {
                 let mut r = s.clone();
@@ -135,47 +131,47 @@ mod test {
             let sa = SuffixArray::new(&s);
             let reverse_sa = SuffixArray::new(&reverse_s);
 
-            let mut rmq = SegmentTree::new(n + 1, MAX, |a, b| cmp::min(a, b));
-            let mut reverse_rmq = SegmentTree::new(n + 1, MAX, |a, b| cmp::min(a, b));
+            let mut rmq = SegmentTree::new(n + 1, std::i64::MAX, |a, b| cmp::min(a, b));
+            let mut reverse_rmq = SegmentTree::new(n + 1, std::i64::MAX, |a, b| cmp::min(a, b));
             for i in 0..(n + 1) {
                 rmq.update(i, sa.array[i] as i64);
                 reverse_rmq.update(i, reverse_sa.array[i] as i64);
             }
 
 
-            let m = input.pop_front().unwrap().parse::<usize>().unwrap();
+            let m = input.next();
             for _ in 0..m {
-                let x = input.pop_front().unwrap().to_owned().bytes().collect();
+                let x = input.next::<String>().bytes().collect();
                 let y = {
-                    let mut y = input.pop_front().unwrap().to_owned().bytes().collect::<Vec<_>>();
+                    let mut y: Vec<u8> = input.next::<String>().bytes().collect();
                     y.reverse();
                     y
                 };
 
                 if !sa.contains(&x) {
-                    assert_eq!(output.pop_front().unwrap(), "0");
+                    assert_eq!(output.next::<String>(), "0");
                     continue;
                 }
                 let low = sa.lower_bound(&x);
                 let up = sa.upper_bound(&x);
 
                 if !reverse_sa.contains(&y) {
-                    assert_eq!(output.pop_front().unwrap(), "0");
+                    assert_eq!(output.next::<String>(), "0");
                     continue;
                 }
                 let reverse_low = reverse_sa.lower_bound(&y);
                 let reverse_up = reverse_sa.upper_bound(&y);
 
                 if low >= up || reverse_low >= reverse_up {
-                    assert_eq!(output.pop_front().unwrap(), "0");
+                    assert_eq!(output.next::<String>(), "0");
                 }
 
                 let s = rmq.query(low, up) as usize;
                 let t = n - reverse_rmq.query(reverse_low, reverse_up) as usize;
                 if s + x.len() <= t && s <= t - y.len() {
-                    assert_eq!(output.pop_front().unwrap().parse::<usize>().unwrap(), t - s);
+                    assert_eq!(output.next::<usize>(), t - s);
                 } else {
-                    assert_eq!(output.pop_front().unwrap(), "0");
+                    assert_eq!(output.next::<String>(), "0");
                 }
             }
         }

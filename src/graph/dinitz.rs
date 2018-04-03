@@ -115,29 +115,29 @@ impl Dinitz {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_helper::load_test_cases;
+    use test_helper::TestCaseProducer;
 
-    // Solve http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A
+    /// Solve http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A
     #[test]
     fn solve_grl_6_a() {
-        let mut input: VecDeque<i64> = load_test_cases("./assets/GRL_6_A.in");
-        let mut output: VecDeque<i64> = load_test_cases("./assets/GRL_6_A.out");
+        let mut input = TestCaseProducer::new("./assets/GRL_6_A.in");
+        let mut output = TestCaseProducer::new("./assets/GRL_6_A.out");
 
-        let test_cases = input.pop_front().unwrap() as usize;
-        assert_eq!(test_cases, output.pop_front().unwrap() as usize);
+        let test_cases = input.next();
+        assert_eq!(test_cases, output.next());
         for _ in 0..test_cases {
-            let v = input.pop_front().unwrap() as usize;
-            let e = input.pop_front().unwrap() as usize;
+            let v = input.next();
+            let e = input.next();
 
             let mut dinitz = Dinitz::new(v);
             for _ in 0..e {
-                let from = input.pop_front().unwrap() as usize;
-                let to = input.pop_front().unwrap() as usize;
-                let c = input.pop_front().unwrap();
+                let from = input.next();
+                let to = input.next();
+                let c = input.next();
                 dinitz.add_edge(from, to, c);
             }
             let flow = dinitz.max_flow(0, v - 1);
-            let ans = output.pop_front().unwrap();
+            let ans = output.next();
             assert_eq!(flow, ans);
         }
     }

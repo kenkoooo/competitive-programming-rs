@@ -77,36 +77,30 @@ pub mod strongly_connected_components {
 mod tests {
     use super::*;
     use std::fs;
-    use test_helper::load_test_cases;
+    use test_helper::TestCaseProducer;
 
     #[test]
     fn solve_grl_3_c() {
-        let mut input_files = fs::read_dir("./assets/GRL_3_C/in/").unwrap().map(|result| { result.unwrap().path().display().to_string() }).collect::<Vec<_>>();
-        let mut output_files = fs::read_dir("./assets/GRL_3_C/out/").unwrap().map(|result| { result.unwrap().path().display().to_string() }).collect::<Vec<_>>();
+        let mut input = TestCaseProducer::new_from_directory("./assets/GRL_3_C/in/");
+        let mut output = TestCaseProducer::new_from_directory("./assets/GRL_3_C/out/");
 
-        input_files.sort();
-        output_files.sort();
-
-        for i in 0..input_files.len() {
-            let mut input = load_test_cases::<usize>(&input_files[i]);
-            let mut output = load_test_cases::<usize>(&output_files[i]);
-
-            let v: usize = input.pop_front().unwrap();
-            let e: usize = input.pop_front().unwrap();
+        while !input.is_empty() {
+            let v: usize = input.next();
+            let e: usize = input.next();
             let mut graph = vec![vec![]; v];
             for _ in 0..e {
-                let s: usize = input.pop_front().unwrap();
-                let t: usize = input.pop_front().unwrap();
+                let s: usize = input.next();
+                let t: usize = input.next();
                 graph[s].push(t);
             }
 
             let cmp = strongly_connected_components::decompose(&graph);
-            let q: usize = input.pop_front().unwrap();
+            let q: usize = input.next();
             for _ in 0..q {
-                let u: usize = input.pop_front().unwrap();
-                let v: usize = input.pop_front().unwrap();
+                let u: usize = input.next();
+                let v: usize = input.next();
 
-                let expected = output.pop_front().unwrap();
+                let expected = output.next();
 
                 if cmp[u] == cmp[v] {
                     assert_eq!(1, expected);

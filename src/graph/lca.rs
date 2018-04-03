@@ -88,26 +88,20 @@ impl LowestCommonAncestor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_helper::load_test_cases;
+    use test_helper::TestCaseProducer;
 
     #[test]
     fn solve_grl_5_c() {
-        let mut input_files = fs::read_dir("./assets/GRL_5_C/in/").unwrap().map(|result| { result.unwrap().path().display().to_string() }).collect::<Vec<_>>();
-        let mut output_files = fs::read_dir("./assets/GRL_5_C/out/").unwrap().map(|result| { result.unwrap().path().display().to_string() }).collect::<Vec<_>>();
+        let mut input = TestCaseProducer::new_from_directory("./assets/GRL_5_C/in/");
+        let mut output = TestCaseProducer::new_from_directory("./assets/GRL_5_C/out/");
 
-        input_files.sort();
-        output_files.sort();
-        for i in 0..input_files.len() {
-            let mut input = load_test_cases::<String>(&input_files[i]);
-            let mut output = load_test_cases::<String>(&output_files[i]);
-
-
-            let n: usize = input.pop_front().unwrap().parse().unwrap();
+        while !input.is_empty() {
+            let n: usize = input.next();
             let mut graph = (0..n).map(|_| Vec::new()).collect::<Vec<_>>();
             for i in 0..n {
-                let k = input.pop_front().unwrap().parse().unwrap();
+                let k = input.next();
                 for _ in 0..k {
-                    let c: usize = input.pop_front().unwrap().parse().unwrap();
+                    let c: usize = input.next();
                     graph[i].push(c);
                     graph[c].push(i);
                 }
@@ -115,13 +109,13 @@ mod tests {
 
             let lca = LowestCommonAncestor::new(&graph);
 
-            let q: usize = input.pop_front().unwrap().parse().unwrap();
+            let q: usize = input.next();
             for _ in 0..q {
-                let u: usize = input.pop_front().unwrap().parse().unwrap();
-                let v: usize = input.pop_front().unwrap().parse().unwrap();
+                let u: usize = input.next();
+                let v: usize = input.next();
                 let ans = lca.get_lca(u, v);
 
-                let expected: usize = output.pop_front().unwrap().parse().unwrap();
+                let expected: usize = output.next();
                 assert_eq!(ans, expected);
             }
         }
