@@ -9,6 +9,7 @@ readme = "README.md"
 repository = "https://github.com/kenkoooo/competitive-programming-rs"
 documentation = "https://kenkoooo.github.io/competitive-programming-rs/"
 homepage = "https://github.com/kenkoooo/competitive-programming-rs"
+exclude = ["assets/"]
 
 [dependencies]
 rand = "0.3.18"
