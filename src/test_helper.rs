@@ -6,6 +6,21 @@ use std::error::Error;
 use std::fs::File;
 use std::path::Path;
 
+pub struct TestCaseProducer {
+    queue: VecDeque<String>
+}
+
+impl TestCaseProducer {
+    pub fn new(filepath: &str) -> TestCaseProducer {
+        let cases = load_test_cases(filepath);
+        TestCaseProducer { queue: cases }
+    }
+
+    pub fn next<T>(&mut self) -> T where T: str::FromStr, T::Err: fmt::Debug {
+        self.queue.pop_front().unwrap().parse().ok().unwrap()
+    }
+}
+
 pub fn load_test_cases<T>(filepath: &str) -> VecDeque<T>
     where T: str::FromStr, T::Err: fmt::Debug {
     let path = Path::new(filepath);

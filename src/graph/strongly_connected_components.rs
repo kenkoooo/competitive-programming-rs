@@ -80,7 +80,7 @@ mod tests {
     use test_helper::load_test_cases;
 
     #[test]
-    fn solve_grl_5_c() {
+    fn solve_grl_3_c() {
         let mut input_files = fs::read_dir("./assets/GRL_3_C/in/").unwrap().map(|result| { result.unwrap().path().display().to_string() }).collect::<Vec<_>>();
         let mut output_files = fs::read_dir("./assets/GRL_3_C/out/").unwrap().map(|result| { result.unwrap().path().display().to_string() }).collect::<Vec<_>>();
 
