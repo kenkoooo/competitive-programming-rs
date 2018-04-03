@@ -5,6 +5,4 @@
 
 Competitive Programming Snippets in Rust can be used in programming contests.
 
-## Documentation
-
-[Documentation](https://kenkoooo.github.io/competitive-programming-rs/) is written as rustdoc.
+- [Documentation](https://docs.rs/competitive-programming-rs) 

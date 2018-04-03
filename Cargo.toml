@@ -1,13 +1,13 @@
 [package]
 name = "competitive-programming-rs"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["kenkoooo"]
 description = "Competitive Programming Library in Rust"
 license-file = "LICENSE"
 readme = "README.md"
 repository = "https://github.com/kenkoooo/competitive-programming-rs"
-documentation = "https://kenkoooo.github.io/competitive-programming-rs/"
-homepage = "https://github.com/kenkoooo/competitive-programming-rs"
+documentation = "https://docs.rs/competitive-programming-rs"
+homepage = "https://docs.rs/competitive-programming-rs"
 exclude = ["assets/*"]
 
 [dependencies]
