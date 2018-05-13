@@ -1,12 +1,11 @@
 pub mod bellman_ford {
-    pub fn shortest_path(graph: &Vec<Vec<(usize, i64)>>, start: usize, inf: i64) -> Option<Vec<i64>> {
+    pub fn shortest_path(graph: &Vec<Vec<(usize, i64)>>, start: usize, inf: i64) -> (Vec<i64>, Vec<bool>) {
         let n = graph.len();
         let mut dist = vec![inf; n];
         dist[start] = 0;
         for _ in 0..n {
             for v in 0..n {
-                for e in &graph[v] {
-                    let (to, cost) = *e;
+                for &(to, cost) in &graph[v] {
                     if dist[v] == inf || dist[to] <= dist[v] + cost {
                         continue;
                     }
@@ -18,8 +17,7 @@ pub mod bellman_ford {
         let mut negative = vec![false; n];
         for _ in 0..n {
             for v in 0..n {
-                for e in &graph[v] {
-                    let (to, cost) = *e;
+                for &(to, cost) in &graph[v] {
                     if dist[v] == inf {
                         continue;
                     }
@@ -34,12 +32,7 @@ pub mod bellman_ford {
             }
         }
 
-        for i in 0..n {
-            if negative[i] {
-                return None;
-            }
-        }
-        return Some(dist);
+        return (dist, negative);
     }
 }
 
@@ -71,23 +64,26 @@ mod tests {
 
             let inf = std::i64::MAX;
 
-            match bellman_ford::shortest_path(&graph, r, inf) {
-                Some(dist) => {
-                    for i in 0..v {
-                        if dist[i] == inf {
-                            let out: String = output.next();
-                            assert_eq!(out, "INF");
-                        } else {
-                            let out: i64 = output.next();
-                            assert_eq!(dist[i], out);
-                        }
+            let (dist, negative) = bellman_ford::shortest_path(&graph, r, inf);
+            let mut neg = false;
+            for &b in &negative {
+                neg = neg || b;
+            }
+
+            if neg {
+                let out1: String = output.next();
+                let out2: String = output.next();
+                assert_eq!(out1, "NEGATIVE");
+                assert_eq!(out2, "CYCLE");
+            } else {
+                for i in 0..v {
+                    if dist[i] == inf {
+                        let out: String = output.next();
+                        assert_eq!(out, "INF");
+                    } else {
+                        let out: i64 = output.next();
+                        assert_eq!(dist[i], out);
                     }
-                }
-                None => {
-                    let out1: String = output.next();
-                    let out2: String = output.next();
-                    assert_eq!(out1, "NEGATIVE");
-                    assert_eq!(out2, "CYCLE");
                 }
             }
         }
