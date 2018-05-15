@@ -1,3 +1,5 @@
+use std::ops::Sub;
+
 fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec<usize> {
     let n = points.len();
     if n <= 1 {
@@ -17,9 +19,7 @@ fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec<usi
     for &i in &ps {
         while qs.len() > 1 {
             let k = qs.len();
-            let det = points[qs[k - 1]]
-                .sub(&points[qs[k - 2]])
-                .det(&points[i].sub(&points[qs[k - 1]]));
+            let det = (points[qs[k - 1]] - points[qs[k - 2]]).det(&(points[i] - points[qs[k - 1]]));
             if det < 0.0 || (det <= 0.0 && !contain_on_segment) {
                 qs.pop();
             } else {
@@ -34,9 +34,7 @@ fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec<usi
         let i = ps[i];
         while qs.len() > t {
             let k = qs.len();
-            let det = points[qs[k - 1]]
-                .sub(&points[qs[k - 2]])
-                .det(&points[i].sub(&points[qs[k - 1]]));
+            let det = (points[qs[k - 1]] - points[qs[k - 2]]).det(&(points[i] - points[qs[k - 1]]));
             if det < 0.0 || (det <= 0.0 && !contain_on_segment) {
                 qs.pop();
             } else {
@@ -50,20 +48,23 @@ fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec<usi
     return qs;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 struct Point {
     x: f64,
     y: f64,
 }
 
-impl Point {
-    fn sub(&self, other: &Point) -> Point {
+impl Sub for Point {
+    type Output = Point;
+    fn sub(self, other: Point) -> Point {
         Point {
             x: self.x - other.x,
             y: self.y - other.y,
         }
     }
+}
 
+impl Point {
     fn det(&self, other: &Point) -> f64 {
         self.x * other.y - self.y * other.x
     }
