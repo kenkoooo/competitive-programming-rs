@@ -1,4 +1,3 @@
-use std::fs;
 use std::collections::VecDeque;
 
 const MAX_PARENT: usize = 1 << 50;
@@ -37,7 +36,9 @@ impl LowestCommonAncestor {
             stack.push_front(v);
             for u in &graph[v] {
                 let u = *u;
-                if depth_vis[u] { continue; }
+                if depth_vis[u] {
+                    continue;
+                }
                 parent[0][u] = v;
                 depth[u] = depth[v] + 1;
                 depth_vis[u] = true;
@@ -45,7 +46,9 @@ impl LowestCommonAncestor {
             }
 
             let head = stack.pop_front().unwrap();
-            if head != v { stack.push_front(head); }
+            if head != v {
+                stack.push_front(head);
+            }
         }
 
         for k in 0..(log_v - 1) {
@@ -58,17 +61,29 @@ impl LowestCommonAncestor {
             }
         }
 
-        LowestCommonAncestor { graph: graph, parent: parent, depth: depth, root: root, log_v: log_v }
+        LowestCommonAncestor {
+            graph: graph,
+            parent: parent,
+            depth: depth,
+            root: root,
+            log_v: log_v,
+        }
     }
 
     fn get_lca(&self, u: usize, v: usize) -> usize {
-        let (mut u, mut v) = if self.depth[u] <= self.depth[v] { (u, v) } else { (v, u) };
+        let (mut u, mut v) = if self.depth[u] <= self.depth[v] {
+            (u, v)
+        } else {
+            (v, u)
+        };
         for k in 0..self.log_v {
             if ((self.depth[v] - self.depth[u]) & (1 << k)) != 0 {
                 v = self.parent[k][v];
             }
         }
-        if u == v { return u; }
+        if u == v {
+            return u;
+        }
 
         for k in (0..self.log_v).rev() {
             if self.parent[k][u] != self.parent[k][v] {

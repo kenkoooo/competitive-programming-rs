@@ -17,7 +17,9 @@ pub mod strongly_connected_components {
         let mut stack = VecDeque::new();
         let mut added = vec![false; num_v];
         for i in 0..num_v {
-            if used[i] { continue; }
+            if used[i] {
+                continue;
+            }
             stack.push_front(i);
             while !stack.is_empty() {
                 let v = stack.pop_front().unwrap();
@@ -46,7 +48,9 @@ pub mod strongly_connected_components {
         vs.reverse();
         for i in &vs {
             let i = *i;
-            if used[i] { continue; }
+            if used[i] {
+                continue;
+            }
             stack.push_front(i);
             used[i] = true;
             cmp[i] = k;
@@ -56,7 +60,9 @@ pub mod strongly_connected_components {
                 let mut pushed = false;
                 for u in &reverse_graph[v] {
                     let u = *u;
-                    if used[u] { continue; }
+                    if used[u] {
+                        continue;
+                    }
                     used[u] = true;
                     cmp[u] = k;
                     stack.push_front(u);
@@ -76,7 +82,6 @@ pub mod strongly_connected_components {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs;
     use test_helper::TestCaseProducer;
 
     #[test]

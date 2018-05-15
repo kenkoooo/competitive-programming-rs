@@ -1,5 +1,9 @@
 pub mod bellman_ford {
-    pub fn shortest_path(graph: &Vec<Vec<(usize, i64)>>, start: usize, inf: i64) -> (Vec<i64>, Vec<bool>) {
+    pub fn shortest_path(
+        graph: &Vec<Vec<(usize, i64)>>,
+        start: usize,
+        inf: i64,
+    ) -> (Vec<i64>, Vec<bool>) {
         let n = graph.len();
         let mut dist = vec![inf; n];
         dist[start] = 0;
@@ -40,7 +44,6 @@ pub mod bellman_ford {
 mod tests {
     use super::*;
     use std;
-    use std::fs;
     use test_helper::TestCaseProducer;
 
     #[test]
