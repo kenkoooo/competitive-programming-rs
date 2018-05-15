@@ -1,6 +1,5 @@
 use std::cmp;
 use std::cmp::Ordering;
-use std::fs;
 
 pub struct SuffixArray {
     n: usize,
@@ -37,7 +36,12 @@ impl SuffixArray {
 
             tmp[array[0]] = 0;
             for i in 1..(n + 1) {
-                tmp[array[i]] = tmp[array[i - 1]] + if compare_node(array[i - 1], array[i], k, &rank) == Ordering::Less { 1 } else { 0 }
+                tmp[array[i]] = tmp[array[i - 1]]
+                    + if compare_node(array[i - 1], array[i], k, &rank) == Ordering::Less {
+                        1
+                    } else {
+                        0
+                    }
             }
             for i in 0..(n + 1) {
                 rank[i] = tmp[i];
@@ -45,7 +49,12 @@ impl SuffixArray {
             k *= 2;
         }
 
-        SuffixArray { n: n, rank: rank, array: array, s: s.clone() }
+        SuffixArray {
+            n: n,
+            rank: rank,
+            array: array,
+            s: s.clone(),
+        }
     }
 
     pub fn contains(&self, t: &Vec<u8>) -> bool {
@@ -60,7 +69,10 @@ impl SuffixArray {
         }
     }
 
-    fn binary_search<F>(&self, t: &Vec<u8>, f: F) -> usize where F: Fn(&[u8], &Vec<u8>) -> bool {
+    fn binary_search<F>(&self, t: &Vec<u8>, f: F) -> usize
+    where
+        F: Fn(&[u8], &Vec<u8>) -> bool,
+    {
         let (mut a, mut b) = (-1, self.n as i32 + 1);
         while b - a > 1 {
             let c = (a + b) / 2;
@@ -87,12 +99,11 @@ impl SuffixArray {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
-    use std;
     use data_structure::segment_tree::SegmentTree;
+    use std;
     use test_helper::TestCaseProducer;
 
     #[test]
@@ -137,7 +148,6 @@ mod test {
                 rmq.update(i, sa.array[i] as i64);
                 reverse_rmq.update(i, reverse_sa.array[i] as i64);
             }
-
 
             let m = input.next();
             for _ in 0..m {

@@ -16,3 +16,6 @@ pub mod test_helper;
 
 /// Mathematical algorithms.
 pub mod math;
+
+/// Geometry algorithms.
+pub mod geometry;
