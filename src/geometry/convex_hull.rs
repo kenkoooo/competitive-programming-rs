@@ -1,4 +1,4 @@
-use std::ops::Sub;
+use std;
 
 fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec<usize> {
     let n = points.len();
@@ -54,7 +54,7 @@ struct Point {
     y: f64,
 }
 
-impl Sub for Point {
+impl std::ops::Sub for Point {
     type Output = Point;
     fn sub(self, other: Point) -> Point {
         Point {
