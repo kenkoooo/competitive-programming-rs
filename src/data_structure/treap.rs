@@ -28,6 +28,9 @@ mod treap {
         }
     }
 
+    /// `Treap` is a binary search tree data structure that maintain a dynamic set
+    /// of ordered keys and allow binary searches among the keys,
+    /// [https://en.wikipedia.org/wiki/Treap](https://en.wikipedia.org/wiki/Treap)
     #[derive(Debug)]
     pub struct Treap<T> {
         random_state: XorShift,
