@@ -4,7 +4,6 @@ use std::cmp::Ordering;
 pub struct SuffixArray {
     n: usize,
     s: Vec<u8>,
-    rank: Vec<i32>,
     array: Vec<usize>,
 }
 
@@ -51,7 +50,6 @@ impl SuffixArray {
 
         SuffixArray {
             n: n,
-            rank: rank,
             array: array,
             s: s.clone(),
         }

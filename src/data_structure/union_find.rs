@@ -1,19 +1,19 @@
-struct UnionFind {
+pub struct UnionFind {
     parent: Vec<usize>,
     sizes: Vec<usize>,
     size: usize,
 }
 
 impl UnionFind {
-    fn new(n: usize) -> UnionFind {
+    pub fn new(n: usize) -> UnionFind {
         UnionFind {
-            parent: (0..n).map(|i| { i }).collect::<Vec<usize>>(),
+            parent: (0..n).map(|i| i).collect::<Vec<usize>>(),
             sizes: vec![1; n],
             size: n,
         }
     }
 
-    fn find(&mut self, x: usize) -> usize {
+    pub fn find(&mut self, x: usize) -> usize {
         if x == self.parent[x] {
             x
         } else {
@@ -23,7 +23,7 @@ impl UnionFind {
         }
     }
 
-    fn unite(&mut self, x: usize, y: usize) -> bool {
+    pub fn unite(&mut self, x: usize, y: usize) -> bool {
         let parent_x = self.find(x);
         let parent_y = self.find(y);
         if parent_x == parent_y {
@@ -43,7 +43,6 @@ impl UnionFind {
         return true;
     }
 }
-
 
 #[cfg(test)]
 mod test {
@@ -67,11 +66,7 @@ mod test {
                 if com == 0 {
                     uf.unite(x, y);
                 } else {
-                    let ans = if uf.find(x) == uf.find(y) {
-                        1
-                    } else {
-                        0
-                    };
+                    let ans = if uf.find(x) == uf.find(y) { 1 } else { 0 };
                     assert_eq!(ans, output.next());
                 }
             }

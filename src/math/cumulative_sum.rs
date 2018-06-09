@@ -1,13 +1,13 @@
 use std::cmp;
 
-struct CumulativeSum {
+pub struct CumulativeSum {
     ny: usize,
     nx: usize,
     sum: Vec<Vec<usize>>,
 }
 
 impl CumulativeSum {
-    fn new(a: &Vec<Vec<usize>>) -> CumulativeSum {
+    pub fn new(a: &Vec<Vec<usize>>) -> CumulativeSum {
         let ny = a.len();
         let nx = a[0].len();
         let mut sum = vec![vec![0; nx + 1]; ny + 1];
@@ -16,16 +16,22 @@ impl CumulativeSum {
                 sum[i + 1][j + 1] = a[i][j] + sum[i][j + 1] + sum[i + 1][j] - sum[i][j];
             }
         }
-        CumulativeSum { ny: ny, nx: nx, sum: sum }
+        CumulativeSum {
+            ny: ny,
+            nx: nx,
+            sum: sum,
+        }
     }
 
-    fn get_sum(&self, y1: usize, x1: usize, y2: usize, x2: usize) -> usize {
+    pub fn get_sum(&self, y1: usize, x1: usize, y2: usize, x2: usize) -> usize {
         if y1 > y2 || x1 > x2 {
             return 0;
         }
         let y2 = cmp::min(y2, self.ny - 1);
         let x2 = cmp::min(x2, self.nx - 1);
-        return self.sum[y2 + 1][x2 + 1] + self.sum[y1][x1] - self.sum[y1][x2 + 1] - self.sum[y2 + 1][x1];
+        return self.sum[y2 + 1][x2 + 1] + self.sum[y1][x1]
+            - self.sum[y1][x2 + 1]
+            - self.sum[y2 + 1][x1];
     }
 }
 
@@ -33,8 +39,8 @@ impl CumulativeSum {
 mod test {
     extern crate rand;
 
-    use super::*;
     use self::rand::distributions::{IndependentSample, Range};
+    use super::*;
 
     #[test]
     fn random_array() {

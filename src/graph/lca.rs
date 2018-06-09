@@ -1,20 +1,16 @@
 use std::collections::VecDeque;
 
 const MAX_PARENT: usize = 1 << 50;
-
-struct LowestCommonAncestor {
-    graph: Vec<Vec<usize>>,
+pub struct LowestCommonAncestor {
     parent: Vec<Vec<usize>>,
     depth: Vec<usize>,
-    root: usize,
     log_v: usize,
 }
 
 impl LowestCommonAncestor {
-    fn new(graph: &Vec<Vec<usize>>) -> LowestCommonAncestor {
+    pub fn new(graph: &Vec<Vec<usize>>) -> Self {
         let num_v = graph.len();
         let root = 0;
-        let graph = graph.clone();
         let mut depth = vec![0; num_v];
 
         let mut log_v = 1;
@@ -34,8 +30,7 @@ impl LowestCommonAncestor {
         while !stack.is_empty() {
             let v = stack.pop_front().unwrap();
             stack.push_front(v);
-            for u in &graph[v] {
-                let u = *u;
+            for &u in &graph[v] {
                 if depth_vis[u] {
                     continue;
                 }
@@ -62,15 +57,13 @@ impl LowestCommonAncestor {
         }
 
         LowestCommonAncestor {
-            graph: graph,
             parent: parent,
             depth: depth,
-            root: root,
             log_v: log_v,
         }
     }
 
-    fn get_lca(&self, u: usize, v: usize) -> usize {
+    pub fn get_lca(&self, u: usize, v: usize) -> usize {
         let (mut u, mut v) = if self.depth[u] <= self.depth[v] {
             (u, v)
         } else {
@@ -94,7 +87,7 @@ impl LowestCommonAncestor {
         return self.parent[0][u];
     }
 
-    fn get_dist(&self, u: usize, v: usize) -> usize {
+    pub fn get_dist(&self, u: usize, v: usize) -> usize {
         let lca = self.get_lca(u, v);
         self.depth[u] + self.depth[v] - self.depth[lca] * 2
     }

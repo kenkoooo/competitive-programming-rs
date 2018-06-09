@@ -1,4 +1,4 @@
-mod treap {
+pub mod treap {
     use std::cmp::Ordering::*;
 
     type Link<T> = Option<Box<Node<T>>>;

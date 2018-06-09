@@ -1,6 +1,6 @@
 use std;
 
-fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec<usize> {
+pub fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec<usize> {
     let n = points.len();
     if n <= 1 {
         return vec![0];
@@ -49,7 +49,7 @@ fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec<usi
 }
 
 #[derive(Debug, Copy, Clone)]
-struct Point {
+pub struct Point {
     x: f64,
     y: f64,
 }
@@ -65,7 +65,7 @@ impl std::ops::Sub for Point {
 }
 
 impl Point {
-    fn det(&self, other: &Point) -> f64 {
+    pub fn det(&self, other: &Point) -> f64 {
         self.x * other.y - self.y * other.x
     }
 }
