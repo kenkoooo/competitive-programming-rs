@@ -53,6 +53,39 @@ where
     }
 }
 
+impl<T> Sub<T> for ModInt<T>
+where
+    T: PartialOrd + Copy + Add<Output = T> + Sub<Output = T> + Rem<Output = T>,
+{
+    type Output = ModInt<T>;
+    fn sub(self, rhs: T) -> ModInt<T> {
+        let rhs = if rhs >= self.modulo {
+            rhs % self.modulo
+        } else {
+            rhs
+        };
+        let value = if self.value < rhs {
+            self.value + self.modulo
+        } else {
+            self.value
+        };
+        ModInt {
+            value: value - rhs,
+            modulo: self.modulo,
+        }
+    }
+}
+
+impl<T> Sub<ModInt<T>> for ModInt<T>
+where
+    T: PartialOrd + Copy + Add<Output = T> + Sub<Output = T> + Rem<Output = T>,
+{
+    type Output = ModInt<T>;
+    fn sub(self, rhs: ModInt<T>) -> ModInt<T> {
+        self - rhs.value
+    }
+}
+
 impl<T> AddAssign<T> for ModInt<T>
 where
     T: Add<Output = T> + Sub<Output = T> + Copy + PartialOrd,
@@ -161,7 +194,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn random_add() {
+    fn random_add_sub() {
         let modulo = 1_000_000_007;
         let between = Range::new(0, modulo);
         let mut rng = rand::thread_rng();
@@ -174,6 +207,8 @@ mod test {
 
             assert_eq!((mx + my).value, (x + y) % modulo);
             assert_eq!((mx + y).value, (x + y) % modulo);
+            assert_eq!((mx - my).value, (x + modulo - y) % modulo);
+            assert_eq!((mx - y).value, (x + modulo - y) % modulo);
 
             let mut x = x;
             let mut mx = mx;
