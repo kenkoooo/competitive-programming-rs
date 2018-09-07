@@ -12,3 +12,4 @@ exclude = ["assets/*"]
 
 [dependencies]
 rand = "0.4.2"
+num-traits = "0.2"

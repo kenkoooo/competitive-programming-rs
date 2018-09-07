@@ -64,7 +64,6 @@ mod test {
     use super::*;
     use std::cmp;
     use std::i64::MAX;
-    use test::Bencher;
 
     #[test]
     fn random_array() {
@@ -106,20 +105,5 @@ mod test {
             }
             assert_eq!(seg.query(0, n), minimum);
         }
-    }
-
-    #[bench]
-    fn bench(b: &mut Bencher) {
-        b.iter(|| {
-            let n = 100000;
-
-            let mut seg = SegmentTree::new(n, MAX, |a, b| cmp::min(a, b));
-
-            for _ in 0..n {
-                let value = rand::thread_rng().gen::<i64>();
-                let k = rand::thread_rng().gen_range(0, n);
-                seg.update(k, value);
-            }
-        });
     }
 }

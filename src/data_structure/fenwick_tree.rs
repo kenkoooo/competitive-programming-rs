@@ -51,8 +51,7 @@ impl<T: Copy + AddAssign + Sub<Output = T>> FenwickTree<T> {
 #[cfg(test)]
 mod test {
     extern crate rand;
-
-    use self::rand::Rng;
+    use self::rand::{thread_rng, Rng};
     use super::*;
 
     #[test]
@@ -62,8 +61,8 @@ mod test {
         let mut v = vec![0; n];
 
         for _ in 0..10000 {
-            let value = rand::thread_rng().gen_range(0, 1000);
-            let k = rand::thread_rng().gen_range(0, n);
+            let value = thread_rng().gen_range(0, 1000);
+            let k = thread_rng().gen_range(0, n);
             v[k] += value;
             bit.add(k, value);
 
