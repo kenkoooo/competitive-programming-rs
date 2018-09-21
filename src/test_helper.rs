@@ -1,19 +1,22 @@
-use std::io::Read;
-use std::str;
-use std::fmt;
 use std::collections::vec_deque::VecDeque;
 use std::error::Error;
-use std::fs::File;
-use std::path::Path;
+use std::fmt;
 use std::fs;
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+use std::str;
 
 pub struct TestCaseProducer {
-    queue: VecDeque<String>
+    queue: VecDeque<String>,
 }
 
 impl TestCaseProducer {
     pub fn new(filepath: &str) -> TestCaseProducer {
-        let q = load_test_values(filepath).iter().map(|s| s.to_owned()).collect();
+        let q = load_test_values(filepath)
+            .iter()
+            .map(|s| s.to_owned())
+            .collect();
         TestCaseProducer { queue: q }
     }
 
@@ -33,11 +36,17 @@ impl TestCaseProducer {
         TestCaseProducer { queue: q }
     }
 
-    pub fn next<T>(&mut self) -> T where T: str::FromStr, T::Err: fmt::Debug {
+    pub fn next<T>(&mut self) -> T
+    where
+        T: str::FromStr,
+        T::Err: fmt::Debug,
+    {
         self.queue.pop_front().unwrap().parse().ok().unwrap()
     }
 
-    pub fn is_empty(&self) -> bool { self.queue.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.queue.is_empty()
+    }
 }
 
 fn load_test_values(filepath: &str) -> Vec<String> {
@@ -52,9 +61,10 @@ fn load_test_values(filepath: &str) -> Vec<String> {
     let mut s = String::new();
     match file.read_to_string(&mut s) {
         Err(why) => panic!("couldn't read {}: {}", display, Error::description(&why)),
-        Ok(_) => s.trim()
+        Ok(_) => s
+            .trim()
             .split(|c| c == '\n' || c == ' ')
             .map(|s| s.to_owned())
-            .collect::<Vec<String>>()
+            .collect::<Vec<String>>(),
     }
 }
