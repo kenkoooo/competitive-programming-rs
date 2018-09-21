@@ -1,4 +1,4 @@
-struct BridgeDetector {
+pub struct BridgeDetector {
     articulations: Vec<usize>,
     bridges: Vec<(usize, usize)>,
     visit: Vec<bool>,
@@ -8,15 +8,18 @@ struct BridgeDetector {
 }
 
 impl BridgeDetector {
-    fn new(n: usize) -> Self {
-        BridgeDetector {
+    pub fn new(graph: &Vec<Vec<usize>>) -> Self {
+        let n = graph.len();
+        let mut d = BridgeDetector {
             articulations: vec![],
             bridges: vec![],
             visit: vec![false; n],
             ord: vec![0; n],
             low: vec![0; n],
             k: 0,
-        }
+        };
+        d.run(graph);
+        d
     }
 
     fn run(&mut self, graph: &Vec<Vec<usize>>) {
@@ -85,8 +88,7 @@ mod tests {
                 graph[v].push(u);
             }
 
-            let mut low_link = BridgeDetector::new(n);
-            low_link.run(&graph);
+            let mut low_link = BridgeDetector::new(&graph);
             low_link.articulations.sort();
 
             if low_link.articulations.is_empty() {
