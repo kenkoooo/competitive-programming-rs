@@ -1,4 +1,4 @@
-struct LowLink {
+struct BridgeDetector {
     articulations: Vec<usize>,
     bridges: Vec<(usize, usize)>,
     visit: Vec<bool>,
@@ -7,9 +7,9 @@ struct LowLink {
     k: usize,
 }
 
-impl LowLink {
+impl BridgeDetector {
     fn new(n: usize) -> Self {
-        LowLink {
+        BridgeDetector {
             articulations: vec![],
             bridges: vec![],
             visit: vec![false; n],
@@ -85,7 +85,7 @@ mod tests {
                 graph[v].push(u);
             }
 
-            let mut low_link = LowLink::new(n);
+            let mut low_link = BridgeDetector::new(n);
             low_link.run(&graph);
             low_link.articulations.sort();
 
