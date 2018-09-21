@@ -101,4 +101,37 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn solve_grl_3_b() {
+        let mut input = TestCaseProducer::new_from_directory("./assets/GRL_3_B/in/");
+        let mut output = TestCaseProducer::new_from_directory("./assets/GRL_3_B/out/");
+
+        while !input.is_empty() {
+            let n: usize = input.next();
+            let m: usize = input.next();
+            println!("{} {}", n, m);
+            let mut graph = vec![vec![]; n];
+            for _ in 0..m {
+                let u: usize = input.next();
+                let v: usize = input.next();
+                graph[u].push(v);
+                graph[v].push(u);
+            }
+
+            let mut low_link = BridgeDetector::new(&graph);
+            low_link.bridges.sort();
+
+            if low_link.bridges.is_empty() {
+                output.next::<String>();
+            }
+
+            for &(a, b) in low_link.bridges.iter() {
+                let ans: usize = output.next();
+                assert_eq!(ans, a);
+                let ans: usize = output.next();
+                assert_eq!(ans, b);
+            }
+        }
+    }
 }
