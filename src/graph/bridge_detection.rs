@@ -2,8 +2,8 @@ pub struct BridgeDetector {
     articulations: Vec<usize>,
     bridges: Vec<(usize, usize)>,
     visit: Vec<bool>,
-    ord: Vec<usize>,
-    low: Vec<usize>,
+    order: Vec<usize>,
+    low_link: Vec<usize>,
     k: usize,
 }
 
@@ -14,8 +14,8 @@ impl BridgeDetector {
             articulations: vec![],
             bridges: vec![],
             visit: vec![false; n],
-            ord: vec![0; n],
-            low: vec![0; n],
+            order: vec![0; n],
+            low_link: vec![0; n],
             k: 0,
         };
         d.run(graph);
@@ -30,35 +30,36 @@ impl BridgeDetector {
             }
         }
     }
-    
+
     fn dfs(&mut self, v: usize, previous: usize, graph: &Vec<Vec<usize>>, root: usize) {
         self.visit[v] = true;
-        self.ord[v] = self.k;
+        self.order[v] = self.k;
         self.k += 1;
-        self.low[v] = self.ord[v];
+        self.low_link[v] = self.order[v];
 
         let mut is_articulation = false;
-        let mut count = 0;
+        let mut dimension = 0;
         for &next in graph[v].iter() {
             if !self.visit[next] {
-                count += 1;
+                // The edge (v->next) is not a backedge.
+                dimension += 1;
                 self.dfs(next, v, graph, root);
-                if self.low[v] > self.low[next] {
-                    self.low[v] = self.low[next];
+                if self.low_link[v] > self.low_link[next] {
+                    self.low_link[v] = self.low_link[next];
                 }
-                if v != root && self.ord[v] <= self.low[next] {
+                if v != root && self.order[v] <= self.low_link[next] {
                     is_articulation = true;
                 }
-                if self.ord[v] < self.low[next] {
+                if self.order[v] < self.low_link[next] {
                     let (v, next) = if v < next { (v, next) } else { (next, v) };
                     self.bridges.push((v, next));
                 }
-            } else if v == root || next != previous && self.low[v] > self.ord[next] {
-                self.low[v] = self.ord[next];
+            } else if v == root || next != previous && self.low_link[v] > self.order[next] {
+                self.low_link[v] = self.order[next];
             }
         }
 
-        if v == root && count > 1 {
+        if v == root && dimension > 1 {
             is_articulation = true;
         }
         if is_articulation {
@@ -89,14 +90,14 @@ mod tests {
                 graph[v].push(u);
             }
 
-            let mut low_link = BridgeDetector::new(&graph);
-            low_link.articulations.sort();
+            let mut low_link_link = BridgeDetector::new(&graph);
+            low_link_link.articulations.sort();
 
-            if low_link.articulations.is_empty() {
+            if low_link_link.articulations.is_empty() {
                 output.next::<String>();
             }
 
-            for &v in low_link.articulations.iter() {
+            for &v in low_link_link.articulations.iter() {
                 let ans: usize = output.next();
                 assert_eq!(ans, v);
             }
@@ -120,14 +121,14 @@ mod tests {
                 graph[v].push(u);
             }
 
-            let mut low_link = BridgeDetector::new(&graph);
-            low_link.bridges.sort();
+            let mut low_link_link = BridgeDetector::new(&graph);
+            low_link_link.bridges.sort();
 
-            if low_link.bridges.is_empty() {
+            if low_link_link.bridges.is_empty() {
                 output.next::<String>();
             }
 
-            for &(a, b) in low_link.bridges.iter() {
+            for &(a, b) in low_link_link.bridges.iter() {
                 let ans: usize = output.next();
                 assert_eq!(ans, a);
                 let ans: usize = output.next();
