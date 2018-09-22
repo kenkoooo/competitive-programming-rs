@@ -51,8 +51,9 @@ impl BridgeDetector {
                     is_articulation = true;
                 }
                 if self.order[v] < self.low_link[next] {
-                    let (v, next) = if v < next { (v, next) } else { (next, v) };
-                    self.bridges.push((v, next));
+                    let min = cmp::min(v, next);
+                    let max = cmp::max(v, next);
+                    self.bridges.push((min, max));
                 }
             } else if v == root || next != previous {
                 // The edge (v->next) is a backedge.
