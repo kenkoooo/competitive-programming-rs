@@ -26,11 +26,12 @@ impl BridgeDetector {
         let n = graph.len();
         for i in 0..n {
             if !self.visit[i] {
-                self.dfs(i, None, graph);
+                self.dfs(i, 0, graph, i);
             }
         }
     }
-    fn dfs(&mut self, v: usize, p: Option<usize>, graph: &Vec<Vec<usize>>) {
+    
+    fn dfs(&mut self, v: usize, previous: usize, graph: &Vec<Vec<usize>>, root: usize) {
         self.visit[v] = true;
         self.ord[v] = self.k;
         self.k += 1;
@@ -41,23 +42,23 @@ impl BridgeDetector {
         for &next in graph[v].iter() {
             if !self.visit[next] {
                 count += 1;
-                self.dfs(next, Some(v), graph);
+                self.dfs(next, v, graph, root);
                 if self.low[v] > self.low[next] {
                     self.low[v] = self.low[next];
                 }
-                if p.is_some() && self.ord[v] <= self.low[next] {
+                if v != root && self.ord[v] <= self.low[next] {
                     is_articulation = true;
                 }
                 if self.ord[v] < self.low[next] {
                     let (v, next) = if v < next { (v, next) } else { (next, v) };
                     self.bridges.push((v, next));
                 }
-            } else if p.is_none() || next != p.unwrap() && self.low[v] > self.ord[next] {
+            } else if v == root || next != previous && self.low[v] > self.ord[next] {
                 self.low[v] = self.ord[next];
             }
         }
 
-        if p.is_none() && count > 1 {
+        if v == root && count > 1 {
             is_articulation = true;
         }
         if is_articulation {
