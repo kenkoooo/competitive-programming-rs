@@ -1,22 +1,29 @@
 pub mod bitset {
-    use std::ops::BitOrAssign;
-    const ONE_SIZE: usize = 60;
-    const MAXIMUM: u64 = (1 << ONE_SIZE) - 1;
+    use std::ops::{BitOrAssign, Shl};
+    const ONE_VALUE_LENGTH: usize = 60;
+    const MAXIMUM: u64 = (1 << ONE_VALUE_LENGTH) - 1;
 
     pub fn get_bit_position(index: usize) -> (usize, usize) {
-        let data_index = index / ONE_SIZE;
-        let bit_index = index % ONE_SIZE;
+        let data_index = index / ONE_VALUE_LENGTH;
+        let bit_index = index % ONE_VALUE_LENGTH;
         (data_index, bit_index)
     }
 
+    #[derive(PartialEq, Clone, Debug)]
     pub struct BitSet {
         data: Vec<u64>,
     }
 
     impl BitOrAssign for BitSet {
         fn bitor_assign(&mut self, rhs: Self) {
-            assert_eq!(self.data.len(), rhs.data.len());
-            let n = self.data.len();
+            if self.data.len() < rhs.data.len() {
+                self.data.resize(rhs.data.len(), 0);
+            }
+            let n = if self.data.len() > rhs.data.len() {
+                rhs.data.len()
+            } else {
+                self.data.len()
+            };
             for i in 0..n {
                 assert!(self.data[i] <= MAXIMUM);
                 assert!(rhs.data[i] <= MAXIMUM);
@@ -25,9 +32,36 @@ pub mod bitset {
         }
     }
 
+    impl Shl<usize> for BitSet {
+        type Output = Self;
+        fn shl(self, rhs: usize) -> Self {
+            let mut next_data = Vec::new();
+            let prefix_empty_count = rhs / ONE_VALUE_LENGTH;
+            let shift_count = rhs % ONE_VALUE_LENGTH;
+            for _ in 0..prefix_empty_count {
+                next_data.push(0);
+            }
+
+            let mut from_previous = 0;
+            let room = ONE_VALUE_LENGTH - shift_count;
+            for &data in self.data.iter() {
+                let overflow = (data >> room) << room;
+                let rest = data - overflow;
+                let value = (rest << shift_count) + from_previous;
+                assert!(value <= MAXIMUM);
+                next_data.push(value);
+                from_previous = overflow >> room;
+            }
+            if from_previous > 0 {
+                next_data.push(from_previous);
+            }
+            BitSet { data: next_data }
+        }
+    }
+
     impl BitSet {
         pub fn new(n: usize) -> Self {
-            let size = (n + ONE_SIZE - 1) / ONE_SIZE;
+            let size = (n + ONE_VALUE_LENGTH - 1) / ONE_VALUE_LENGTH;
             BitSet {
                 data: vec![0; size],
             }
@@ -79,6 +113,7 @@ mod test {
             }
         }
     }
+
     #[test]
     fn test_bitset_or() {
         let mut value1 = 717;
@@ -97,5 +132,15 @@ mod test {
                 assert!(!bitset1.get(i));
             }
         }
+    }
+
+    #[test]
+    fn test_bitset_shift_left() {
+        let value1 = 717;
+        let first_shift = 30;
+        let second_shift = 40;
+        let bitset1 = BitSet::new_from(value1) << (first_shift + second_shift);
+        let bitset2 = BitSet::new_from(value1 << first_shift) << second_shift;
+        assert!(bitset1 == bitset2);
     }
 }
