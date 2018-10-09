@@ -35,27 +35,7 @@ pub mod bitset {
     impl Shl<usize> for BitSet {
         type Output = Self;
         fn shl(self, rhs: usize) -> Self {
-            let mut next_data = Vec::new();
-            let prefix_empty_count = rhs / ONE_VALUE_LENGTH;
-            let shift_count = rhs % ONE_VALUE_LENGTH;
-            for _ in 0..prefix_empty_count {
-                next_data.push(0);
-            }
-
-            let mut from_previous = 0;
-            let room = ONE_VALUE_LENGTH - shift_count;
-            for &data in self.data.iter() {
-                let overflow = (data >> room) << room;
-                let rest = data - overflow;
-                let value = (rest << shift_count) + from_previous;
-                assert!(value <= MAXIMUM);
-                next_data.push(value);
-                from_previous = overflow >> room;
-            }
-            if from_previous > 0 {
-                next_data.push(from_previous);
-            }
-            BitSet { data: next_data }
+            self.shift_left(rhs)
         }
     }
 
@@ -86,6 +66,30 @@ pub mod bitset {
             let (data_index, bit_index) = get_bit_position(index);
             assert!(self.data.len() > data_index);
             self.data[data_index] & (1 << bit_index) != 0
+        }
+
+        pub fn shift_left(&self, shift: usize) -> Self {
+            let mut next_data = Vec::new();
+            let prefix_empty_count = shift / ONE_VALUE_LENGTH;
+            let shift_count = shift % ONE_VALUE_LENGTH;
+            for _ in 0..prefix_empty_count {
+                next_data.push(0);
+            }
+
+            let mut from_previous = 0;
+            let room = ONE_VALUE_LENGTH - shift_count;
+            for &data in self.data.iter() {
+                let overflow = (data >> room) << room;
+                let rest = data - overflow;
+                let value = (rest << shift_count) + from_previous;
+                assert!(value <= MAXIMUM);
+                next_data.push(value);
+                from_previous = overflow >> room;
+            }
+            if from_previous > 0 {
+                next_data.push(from_previous);
+            }
+            BitSet { data: next_data }
         }
     }
 }
