@@ -1,3 +1,4 @@
+pub mod bitset;
 pub mod fenwick_tree;
 pub mod range_add_segment_tree;
 pub mod segment_tree;
