@@ -43,7 +43,7 @@ where
     fn add(self, rhs: T) -> ModInt<T> {
         let m = self.modulo;
         let mut t = rhs + self.value;
-        if t > m {
+        if t >= m {
             t = t - m;
         }
         ModInt {
@@ -254,5 +254,14 @@ mod test {
             assert_eq!((mx * my).value, (x * y) % modulo);
             assert_eq!((mx * y).value, (x * y) % modulo);
         }
+    }
+
+    #[test]
+    fn zero_test() {
+        let modulo = 5;
+        let a = ModInt::new(2, modulo);
+        let b = ModInt::new(3, modulo);
+        let c = a + b;
+        assert_eq!(c.value, 0);
     }
 }
