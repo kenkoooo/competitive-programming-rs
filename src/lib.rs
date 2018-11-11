@@ -22,3 +22,6 @@ pub mod math;
 
 /// Geometry algorithms.
 pub mod geometry;
+
+/// Useful tools for coding contests.
+pub mod utils;
