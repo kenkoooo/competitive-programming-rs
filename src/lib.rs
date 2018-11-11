@@ -2,6 +2,10 @@
 //! The Competitive Programming Library in Rust is a set of snippets,
 //! which can be used in programming contests.
 
+#![feature(test)]
+
+extern crate test;
+
 extern crate num_traits;
 
 /// Algorithms related to graph theory.

@@ -97,6 +97,7 @@ pub mod bitset {
 #[cfg(test)]
 mod test {
     use super::bitset::*;
+    use test::Bencher;
 
     #[test]
     fn test_set_bit() {
@@ -146,5 +147,18 @@ mod test {
         let bitset1 = BitSet::new_from(value1) << (first_shift + second_shift);
         let bitset2 = BitSet::new_from(value1 << first_shift) << second_shift;
         assert!(bitset1 == bitset2);
+    }
+
+    #[bench]
+    fn bench_bitset(b: &mut Bencher) {
+        let n = 2000;
+        b.iter(|| {
+            let mut set = BitSet::new(n);
+            for i in 1..=n {
+                let next = set.shift_left(i);
+                set |= next;
+            }
+            set
+        })
     }
 }
