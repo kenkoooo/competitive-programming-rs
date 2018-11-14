@@ -3,11 +3,7 @@ pub struct Scanner<R: std::io::Read> {
 }
 
 impl<R: std::io::Read> Scanner<R> {
-    pub fn read<T>(&mut self) -> T
-    where
-        T: std::str::FromStr,
-        T::Err: std::fmt::Debug,
-    {
+    pub fn read<T: std::str::FromStr>(&mut self) -> T {
         use std::io::Read;
         let buf = self
             .reader
@@ -19,6 +15,7 @@ impl<R: std::io::Read> Scanner<R> {
             .collect::<Vec<_>>();
         unsafe { std::str::from_utf8_unchecked(&buf) }
             .parse()
+            .ok()
             .expect("Parse error.")
     }
 }
