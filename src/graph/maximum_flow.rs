@@ -117,7 +117,7 @@ pub mod dinitz {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_helper::TestCaseProducer;
+    use utils::test_helper::TestCaseProducer;
 
     /// Solve http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A
     #[test]

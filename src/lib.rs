@@ -14,11 +14,11 @@ pub mod graph;
 /// Structures that can efficiently operate data.
 pub mod data_structure;
 
-/// Functions to test this library with contest-style IO files.
-pub mod test_helper;
-
 /// Mathematical algorithms.
 pub mod math;
 
 /// Geometry algorithms.
 pub mod geometry;
+
+/// Utilities for tests, stdin, and so on.
+pub mod utils;
