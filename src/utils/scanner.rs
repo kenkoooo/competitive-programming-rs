@@ -1,13 +1,11 @@
-pub struct Scanner<R: std::io::Read> {
-    reader: R,
+pub trait Scanner {
+    fn read_input<T: std::str::FromStr>(&mut self) -> T;
 }
 
-impl<R: std::io::Read> Scanner<R> {
-    pub fn read<T: std::str::FromStr>(&mut self) -> T {
+impl<R: std::io::Read> Scanner for R {
+    fn read_input<T: std::str::FromStr>(&mut self) -> T {
         use std::io::Read;
         let buf = self
-            .reader
-            .by_ref()
             .bytes()
             .map(|b| b.unwrap())
             .skip_while(|&b| b == b' ' || b == b'\n')
@@ -28,10 +26,10 @@ mod tests {
     #[test]
     fn scanner_test() {
         let cursor = io::Cursor::new(b"1 a 0.1");
-        let mut sc = Scanner { reader: cursor };
+        let mut sc = cursor;
 
-        assert_eq!(1, sc.read());
-        assert_eq!("a".to_string(), sc.read::<String>());
-        assert_eq!(0.1, sc.read());
+        assert_eq!(1, sc.read_input());
+        assert_eq!("a".to_string(), sc.read_input::<String>());
+        assert_eq!(0.1, sc.read_input());
     }
 }
