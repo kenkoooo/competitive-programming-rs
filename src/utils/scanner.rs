@@ -1,5 +1,11 @@
 pub trait Scanner {
     fn scan<T: std::str::FromStr>(&mut self) -> T;
+    fn scan_vec<T: std::str::FromStr>(&mut self, n: usize) -> Vec<T> {
+        (0..n).map(|_| self.scan()).collect()
+    }
+    fn chars(&mut self) -> Vec<char> {
+        self.scan::<String>().chars().collect()
+    }
 }
 
 impl<R: std::io::Read> Scanner for R {
