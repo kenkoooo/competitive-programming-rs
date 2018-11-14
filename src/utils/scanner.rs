@@ -1,17 +1,11 @@
-pub trait Scanner {
-    fn scan<T: std::str::FromStr>(&mut self) -> T;
-    fn scan_vec<T: std::str::FromStr>(&mut self, n: usize) -> Vec<T> {
-        (0..n).map(|_| self.scan()).collect()
-    }
-    fn chars(&mut self) -> Vec<char> {
-        self.scan::<String>().chars().collect()
-    }
-}
+pub struct Scanner<R>(R);
 
-impl<R: std::io::Read> Scanner for R {
-    fn scan<T: std::str::FromStr>(&mut self) -> T {
+impl<R: std::io::Read> Scanner<R> {
+    pub fn read<T: std::str::FromStr>(&mut self) -> T {
         use std::io::Read;
         let buf = self
+            .0
+            .by_ref()
             .bytes()
             .map(|b| b.unwrap())
             .skip_while(|&b| b == b' ' || b == b'\n')
@@ -21,6 +15,12 @@ impl<R: std::io::Read> Scanner for R {
             .parse()
             .ok()
             .expect("Parse error.")
+    }
+    pub fn read_vec<T: std::str::FromStr>(&mut self, n: usize) -> Vec<T> {
+        (0..n).map(|_| self.read()).collect()
+    }
+    pub fn chars(&mut self) -> Vec<char> {
+        self.read::<String>().chars().collect()
     }
 }
 
@@ -32,10 +32,10 @@ mod tests {
     #[test]
     fn scanner_test() {
         let cursor = io::Cursor::new(b"1 a 0.1");
-        let mut sc = cursor;
+        let mut sc = Scanner(cursor);
 
-        assert_eq!(1, sc.scan());
-        assert_eq!("a".to_string(), sc.scan::<String>());
-        assert_eq!(0.1, sc.scan());
+        assert_eq!(1, sc.read());
+        assert_eq!("a".to_string(), sc.read::<String>());
+        assert_eq!(0.1, sc.read());
     }
 }
