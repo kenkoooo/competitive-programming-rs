@@ -102,7 +102,7 @@ mod test {
     use super::*;
     use data_structure::segment_tree::SegmentTree;
     use std;
-    use test_helper::TestCaseProducer;
+    use utils::test_helper::TestCaseProducer;
 
     #[test]
     fn small_test() {

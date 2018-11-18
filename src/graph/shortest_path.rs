@@ -44,7 +44,7 @@ pub mod bellman_ford {
 mod tests {
     use super::*;
     use std;
-    use test_helper::TestCaseProducer;
+    use utils::test_helper::TestCaseProducer;
 
     #[test]
     fn solve_grl_1_b() {

@@ -96,7 +96,7 @@ impl LowestCommonAncestor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_helper::TestCaseProducer;
+    use utils::test_helper::TestCaseProducer;
 
     #[test]
     fn solve_grl_5_c() {

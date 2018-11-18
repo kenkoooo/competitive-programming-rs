@@ -1,42 +1,28 @@
-pub mod scanner {
-    use std::fmt::Debug;
-    use std::io::Read;
-    use std::str::{self, FromStr};
+pub struct Scanner<R> {
+    reader: R,
+}
 
-    pub struct Scanner<R: Read> {
-        reader: R,
-        buf: Vec<u8>,
+impl<R: std::io::Read> Scanner<R> {
+    pub fn read<T: std::str::FromStr>(&mut self) -> T {
+        use std::io::Read;
+        let buf = self
+            .reader
+            .by_ref()
+            .bytes()
+            .map(|b| b.unwrap())
+            .skip_while(|&b| b == b' ' || b == b'\n')
+            .take_while(|&b| b != b' ' && b != b'\n')
+            .collect::<Vec<_>>();
+        unsafe { std::str::from_utf8_unchecked(&buf) }
+            .parse()
+            .ok()
+            .expect("Parse error.")
     }
-
-    impl<R: Read> Scanner<R> {
-        pub fn new(reader: R) -> Self {
-            Scanner {
-                reader: reader,
-                buf: Vec::new(),
-            }
-        }
-
-        pub fn read<T>(&mut self) -> T
-        where
-            T: FromStr,
-            T::Err: Debug,
-        {
-            self.buf.clear();
-            for c in self
-                .reader
-                .by_ref()
-                .bytes()
-                .map(|b| b.unwrap())
-                .skip_while(|&b| b == b' ' || b == b'\n')
-                .take_while(|&b| b != b' ' && b != b'\n')
-            {
-                self.buf.push(c);
-            }
-
-            unsafe { str::from_utf8_unchecked(&self.buf) }
-                .parse()
-                .expect("Parse error.")
-        }
+    pub fn read_vec<T: std::str::FromStr>(&mut self, n: usize) -> Vec<T> {
+        (0..n).map(|_| self.read()).collect()
+    }
+    pub fn chars(&mut self) -> Vec<char> {
+        self.read::<String>().chars().collect()
     }
 }
 
@@ -48,7 +34,7 @@ mod tests {
     #[test]
     fn scanner_test() {
         let cursor = io::Cursor::new(b"1 2 3 \n4 5 6");
-        let mut sc = scanner::Scanner::new(cursor);
+        let mut sc = Scanner { reader: cursor };
 
         assert_eq!(1, sc.read());
         assert_eq!(2, sc.read());
@@ -56,5 +42,11 @@ mod tests {
         assert_eq!(4, sc.read());
         assert_eq!(5, sc.read());
         assert_eq!(6, sc.read());
+        let cursor = io::Cursor::new(b"1 a 0.1");
+        let mut sc = Scanner { reader: cursor };
+
+        assert_eq!(1, sc.read());
+        assert_eq!("a".to_string(), sc.read::<String>());
+        assert_eq!(0.1, sc.read());
     }
 }
