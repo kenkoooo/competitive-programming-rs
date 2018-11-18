@@ -164,7 +164,7 @@ pub mod mod_int {
     }
 
     impl<T> ModInt<T> {
-        pub fn new(value: T, modulo: T) -> ModInt<T> {
+        pub fn new(value: T, modulo: T) -> Self {
             ModInt {
                 value: value,
                 modulo: modulo,
