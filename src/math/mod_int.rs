@@ -1,8 +1,8 @@
 pub mod mod_int {
     use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
-    const MOD: usize = 1_000_000_007;
     type Num = usize;
+    const MOD: Num = 1_000_000_007;
 
     #[derive(Clone, Copy)]
     pub struct ModInt<T: Copy + Clone>(pub T);
