@@ -96,6 +96,20 @@ pub mod mod_int {
         pub fn new(value: Num) -> Self {
             ModInt(value)
         }
+
+        pub fn pow(self, e: usize) -> ModInt<Num> {
+            let mut result = ModInt::new(1);
+            let mut cur = self;
+            let mut e = e;
+            while e > 0 {
+                if e & 1 == 1 {
+                    result *= cur;
+                }
+                e >>= 1;
+                cur *= cur;
+            }
+            result
+        }
     }
 }
 
@@ -166,5 +180,12 @@ mod test {
         let b = ModInt::new(7);
         let c = a + b;
         assert_eq!(c.0, 0);
+    }
+
+    #[test]
+    fn pow_test() {
+        let a = ModInt::new(3);
+        let a = a.pow(4);
+        assert_eq!(a.0, 81);
     }
 }
