@@ -15,11 +15,17 @@ impl Combination {
         }
         fact[0] = 1;
         inv_fact[0] = 1;
-        for i in 0..max { fact[i + 1] = fact[i] * (i + 1) % modulo; }
+        for i in 0..max {
+            fact[i + 1] = fact[i] * (i + 1) % modulo;
+        }
         for i in 0..max {
             inv_fact[i + 1] = inv_fact[i] * inv[i + 1] % modulo;
         }
-        Combination { fact: fact, inv_fact: inv_fact, modulo: modulo }
+        Combination {
+            fact: fact,
+            inv_fact: inv_fact,
+            modulo: modulo,
+        }
     }
 
     pub fn get(&self, x: usize, y: usize) -> usize {
@@ -34,7 +40,13 @@ mod test {
 
     use super::*;
 
-    fn gcd(a: usize, b: usize) -> usize { if b == 0 { a } else { gcd(b, a % b) } }
+    fn gcd(a: usize, b: usize) -> usize {
+        if b == 0 {
+            a
+        } else {
+            gcd(b, a % b)
+        }
+    }
 
     #[test]
     fn random_combination() {
@@ -47,7 +59,9 @@ mod test {
                 for i in 0..m {
                     let mut divisor = i + 1;
                     for j in 0..(i + 1) {
-                        if divisor == 1 { break; }
+                        if divisor == 1 {
+                            break;
+                        }
 
                         let g = gcd(divisor, upper[j]);
                         upper[j] /= g;
@@ -56,7 +70,9 @@ mod test {
                 }
 
                 let mut check = 1;
-                for u in &upper { check = (check * u) % modulo; }
+                for u in &upper {
+                    check = (check * u) % modulo;
+                }
 
                 assert_eq!(comb.get(n, m), check);
             }
