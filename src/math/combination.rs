@@ -32,6 +32,10 @@ impl Combination {
         assert!(x >= y);
         self.fact[x] * self.inv_fact[y] % self.modulo * self.inv_fact[x - y] % self.modulo
     }
+
+    pub fn h(&self, n: usize, r: usize) -> usize {
+        self.get(n + r - 1, r)
+    }
 }
 
 #[cfg(test)]
