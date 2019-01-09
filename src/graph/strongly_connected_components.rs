@@ -8,8 +8,8 @@ pub mod strongly_connected_components {
 
         let mut reverse_graph = vec![vec![]; num_v];
         for i in 0..num_v {
-            for v in &graph[i] {
-                reverse_graph[*v].push(i);
+            for &v in graph[i].iter() {
+                reverse_graph[v].push(i);
             }
         }
         let mut used = vec![false; num_v];
@@ -21,13 +21,11 @@ pub mod strongly_connected_components {
                 continue;
             }
             stack.push_front(i);
-            while !stack.is_empty() {
-                let v = stack.pop_front().unwrap();
+            while let Some(v) = stack.pop_front() {
                 stack.push_front(v);
                 used[v] = true;
                 let mut pushed = false;
-                for j in (0..graph[v].len()).rev() {
-                    let u = graph[v][j];
+                for &u in graph[v].iter().rev() {
                     if !used[u] {
                         stack.push_front(u);
                         pushed = true;
@@ -46,20 +44,17 @@ pub mod strongly_connected_components {
         used = vec![false; num_v];
         let mut k = 0;
         vs.reverse();
-        for i in &vs {
-            let i = *i;
+        for &i in vs.iter() {
             if used[i] {
                 continue;
             }
             stack.push_front(i);
             used[i] = true;
             cmp[i] = k;
-            while !stack.is_empty() {
-                let v = stack.pop_front().unwrap();
+            while let Some(v) = stack.pop_front() {
                 stack.push_front(v);
                 let mut pushed = false;
-                for u in &reverse_graph[v] {
-                    let u = *u;
+                for &u in reverse_graph[v].iter() {
                     if used[u] {
                         continue;
                     }
