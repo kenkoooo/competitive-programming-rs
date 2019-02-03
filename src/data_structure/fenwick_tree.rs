@@ -1,50 +1,52 @@
-use std::ops::{AddAssign, Sub};
-/// `FenwickTree` is a data structure that can efficiently update elements
-/// and calculate prefix sums in a table of numbers.
-/// [https://en.wikipedia.org/wiki/Fenwick_tree](https://en.wikipedia.org/wiki/Fenwick_tree)
-pub struct FenwickTree<T> {
-    n: usize,
-    data: Vec<T>,
-    init: T,
-}
-
-impl<T: Copy + AddAssign + Sub<Output = T>> FenwickTree<T> {
-    /// Constructs a new `FenwickTree`. The size of `FenwickTree` should be specified by `size`.
-    pub fn new(size: usize, init: T) -> FenwickTree<T> {
-        FenwickTree {
-            n: size + 1,
-            data: vec![init; size + 1],
-            init: init,
-        }
+pub mod fenwick_tree {
+    use std::ops::{AddAssign, Sub};
+    /// `FenwickTree` is a data structure that can efficiently update elements
+    /// and calculate prefix sums in a table of numbers.
+    /// [https://en.wikipedia.org/wiki/Fenwick_tree](https://en.wikipedia.org/wiki/Fenwick_tree)
+    pub struct FenwickTree<T> {
+        n: usize,
+        data: Vec<T>,
+        init: T,
     }
 
-    pub fn add(&mut self, k: usize, value: T) {
-        let mut x = k;
-        while x < self.n {
-            self.data[x] += value;
-            x |= x + 1;
-        }
-    }
-
-    /// Returns a sum of range `[l, r)`
-    pub fn sum(&self, l: usize, r: usize) -> T {
-        self.sum_one(r) - self.sum_one(l)
-    }
-
-    /// Returns a sum of range `[0, k)`
-    pub fn sum_one(&self, k: usize) -> T {
-        if k >= self.n {
-            panic!("");
+    impl<T: Copy + AddAssign + Sub<Output = T>> FenwickTree<T> {
+        /// Constructs a new `FenwickTree`. The size of `FenwickTree` should be specified by `size`.
+        pub fn new(size: usize, init: T) -> FenwickTree<T> {
+            FenwickTree {
+                n: size + 1,
+                data: vec![init; size + 1],
+                init: init,
+            }
         }
 
-        let mut result = self.init;
-        let mut x = k as i32 - 1;
-        while x >= 0 {
-            result += self.data[x as usize];
-            x = (x & (x + 1)) - 1;
+        pub fn add(&mut self, k: usize, value: T) {
+            let mut x = k;
+            while x < self.n {
+                self.data[x] += value;
+                x |= x + 1;
+            }
         }
 
-        result
+        /// Returns a sum of range `[l, r)`
+        pub fn sum(&self, l: usize, r: usize) -> T {
+            self.sum_one(r) - self.sum_one(l)
+        }
+
+        /// Returns a sum of range `[0, k)`
+        pub fn sum_one(&self, k: usize) -> T {
+            if k >= self.n {
+                panic!("");
+            }
+
+            let mut result = self.init;
+            let mut x = k as i32 - 1;
+            while x >= 0 {
+                result += self.data[x as usize];
+                x = (x & (x + 1)) - 1;
+            }
+
+            result
+        }
     }
 }
 
@@ -52,7 +54,7 @@ impl<T: Copy + AddAssign + Sub<Output = T>> FenwickTree<T> {
 mod test {
     extern crate rand;
     use self::rand::{thread_rng, Rng};
-    use super::*;
+    use super::fenwick_tree::FenwickTree;
 
     #[test]
     fn random_array() {
