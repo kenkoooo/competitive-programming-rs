@@ -34,9 +34,7 @@ pub mod fenwick_tree {
 
         /// Returns a sum of range `[0, k)`
         pub fn sum_one(&self, k: usize) -> T {
-            if k >= self.n {
-                panic!("");
-            }
+            assert!(k < self.n, "k={} n={}", k, self.n);
 
             let mut result = self.init;
             let mut x = k as i32 - 1;
