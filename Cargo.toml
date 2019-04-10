@@ -9,6 +9,7 @@ repository = "https://github.com/kenkoooo/competitive-programming-rs"
 documentation = "https://docs.rs/competitive-programming-rs"
 homepage = "https://docs.rs/competitive-programming-rs"
 exclude = ["assets/*"]
+edition = "2018"
 
 [dependencies]
 rand = "0.4.2"

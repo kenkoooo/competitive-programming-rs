@@ -50,9 +50,8 @@ pub mod fenwick_tree {
 
 #[cfg(test)]
 mod test {
-    extern crate rand;
-    use self::rand::{thread_rng, Rng};
     use super::fenwick_tree::FenwickTree;
+    use rand::{thread_rng, Rng};
 
     #[test]
     fn random_array() {

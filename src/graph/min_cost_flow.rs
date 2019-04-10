@@ -111,7 +111,7 @@ pub mod primal_dual {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use utils::test_helper::TestCaseProducer;
+    use crate::utils::test_helper::TestCaseProducer;
 
     #[test]
     fn solve_grl_6_b() {

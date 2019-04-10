@@ -115,10 +115,8 @@ pub mod mod_int {
 
 #[cfg(test)]
 mod test {
-    extern crate rand;
-
-    use self::rand::distributions::{IndependentSample, Range};
     use super::mod_int::*;
+    use rand::distributions::{IndependentSample, Range};
 
     const MOD: usize = 1_000_000_007;
 

@@ -56,7 +56,7 @@ pub mod max_rectangle {
 #[cfg(test)]
 mod test {
     use super::*;
-    use utils::test_helper::TestCaseProducer;
+    use crate::utils::test_helper::TestCaseProducer;
 
     #[test]
     fn solve_dpl_3_b() {

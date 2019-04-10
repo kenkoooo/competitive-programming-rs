@@ -58,10 +58,9 @@ where
 
 #[cfg(test)]
 mod test {
-    extern crate rand;
 
-    use self::rand::Rng;
     use super::*;
+    use rand::Rng;
     use std::cmp;
     use std::i64::MAX;
 

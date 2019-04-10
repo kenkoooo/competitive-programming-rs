@@ -100,9 +100,9 @@ impl SuffixArray {
 #[cfg(test)]
 mod test {
     use super::*;
-    use data_structure::segment_tree::SegmentTree;
+    use crate::data_structure::segment_tree::SegmentTree;
+    use crate::utils::test_helper::TestCaseProducer;
     use std;
-    use utils::test_helper::TestCaseProducer;
 
     #[test]
     fn small_test() {

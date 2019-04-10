@@ -37,10 +37,8 @@ impl CumulativeSum {
 
 #[cfg(test)]
 mod test {
-    extern crate rand;
-
-    use self::rand::distributions::{IndependentSample, Range};
     use super::*;
+    use rand::distributions::{IndependentSample, Range};
 
     #[test]
     fn random_array() {

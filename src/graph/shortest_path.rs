@@ -43,8 +43,8 @@ pub mod bellman_ford {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::test_helper::TestCaseProducer;
     use std;
-    use utils::test_helper::TestCaseProducer;
 
     #[test]
     fn solve_grl_1_b() {

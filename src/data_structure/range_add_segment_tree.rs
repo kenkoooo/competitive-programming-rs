@@ -126,8 +126,7 @@ pub mod range_add_segment_tree {
 #[cfg(test)]
 mod test {
     use super::*;
-    extern crate rand;
-    use self::rand::Rng;
+    use rand::Rng;
     use std::cmp;
 
     #[test]

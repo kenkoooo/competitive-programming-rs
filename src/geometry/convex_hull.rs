@@ -73,7 +73,7 @@ impl Point {
 #[cfg(test)]
 mod test {
     use super::*;
-    use utils::test_helper::TestCaseProducer;
+    use crate::utils::test_helper::TestCaseProducer;
 
     /// Solve http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_4_A
     #[test]

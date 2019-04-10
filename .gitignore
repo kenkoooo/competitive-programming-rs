@@ -4,3 +4,4 @@
 **/*.lock
 **/*.iml
 /rls/
+**/.vscode/

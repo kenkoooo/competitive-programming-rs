@@ -40,9 +40,8 @@ impl Combination {
 
 #[cfg(test)]
 mod test {
-    extern crate rand;
-
     use super::*;
+    use rand;
 
     fn gcd(a: usize, b: usize) -> usize {
         if b == 0 {
