@@ -41,7 +41,6 @@ impl Combination {
 #[cfg(test)]
 mod test {
     use super::*;
-    use rand;
 
     fn gcd(a: usize, b: usize) -> usize {
         if b == 0 {
