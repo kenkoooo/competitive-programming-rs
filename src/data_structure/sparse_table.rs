@@ -1,4 +1,4 @@
-mod sparse_table {
+pub mod sparse_table {
     use std::cmp;
 
     pub struct SparseTable<T, F> {
