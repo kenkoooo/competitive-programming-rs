@@ -1,7 +1,7 @@
 pub mod bitset {
     use std::ops::{BitOrAssign, Shl};
-    const ONE_VALUE_LENGTH: usize = 60;
-    const MAXIMUM: u64 = (1 << ONE_VALUE_LENGTH) - 1;
+    const ONE_VALUE_LENGTH: usize = 63;
+    const MAXIMUM: u64 = (1u64 << ONE_VALUE_LENGTH as u64) - 1;
 
     pub fn get_bit_position(index: usize) -> (usize, usize) {
         let data_index = index / ONE_VALUE_LENGTH;
@@ -55,9 +55,9 @@ pub mod bitset {
             let (data_index, bit_index) = get_bit_position(index);
             assert!(self.data.len() > data_index);
             if value {
-                self.data[data_index] |= 1 << bit_index;
+                self.data[data_index] |= (1 << bit_index) as u64;
             } else {
-                let tmp = MAXIMUM ^ (1 << bit_index);
+                let tmp = MAXIMUM ^ (1 << bit_index) as u64;
                 self.data[data_index] &= tmp;
             }
         }
@@ -65,19 +65,19 @@ pub mod bitset {
         pub fn get(&mut self, index: usize) -> bool {
             let (data_index, bit_index) = get_bit_position(index);
             assert!(self.data.len() > data_index);
-            self.data[data_index] & (1 << bit_index) != 0
+            self.data[data_index] & (1u64 << bit_index as u64) != 0
         }
 
         pub fn shift_left(&self, shift: usize) -> Self {
             let mut next_data = Vec::new();
             let prefix_empty_count = shift / ONE_VALUE_LENGTH;
-            let shift_count = shift % ONE_VALUE_LENGTH;
+            let shift_count = (shift % ONE_VALUE_LENGTH) as u64;
             for _ in 0..prefix_empty_count {
                 next_data.push(0);
             }
 
             let mut from_previous = 0;
-            let room = ONE_VALUE_LENGTH - shift_count;
+            let room = ONE_VALUE_LENGTH as u64 - shift_count;
             for &data in self.data.iter() {
                 let overflow = (data >> room) << room;
                 let rest = data - overflow;
@@ -129,8 +129,8 @@ mod test {
         value1 |= value2;
         bitset1 |= bitset2;
 
-        for i in 0..50 {
-            if value1 & (1 << i) != 0 {
+        for i in 0..50usize {
+            if value1 & (1u64 << i as u64) != 0 {
                 assert!(bitset1.get(i));
             } else {
                 assert!(!bitset1.get(i));
@@ -144,7 +144,7 @@ mod test {
         let first_shift = 30;
         let second_shift = 40;
         let bitset1 = BitSet::new_from(value1) << (first_shift + second_shift);
-        let bitset2 = BitSet::new_from(value1 << first_shift) << second_shift;
+        let bitset2 = BitSet::new_from(value1 << first_shift as u64) << second_shift;
         assert!(bitset1 == bitset2);
     }
 }
