@@ -1,5 +1,5 @@
 pub mod mod_int {
-    use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+    use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
     type Num = usize;
     const MOD: Num = 1_000_000_007;
@@ -64,6 +64,31 @@ pub mod mod_int {
         }
     }
 
+    impl Div<Num> for ModInt<Num> {
+        type Output = ModInt<Num>;
+        fn div(self, rhs: Num) -> ModInt<Num> {
+            self * ModInt(rhs).pow(MOD - 2)
+        }
+    }
+
+    impl Div<ModInt<Num>> for ModInt<Num> {
+        type Output = ModInt<Num>;
+        fn div(self, rhs: ModInt<Num>) -> ModInt<Num> {
+            self / rhs.0
+        }
+    }
+
+    impl DivAssign<Num> for ModInt<Num> {
+        fn div_assign(&mut self, rhs: Num) {
+            *self = *self / rhs
+        }
+    }
+    impl DivAssign<ModInt<Num>> for ModInt<Num> {
+        fn div_assign(&mut self, rhs: ModInt<Num>) {
+            *self = *self / rhs
+        }
+    }
+
     impl Mul<ModInt<Num>> for ModInt<Num> {
         type Output = ModInt<Num>;
 
@@ -93,12 +118,8 @@ pub mod mod_int {
     }
 
     impl ModInt<Num> {
-        pub fn new(value: Num) -> Self {
-            ModInt(value)
-        }
-
         pub fn pow(self, e: usize) -> ModInt<Num> {
-            let mut result = ModInt::new(1);
+            let mut result = ModInt(1);
             let mut cur = self;
             let mut e = e;
             while e > 0 {
@@ -128,8 +149,8 @@ mod test {
             let x: usize = between.ind_sample(&mut rng);
             let y: usize = between.ind_sample(&mut rng);
 
-            let mx = ModInt::new(x);
-            let my = ModInt::new(y);
+            let mx = ModInt(x);
+            let my = ModInt(y);
 
             assert_eq!((mx + my).0, (x + y) % MOD);
             assert_eq!((mx + y).0, (x + y) % MOD);
@@ -164,8 +185,8 @@ mod test {
             let x: usize = between.ind_sample(&mut rng);
             let y: usize = between.ind_sample(&mut rng);
 
-            let mx = ModInt::new(x);
-            let my = ModInt::new(y);
+            let mx = ModInt(x);
+            let my = ModInt(y);
 
             assert_eq!((mx * my).0, (x * y) % MOD);
             assert_eq!((mx * y).0, (x * y) % MOD);
@@ -174,16 +195,26 @@ mod test {
 
     #[test]
     fn zero_test() {
-        let a = ModInt::new(1_000_000_000);
-        let b = ModInt::new(7);
+        let a = ModInt(1_000_000_000);
+        let b = ModInt(7);
         let c = a + b;
         assert_eq!(c.0, 0);
     }
 
     #[test]
     fn pow_test() {
-        let a = ModInt::new(3);
+        let a = ModInt(3);
         let a = a.pow(4);
         assert_eq!(a.0, 81);
+    }
+
+    #[test]
+    fn div_test() {
+        for i in 1..100000 {
+            let mut a = ModInt(1);
+            a /= i;
+            a *= i;
+            assert_eq!(a.0, 1);
+        }
     }
 }
