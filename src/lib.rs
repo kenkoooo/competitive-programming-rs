@@ -16,3 +16,6 @@ pub mod geometry;
 
 /// Utilities for tests, stdin, and so on.
 pub mod utils;
+
+/// String algorithms.
+pub mod string;
