@@ -1,5 +1,4 @@
 pub struct RollingHash {
-    base: u64,
     hash: Vec<u64>,
     pow: Vec<u64>,
 }
@@ -15,7 +14,6 @@ impl RollingHash {
             hash[i + 1] = hash[i].wrapping_mul(base).wrapping_add(s[i] as u64);
         }
         RollingHash {
-            base: base,
             hash: hash,
             pow: pow,
         }
