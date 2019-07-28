@@ -33,7 +33,7 @@ mod tests {
 
     #[test]
     fn test_rolling_hash() {
-        let n = 100;
+        let n = 30;
         let between = Range::new(0, 26);
         let mut rng = rand::thread_rng();
 
@@ -44,8 +44,8 @@ mod tests {
                 s.push(c);
             }
 
-            let mut t = String::new() + s.as_str() + s.as_str();
-
+            let t = String::new() + s.as_str() + s.as_str();
+            let n = t.len();
             let rolling_hash = RollingHash::new(&t.as_bytes(), MOD);
             for i in 0..n {
                 for j in i..n {
