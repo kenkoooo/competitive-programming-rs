@@ -1,35 +1,41 @@
 pub mod range_add_segment_tree {
+    use std::ops::Add;
 
-    use std::cmp;
-    pub const NUM: usize = 1 << 20;
-    pub const INF: i64 = 1 << 60;
-
-    pub struct RangeAddSegmentTree {
-        seg_min: Vec<i64>,
-        seg_max: Vec<i64>,
-        seg_add: Vec<i64>,
+    pub struct RangeAddSegmentTree<T, F> {
+        seg: Vec<T>,
+        seg_add: Vec<T>,
+        num: usize,
+        f: F,
+        init: T,
     }
 
-    impl RangeAddSegmentTree {
-        pub fn new() -> Self {
+    impl<T, F> RangeAddSegmentTree<T, F>
+    where
+        T: PartialOrd + Add<Output = T> + Copy,
+        F: Fn(T, T) -> T + Copy,
+    {
+        pub fn new(n: usize, init: T, f: F, zero: T) -> Self {
+            let num = n.next_power_of_two();
             RangeAddSegmentTree {
-                seg_min: vec![INF; NUM * 2],
-                seg_max: vec![-INF; NUM * 2],
-                seg_add: vec![0; NUM * 2],
+                seg: vec![init; num * 2],
+                seg_add: vec![zero; num * 2],
+                num: num,
+                init: init,
+                f: f,
             }
         }
 
         /// add to [a, b)
-        pub fn add(&mut self, a: usize, b: usize, value: i64) {
-            self.add_to_range(a, b, value, 0, 0, NUM);
+        pub fn add(&mut self, a: usize, b: usize, value: T) {
+            self.add_to_range(a, b, value, 0, 0, self.num);
         }
 
         fn add_to_range(
             &mut self,
             a: usize,
             b: usize,
-            value: i64,
-            k: usize,
+            value: T,
+            mut k: usize,
             left: usize,
             right: usize,
         ) {
@@ -37,17 +43,12 @@ pub mod range_add_segment_tree {
                 return;
             }
             if a <= left && right <= b {
-                let mut k = k;
-                self.seg_add[k] += value;
+                self.seg_add[k] = self.seg_add[k] + value;
                 while k > 0 {
                     k = (k - 1) / 2;
-                    self.seg_min[k] = cmp::min(
-                        self.seg_min[k * 2 + 1] + self.seg_add[k * 2 + 1],
-                        self.seg_min[k * 2 + 2] + self.seg_add[k * 2 + 2],
-                    );
-                    self.seg_max[k] = cmp::max(
-                        self.seg_max[k * 2 + 1] + self.seg_add[k * 2 + 1],
-                        self.seg_max[k * 2 + 2] + self.seg_add[k * 2 + 2],
+                    self.seg[k] = (self.f)(
+                        self.seg[k * 2 + 1] + self.seg_add[k * 2 + 1],
+                        self.seg[k * 2 + 2] + self.seg_add[k * 2 + 2],
                     );
                 }
             } else {
@@ -56,69 +57,30 @@ pub mod range_add_segment_tree {
             }
         }
 
-        pub fn update(&mut self, pos: usize, value: i64) {
-            let mut k = pos + NUM - 1;
-            self.seg_min[k] = value;
-            self.seg_max[k] = value;
+        pub fn update(&mut self, pos: usize, value: T) {
+            let mut k = pos + self.num - 1;
+            self.seg[k] = value;
             while k > 0 {
                 k = (k - 1) / 2;
-                self.seg_min[k] = cmp::min(self.seg_min[k * 2 + 1], self.seg_min[k * 2 + 2]);
-                self.seg_max[k] = cmp::max(self.seg_max[k * 2 + 1], self.seg_max[k * 2 + 2]);
+                self.seg[k] = (self.f)(self.seg[k * 2 + 1], self.seg[k * 2 + 2]);
             }
         }
 
-        pub fn get_min(&self, a: usize, b: usize) -> i64 {
-            get(
-                &self.seg_min,
-                &self.seg_add,
-                INF,
-                a,
-                b,
-                0,
-                0,
-                NUM,
-                &cmp::min,
-            )
+        pub fn get(&self, a: usize, b: usize) -> T {
+            self.get_from_range(a, b, 0, 0, self.num)
         }
 
-        pub fn get_max(&self, a: usize, b: usize) -> i64 {
-            get(
-                &self.seg_max,
-                &self.seg_add,
-                -INF,
-                a,
-                b,
-                0,
-                0,
-                NUM,
-                &cmp::max,
-            )
-        }
-    }
-
-    fn get<F>(
-        seg: &Vec<i64>,
-        add: &Vec<i64>,
-        default_value: i64,
-        a: usize,
-        b: usize,
-        k: usize,
-        left: usize,
-        right: usize,
-        f: &F,
-    ) -> i64
-    where
-        F: Fn(i64, i64) -> i64,
-    {
-        if b <= left || right <= a {
-            default_value
-        } else if a <= left && right <= b {
-            seg[k] + add[k]
-        } else {
-            let mid = (left + right) / 2;
-            let x = get(seg, add, default_value, a, b, k * 2 + 1, left, mid, f);
-            let y = get(seg, add, default_value, a, b, k * 2 + 2, mid, right, f);
-            f(x, y) + add[k]
+        fn get_from_range(&self, a: usize, b: usize, k: usize, left: usize, right: usize) -> T {
+            if b <= left || right <= a {
+                self.init
+            } else if a <= left && right <= b {
+                self.seg[k] + self.seg_add[k]
+            } else {
+                let mid = (left + right) / 2;
+                let x = self.get_from_range(a, b, k * 2 + 1, left, mid);
+                let y = self.get_from_range(a, b, k * 2 + 2, mid, right);
+                (self.f)(x, y) + self.seg_add[k]
+            }
         }
     }
 }
@@ -129,19 +91,36 @@ mod test {
     use rand::Rng;
     use std::cmp;
 
+    const INF: i64 = 1 << 60;
+
     #[test]
     fn random_add() {
-        let n = 30;
+        let n = 32;
         let mut array = vec![0; n];
-        let mut seg = range_add_segment_tree::RangeAddSegmentTree::new();
+        let mut seg_min = range_add_segment_tree::RangeAddSegmentTree::new(
+            n,
+            INF,
+            |a, b| if a > b { b } else { a },
+            0,
+        );
+        let mut seg_max = range_add_segment_tree::RangeAddSegmentTree::new(
+            n,
+            -INF,
+            |a, b| if a < b { b } else { a },
+            0,
+        );
         for i in 0..n {
-            seg.update(i, 0);
+            let value = rand::thread_rng().gen::<i16>() as i64;
+            array[i] = value;
+            seg_min.update(i, value);
+            seg_max.update(i, value);
         }
 
         for l in 0..n {
             for r in (l + 1)..n {
                 let value = rand::thread_rng().gen::<i16>() as i64;
-                seg.add(l, r, value);
+                seg_min.add(l, r, value);
+                seg_max.add(l, r, value);
 
                 for i in l..r {
                     array[i] += value;
@@ -149,15 +128,15 @@ mod test {
 
                 for l in 0..n {
                     for r in (l + 1)..n {
-                        let mut min = range_add_segment_tree::INF;
-                        let mut max = -range_add_segment_tree::INF;
+                        let mut min = INF;
+                        let mut max = -INF;
                         for i in l..r {
                             min = cmp::min(min, array[i]);
                             max = cmp::max(max, array[i]);
                         }
 
-                        assert_eq!(seg.get_min(l, r), min);
-                        assert_eq!(seg.get_max(l, r), max);
+                        assert_eq!(seg_min.get(l, r), min);
+                        assert_eq!(seg_max.get(l, r), max);
                     }
                 }
             }
