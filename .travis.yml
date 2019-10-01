@@ -1,7 +1,5 @@
 language: rust
 rust:
-  - 1.15.0 # for AtCoder
-  - 1.17.0 # for Aizu Online Judge
   - 1.35.0 # for Codeforces
   - stable
   - nightly
