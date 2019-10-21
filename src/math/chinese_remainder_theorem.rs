@@ -47,7 +47,7 @@ mod tests {
                 b[i] = ans % m[i];
             }
 
-            let (a, ma) = chinese_remainder_theorem(&b, &m).unwrap();
+            let (a, _) = chinese_remainder_theorem(&b, &m).unwrap();
             for i in 0..n {
                 assert_eq!(a % m[i], b[i]);
             }
