@@ -96,20 +96,19 @@ impl LowestCommonAncestor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::test_helper::TestCaseProducer;
+    use crate::utils::test_helper;
+    use crate::utils::test_helper::Tester;
 
     #[test]
     fn solve_grl_5_c() {
-        let mut input = TestCaseProducer::new_from_directory("./assets/GRL_5_C/in/");
-        let mut output = TestCaseProducer::new_from_directory("./assets/GRL_5_C/out/");
-
-        while !input.is_empty() {
-            let n: usize = input.next();
+        let tester = Tester::new("./assets/GRL_5_C/in/", "./assets/GRL_5_C/out/");
+        tester.test_solution(|sc| {
+            let n: usize = sc.read();
             let mut graph = (0..n).map(|_| Vec::new()).collect::<Vec<_>>();
             for i in 0..n {
-                let k = input.next();
+                let k = sc.read();
                 for _ in 0..k {
-                    let c: usize = input.next();
+                    let c: usize = sc.read();
                     graph[i].push(c);
                     graph[c].push(i);
                 }
@@ -117,15 +116,13 @@ mod tests {
 
             let lca = LowestCommonAncestor::new(&graph);
 
-            let q: usize = input.next();
+            let q: usize = sc.read();
             for _ in 0..q {
-                let u: usize = input.next();
-                let v: usize = input.next();
+                let u: usize = sc.read();
+                let v: usize = sc.read();
                 let ans = lca.get_lca(u, v);
-
-                let expected: usize = output.next();
-                assert_eq!(ans, expected);
+                sc.write(format!("{}\n", ans));
             }
-        }
+        });
     }
 }

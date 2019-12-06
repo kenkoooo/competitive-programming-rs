@@ -73,24 +73,25 @@ impl Point {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::utils::test_helper::TestCaseProducer;
+    use crate::utils::scanner::IO;
+    use crate::utils::test_helper;
+    use crate::utils::test_helper::Tester;
 
     /// Solve http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_4_A
     #[test]
     fn solve_cgl_4_a() {
-        let mut input = TestCaseProducer::new_from_directory("./assets/CGL_4_A/in/");
-        let mut output = TestCaseProducer::new_from_directory("./assets/CGL_4_A/out/");
-        while !input.is_empty() {
-            let n: usize = input.next();
+        let tester = Tester::new("./assets/CGL_4_A/in/", "./assets/CGL_4_A/out/");
+        tester.test_solution(|sc| {
+            let n: usize = sc.read();
             let mut points = Vec::new();
             for _ in 0..n {
-                let x: f64 = input.next();
-                let y: f64 = input.next();
+                let x: f64 = sc.read();
+                let y: f64 = sc.read();
                 points.push(Point { x: x, y: y });
             }
 
             let convex_hull = extract_convex_hull(&points, true);
-            assert_eq!(convex_hull.len(), output.next());
+            sc.write(format!("{}\n", convex_hull.len()));
 
             let n = convex_hull.len();
             let mut start = 0;
@@ -106,9 +107,8 @@ mod test {
             for i in 0..n {
                 let i = (i + start) % n;
                 let i = convex_hull[i];
-                assert_eq!(points[i].x, output.next());
-                assert_eq!(points[i].y, output.next());
+                sc.write(format!("{} {}\n", points[i].x, points[i].y));
             }
-        }
+        });
     }
 }

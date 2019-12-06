@@ -56,27 +56,27 @@ pub mod max_rectangle {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::utils::test_helper::TestCaseProducer;
+    use crate::utils::scanner::IO;
+    use crate::utils::test_helper;
+    use crate::utils::test_helper::Tester;
 
     #[test]
     fn solve_dpl_3_b() {
-        let mut input = TestCaseProducer::new_from_directory("./assets/DPL_3_B/in/");
-        let mut output = TestCaseProducer::new_from_directory("./assets/DPL_3_B/out/");
+        let tester = Tester::new("./assets/DPL_3_B/in/", "./assets/DPL_3_B/out/");
 
-        while !input.is_empty() {
-            let h: usize = input.next();
-            let w: usize = input.next();
+        tester.test_solution(|sc| {
+            let h: usize = sc.read();
+            let w: usize = sc.read();
 
             let mut c = vec![vec![false; w]; h];
             for i in 0..h {
                 for j in 0..w {
-                    c[i][j] = input.next::<usize>() == 0;
+                    c[i][j] = sc.read::<usize>() == 0;
                 }
             }
 
             let ans = max_rectangle::maximize(&c);
-            let expected: usize = output.next();
-            assert_eq!(expected, ans);
-        }
+            sc.write(format!("{}\n", ans));
+        });
     }
 }

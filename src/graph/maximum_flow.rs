@@ -117,30 +117,25 @@ pub mod dinitz {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::test_helper::TestCaseProducer;
+    use crate::utils::test_helper::Tester;
 
     /// Solve http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A
     #[test]
     fn solve_grl_6_a() {
-        let mut input = TestCaseProducer::new("./assets/GRL_6_A.in");
-        let mut output = TestCaseProducer::new("./assets/GRL_6_A.out");
-
-        let test_cases = input.next();
-        assert_eq!(test_cases, output.next());
-        for _ in 0..test_cases {
-            let v = input.next();
-            let e = input.next();
+        let tester = Tester::new("./assets/GRL_6_A/in/", "./assets/GRL_6_A/out/");
+        tester.test_solution(|sc| {
+            let v = sc.read();
+            let e = sc.read();
 
             let mut dinitz = dinitz::Dinitz::new(v);
             for _ in 0..e {
-                let from = input.next();
-                let to = input.next();
-                let c = input.next();
+                let from = sc.read();
+                let to = sc.read();
+                let c = sc.read();
                 dinitz.add_edge(from, to, c);
             }
             let flow = dinitz.max_flow(0, v - 1);
-            let ans = output.next();
-            assert_eq!(flow, ans);
-        }
+            sc.write(format!("{}\n", flow));
+        });
     }
 }

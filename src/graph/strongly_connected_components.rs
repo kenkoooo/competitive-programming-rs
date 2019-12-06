@@ -77,37 +77,33 @@ pub mod strongly_connected_components {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::test_helper::TestCaseProducer;
+    use crate::utils::test_helper::Tester;
 
     #[test]
     fn solve_grl_3_c() {
-        let mut input = TestCaseProducer::new_from_directory("./assets/GRL_3_C/in/");
-        let mut output = TestCaseProducer::new_from_directory("./assets/GRL_3_C/out/");
-
-        while !input.is_empty() {
-            let v: usize = input.next();
-            let e: usize = input.next();
+        let tester = Tester::new("./assets/GRL_3_C/in/", "./assets/GRL_3_C/out/");
+        tester.test_solution(|sc| {
+            let v: usize = sc.read();
+            let e: usize = sc.read();
             let mut graph = vec![vec![]; v];
             for _ in 0..e {
-                let s: usize = input.next();
-                let t: usize = input.next();
+                let s: usize = sc.read();
+                let t: usize = sc.read();
                 graph[s].push(t);
             }
 
             let cmp = strongly_connected_components::decompose(&graph);
-            let q: usize = input.next();
+            let q: usize = sc.read();
             for _ in 0..q {
-                let u: usize = input.next();
-                let v: usize = input.next();
-
-                let expected = output.next();
+                let u: usize = sc.read();
+                let v: usize = sc.read();
 
                 if cmp[u] == cmp[v] {
-                    assert_eq!(1, expected);
+                    sc.write("1\n");
                 } else {
-                    assert_eq!(0, expected);
+                    sc.write("0\n");
                 }
             }
-        }
+        });
     }
 }

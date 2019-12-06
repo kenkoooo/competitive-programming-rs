@@ -73,21 +73,22 @@ impl BridgeDetector {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::test_helper::TestCaseProducer;
+    use crate::utils::scanner::IO;
+    use crate::utils::test_helper;
+    use crate::utils::test_helper::Tester;
 
     #[test]
     fn solve_grl_3_a() {
-        let mut input = TestCaseProducer::new_from_directory("./assets/GRL_3_A/in/");
-        let mut output = TestCaseProducer::new_from_directory("./assets/GRL_3_A/out/");
+        let tester = Tester::new("./assets/GRL_3_A/in/", "./assets/GRL_3_A/out/");
 
-        while !input.is_empty() {
-            let n: usize = input.next();
-            let m: usize = input.next();
-            println!("{} {}", n, m);
+        tester.test_solution(|sc| {
+            let n: usize = sc.read();
+            let m: usize = sc.read();
+
             let mut graph = vec![vec![]; n];
             for _ in 0..m {
-                let u: usize = input.next();
-                let v: usize = input.next();
+                let u: usize = sc.read();
+                let v: usize = sc.read();
                 graph[u].push(v);
                 graph[v].push(u);
             }
@@ -95,30 +96,22 @@ mod tests {
             let mut low_link_link = BridgeDetector::new(&graph);
             low_link_link.articulations.sort();
 
-            if low_link_link.articulations.is_empty() {
-                output.next::<String>();
+            for v in low_link_link.articulations.into_iter() {
+                sc.write(format!("{}\n", v));
             }
-
-            for &v in low_link_link.articulations.iter() {
-                let ans: usize = output.next();
-                assert_eq!(ans, v);
-            }
-        }
+        });
     }
 
     #[test]
     fn solve_grl_3_b() {
-        let mut input = TestCaseProducer::new_from_directory("./assets/GRL_3_B/in/");
-        let mut output = TestCaseProducer::new_from_directory("./assets/GRL_3_B/out/");
-
-        while !input.is_empty() {
-            let n: usize = input.next();
-            let m: usize = input.next();
-            println!("{} {}", n, m);
+        let tester = Tester::new("./assets/GRL_3_B/in/", "./assets/GRL_3_B/out/");
+        tester.test_solution(|sc| {
+            let n: usize = sc.read();
+            let m: usize = sc.read();
             let mut graph = vec![vec![]; n];
             for _ in 0..m {
-                let u: usize = input.next();
-                let v: usize = input.next();
+                let u: usize = sc.read();
+                let v: usize = sc.read();
                 graph[u].push(v);
                 graph[v].push(u);
             }
@@ -126,16 +119,9 @@ mod tests {
             let mut low_link_link = BridgeDetector::new(&graph);
             low_link_link.bridges.sort();
 
-            if low_link_link.bridges.is_empty() {
-                output.next::<String>();
+            for (a, b) in low_link_link.bridges.into_iter() {
+                sc.write(format!("{} {}\n", a, b));
             }
-
-            for &(a, b) in low_link_link.bridges.iter() {
-                let ans: usize = output.next();
-                assert_eq!(ans, a);
-                let ans: usize = output.next();
-                assert_eq!(ans, b);
-            }
-        }
+        });
     }
 }

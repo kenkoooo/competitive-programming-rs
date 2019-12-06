@@ -111,24 +111,22 @@ pub mod primal_dual {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::test_helper::TestCaseProducer;
+    use crate::utils::test_helper::Tester;
 
     #[test]
     fn solve_grl_6_b() {
-        let mut input = TestCaseProducer::new_from_directory("./assets/GRL_6_B/in/");
-        let mut output = TestCaseProducer::new_from_directory("./assets/GRL_6_B/out/");
-
-        while !input.is_empty() {
-            let v: usize = input.next();
-            let e: usize = input.next();
-            let f: i64 = input.next();
+        let tester = Tester::new("./assets/GRL_6_B/in/", "./assets/GRL_6_B/out/");
+        tester.test_solution(|sc| {
+            let v: usize = sc.read();
+            let e: usize = sc.read();
+            let f: i64 = sc.read();
 
             let mut solver = primal_dual::MinimumCostFlowSolver::new(v);
             for _ in 0..e {
-                let u: usize = input.next();
-                let v: usize = input.next();
-                let c: i64 = input.next();
-                let d: i64 = input.next();
+                let u: usize = sc.read();
+                let v: usize = sc.read();
+                let c: i64 = sc.read();
+                let d: i64 = sc.read();
                 solver.add_edge(u, v, c, d);
             }
 
@@ -136,7 +134,7 @@ mod tests {
                 Some(flow) => flow,
                 None => -1,
             };
-            assert_eq!(ans, output.next::<i64>());
-        }
+            sc.write(format!("{}\n", ans));
+        });
     }
 }

@@ -101,7 +101,9 @@ impl SuffixArray {
 mod test {
     use super::*;
     use crate::data_structure::segment_tree::SegmentTree;
-    use crate::utils::test_helper::TestCaseProducer;
+    use crate::utils::scanner::IO;
+    use crate::utils::test_helper;
+    use crate::utils::test_helper::Tester;
     use std;
 
     #[test]
@@ -125,18 +127,18 @@ mod test {
 
     #[test]
     fn jag2014summer_day4_f() {
-        let mut input = TestCaseProducer::new_from_directory("./assets/jag2014summer-day4/F/in/");
-        let mut output = TestCaseProducer::new_from_directory("./assets/jag2014summer-day4/F/out/");
-
-        while !input.is_empty() {
-            let s: Vec<u8> = input.next::<String>().bytes().collect();
+        let tester = Tester::new(
+            "./assets/jag2014summer-day4/F/in/",
+            "./assets/jag2014summer-day4/F/out/",
+        );
+        tester.test_solution(|sc| {
+            let s: Vec<u8> = sc.read::<String>().bytes().collect();
             let n = s.len();
             let reverse_s = {
                 let mut r = s.clone();
                 r.reverse();
                 r
             };
-
             let sa = SuffixArray::new(&s);
             let reverse_sa = SuffixArray::new(&reverse_s);
 
@@ -147,41 +149,41 @@ mod test {
                 reverse_rmq.update(i, reverse_sa.array[i] as i64);
             }
 
-            let m = input.next();
+            let m: usize = sc.read();
             for _ in 0..m {
-                let x = input.next::<String>().bytes().collect();
+                let x = sc.read::<String>().bytes().collect();
                 let y = {
-                    let mut y: Vec<u8> = input.next::<String>().bytes().collect();
+                    let mut y: Vec<u8> = sc.read::<String>().bytes().collect();
                     y.reverse();
                     y
                 };
 
                 if !sa.contains(&x) {
-                    assert_eq!(output.next::<String>(), "0");
+                    sc.write(format!("0\n"));
                     continue;
                 }
                 let low = sa.lower_bound(&x);
                 let up = sa.upper_bound(&x);
 
                 if !reverse_sa.contains(&y) {
-                    assert_eq!(output.next::<String>(), "0");
+                    sc.write(format!("0\n"));
                     continue;
                 }
                 let reverse_low = reverse_sa.lower_bound(&y);
                 let reverse_up = reverse_sa.upper_bound(&y);
 
                 if low >= up || reverse_low >= reverse_up {
-                    assert_eq!(output.next::<String>(), "0");
+                    sc.write(format!("0\n"));
                 }
 
                 let s = rmq.query(low, up) as usize;
                 let t = n - reverse_rmq.query(reverse_low, reverse_up) as usize;
                 if s + x.len() <= t && s <= t - y.len() {
-                    assert_eq!(output.next::<usize>(), t - s);
+                    sc.write(format!("{}\n", t - s));
                 } else {
-                    assert_eq!(output.next::<String>(), "0");
+                    sc.write(format!("0\n"));
                 }
             }
-        }
+        });
     }
 }

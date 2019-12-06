@@ -1,3 +1,4 @@
+use crate::utils::scanner::IO;
 use std::collections::vec_deque::VecDeque;
 use std::error::Error;
 use std::fmt;
@@ -7,64 +8,45 @@ use std::io::Read;
 use std::path::Path;
 use std::str;
 
-pub struct TestCaseProducer {
-    queue: VecDeque<String>,
+pub(crate) struct Tester {
+    input: Vec<Vec<u8>>,
+    output: Vec<Vec<u8>>,
 }
 
-impl TestCaseProducer {
-    pub fn new(filepath: &str) -> TestCaseProducer {
-        let q = load_test_values(filepath)
-            .iter()
-            .map(|s| s.to_owned())
-            .collect();
-        TestCaseProducer { queue: q }
+impl Tester {
+    pub(crate) fn new(input_directory: &str, output_directory: &str) -> Tester {
+        let input = read_from_directory(input_directory);
+        let output = read_from_directory(output_directory);
+        Tester { input, output }
     }
 
-    pub fn new_from_directory(directory_path: &str) -> TestCaseProducer {
-        let mut filenames: Vec<String> = fs::read_dir(directory_path)
-            .unwrap()
-            .map(|result| result.unwrap().path().display().to_string())
-            .collect();
-        filenames.sort();
-
-        let q = filenames
-            .iter()
-            .map(|filename| load_test_values(filename))
-            .flat_map(|values| values.into_iter())
-            .map(|value| value.to_owned())
-            .collect();
-        TestCaseProducer { queue: q }
-    }
-
-    pub fn next<T>(&mut self) -> T
+    pub(crate) fn test_solution<F>(self, solution: F)
     where
-        T: str::FromStr,
-        T::Err: fmt::Debug,
+        F: Fn(&mut IO<&[u8], &mut Vec<u8>>),
     {
-        self.queue.pop_front().unwrap().parse().ok().unwrap()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.queue.is_empty()
+        for (input, output) in self.input.into_iter().zip(self.output) {
+            let mut writer = vec![];
+            {
+                let mut sc = IO::new(&input[..], &mut writer);
+                solution(&mut sc);
+            }
+            assert_eq!(writer, output);
+        }
     }
 }
 
-fn load_test_values(filepath: &str) -> Vec<String> {
-    let path = Path::new(filepath);
-    let display = path.display();
+fn read_file(filepath: &str) -> Vec<u8> {
+    let mut file = File::open(filepath).unwrap();
+    let mut buf = Vec::new();
+    file.read_to_end(&mut buf).unwrap();
+    buf
+}
 
-    let mut file = match File::open(&path) {
-        Err(why) => panic!("couldn't open {}: {}", display, Error::description(&why)),
-        Ok(file) => file,
-    };
-
-    let mut s = String::new();
-    match file.read_to_string(&mut s) {
-        Err(why) => panic!("couldn't read {}: {}", display, Error::description(&why)),
-        Ok(_) => s
-            .trim()
-            .split(|c| c == '\n' || c == ' ')
-            .map(|s| s.to_owned())
-            .collect::<Vec<String>>(),
-    }
+fn read_from_directory(directory_path: &str) -> Vec<Vec<u8>> {
+    let mut filenames: Vec<String> = fs::read_dir(directory_path)
+        .unwrap()
+        .map(|result| result.unwrap().path().display().to_string())
+        .collect();
+    filenames.sort();
+    filenames.into_iter().map(|file| read_file(&file)).collect()
 }

@@ -43,25 +43,23 @@ pub mod bellman_ford {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::test_helper::TestCaseProducer;
+    use crate::utils::test_helper::Tester;
     use std;
 
     #[test]
     fn solve_grl_1_b() {
-        let mut input = TestCaseProducer::new_from_directory("./assets/GRL_1_B/in/");
-        let mut output = TestCaseProducer::new_from_directory("./assets/GRL_1_B/out/");
-
-        while !input.is_empty() {
-            let v: usize = input.next();
-            let e: usize = input.next();
-            let r: usize = input.next();
+        let tester = Tester::new("./assets/GRL_1_B/in/", "./assets/GRL_1_B/out/");
+        tester.test_solution(|sc| {
+            let v: usize = sc.read();
+            let e: usize = sc.read();
+            let r: usize = sc.read();
 
             let mut graph = vec![vec![]; v];
 
             for _ in 0..e {
-                let s: usize = input.next();
-                let t: usize = input.next();
-                let d: i64 = input.next();
+                let s: usize = sc.read();
+                let t: usize = sc.read();
+                let d: i64 = sc.read();
                 graph[s].push((t, d));
             }
 
@@ -74,21 +72,16 @@ mod tests {
             }
 
             if neg {
-                let out1: String = output.next();
-                let out2: String = output.next();
-                assert_eq!(out1, "NEGATIVE");
-                assert_eq!(out2, "CYCLE");
+                sc.write("NEGATIVE CYCLE\n");
             } else {
                 for i in 0..v {
                     if dist[i] == inf {
-                        let out: String = output.next();
-                        assert_eq!(out, "INF");
+                        sc.write("INF\n");
                     } else {
-                        let out: i64 = output.next();
-                        assert_eq!(dist[i], out);
+                        sc.write(format!("{}\n", dist[i]));
                     }
                 }
             }
-        }
+        });
     }
 }

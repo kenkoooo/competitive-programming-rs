@@ -47,29 +47,30 @@ impl UnionFind {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::utils::test_helper::TestCaseProducer;
+    use crate::utils::scanner::IO;
+    use crate::utils::test_helper;
+    use crate::utils::test_helper::Tester;
 
     /// Solve http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_1_A
     #[test]
     fn solve_dsl_1_a() {
-        let mut input = TestCaseProducer::new_from_directory("./assets/DSL_1_A/in/");
-        let mut output = TestCaseProducer::new_from_directory("./assets/DSL_1_A/out/");
+        let tester = Tester::new("./assets/DSL_1_A/in/", "./assets/DSL_1_A/out/");
 
-        while !input.is_empty() {
-            let n = input.next();
-            let q = input.next();
+        tester.test_solution(|sc| {
+            let n = sc.read();
+            let q = sc.read();
             let mut uf = UnionFind::new(n);
             for _ in 0..q {
-                let com: usize = input.next();
-                let x = input.next();
-                let y = input.next();
+                let com: usize = sc.read();
+                let x = sc.read();
+                let y = sc.read();
                 if com == 0 {
                     uf.unite(x, y);
                 } else {
                     let ans = if uf.find(x) == uf.find(y) { 1 } else { 0 };
-                    assert_eq!(ans, output.next());
+                    sc.write(format!("{}\n", ans));
                 }
             }
-        }
+        });
     }
 }
