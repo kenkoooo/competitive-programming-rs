@@ -1,4 +1,4 @@
-mod z_algorithm {
+pub mod z_algorithm {
 
     pub fn calc_z_array<T: PartialEq>(s: &[T]) -> Vec<usize> {
         let n = s.len();

@@ -73,8 +73,6 @@ impl Point {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::utils::scanner::IO;
-    use crate::utils::test_helper;
     use crate::utils::test_helper::Tester;
 
     /// Solve http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_4_A

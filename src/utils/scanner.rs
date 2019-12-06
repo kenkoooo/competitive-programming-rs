@@ -1,5 +1,3 @@
-use std::io::Write;
-
 pub struct IO<R, W: std::io::Write>(R, std::io::BufWriter<W>);
 
 impl<R: std::io::Read, W: std::io::Write> IO<R, W> {

@@ -56,8 +56,6 @@ pub mod max_rectangle {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::utils::scanner::IO;
-    use crate::utils::test_helper;
     use crate::utils::test_helper::Tester;
 
     #[test]

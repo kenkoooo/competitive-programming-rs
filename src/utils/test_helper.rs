@@ -1,11 +1,7 @@
 use crate::utils::scanner::IO;
-use std::collections::vec_deque::VecDeque;
-use std::error::Error;
-use std::fmt;
 use std::fs;
 use std::fs::File;
 use std::io::Read;
-use std::path::Path;
 use std::str;
 
 pub(crate) struct Tester {

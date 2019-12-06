@@ -101,8 +101,6 @@ impl SuffixArray {
 mod test {
     use super::*;
     use crate::data_structure::segment_tree::SegmentTree;
-    use crate::utils::scanner::IO;
-    use crate::utils::test_helper;
     use crate::utils::test_helper::Tester;
     use std;
 
