@@ -1,5 +1,4 @@
 pub mod range_add_segment_tree {
-    use std::ops::Add;
 
     pub struct RangeAddSegmentTree<T, F> {
         seg: Vec<T>,
@@ -11,7 +10,7 @@ pub mod range_add_segment_tree {
 
     impl<T, F> RangeAddSegmentTree<T, F>
     where
-        T: PartialOrd + Add<Output = T> + Copy,
+        T: PartialOrd + std::ops::Add<Output = T> + std::ops::Sub<Output = T> + Copy,
         F: Fn(T, T) -> T + Copy,
     {
         pub fn new(n: usize, init: T, f: F, zero: T) -> Self {
@@ -58,8 +57,10 @@ pub mod range_add_segment_tree {
         }
 
         pub fn update(&mut self, pos: usize, value: T) {
+            let cur = self.get(pos, pos + 1);
             let mut k = pos + self.num - 1;
-            self.seg[k] = value;
+            let raw = self.seg[k];
+            self.seg[k] = raw + value - cur;
             while k > 0 {
                 k = (k - 1) / 2;
                 self.seg[k] = (self.f)(self.seg[k * 2 + 1], self.seg[k * 2 + 2]);
@@ -92,6 +93,44 @@ mod test {
     use std::cmp;
 
     const INF: i64 = 1 << 60;
+
+    #[test]
+    fn edge_case() {
+        let n = 5;
+        let mut seg_min = range_add_segment_tree::RangeAddSegmentTree::new(
+            n,
+            INF as usize,
+            |a, b| if a > b { b } else { a },
+            0,
+        );
+        let mut values = vec![0; n];
+        for i in 0..n {
+            values[i] = i;
+            seg_min.update(i, i);
+        }
+
+        let from = 1;
+        let to = 4;
+        let add = 2;
+        for i in from..to {
+            values[i] += add;
+        }
+        seg_min.add(from, to, add);
+
+        let pos = 2;
+        let value = 1;
+        let cur = seg_min.get(pos, pos + 1);
+        seg_min.update(pos, cur - value);
+        values[pos] -= value;
+
+        for l in 0..n {
+            for r in (l + 1)..(n + 1) {
+                let min1 = seg_min.get(l, r);
+                let &min2 = values[l..r].iter().min().unwrap();
+                assert_eq!(min1, min2);
+            }
+        }
+    }
 
     #[test]
     fn random_add() {
