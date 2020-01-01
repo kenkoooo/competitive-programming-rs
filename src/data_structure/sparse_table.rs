@@ -1,5 +1,4 @@
 pub mod sparse_table {
-    use std::cmp;
 
     pub struct SparseTable<T, F> {
         data: Vec<Vec<T>>,
@@ -20,7 +19,7 @@ pub mod sparse_table {
             }
             for c in 1..count {
                 for i in 0..size {
-                    let next = cmp::min(size - 1, i + (1 << (c - 1)));
+                    let next = std::cmp::min(size - 1, i + (1 << (c - 1)));
                     data[c][i] = op(data[c - 1][i], data[c - 1][next]);
                 }
             }

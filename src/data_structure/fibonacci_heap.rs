@@ -1,8 +1,10 @@
 pub mod fibonacci_heap {
-    use std::collections::HashMap;
 
-    fn store_to_map<T, F>(map: &mut HashMap<usize, Node<T>>, mut node: Node<T>, ordering: F)
-    where
+    fn store_to_map<T, F>(
+        map: &mut std::collections::HashMap<usize, Node<T>>,
+        mut node: Node<T>,
+        ordering: F,
+    ) where
         T: Copy + PartialEq,
         F: Fn(T, T) -> T,
     {
@@ -51,7 +53,7 @@ pub mod fibonacci_heap {
             }
         }
         pub fn pop(&mut self) -> Option<T> {
-            let mut map: HashMap<usize, Node<T>> = HashMap::new();
+            let mut map = std::collections::HashMap::<usize, Node<T>>::new();
             let mut popped = None;
 
             let mut nodes = Vec::new();

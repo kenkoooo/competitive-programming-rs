@@ -1,5 +1,4 @@
 pub mod fenwick_tree {
-    use std::ops::{AddAssign, Sub};
     /// `FenwickTree` is a data structure that can efficiently update elements
     /// and calculate prefix sums in a table of numbers.
     /// [https://en.wikipedia.org/wiki/Fenwick_tree](https://en.wikipedia.org/wiki/Fenwick_tree)
@@ -9,7 +8,7 @@ pub mod fenwick_tree {
         init: T,
     }
 
-    impl<T: Copy + AddAssign + Sub<Output = T>> FenwickTree<T> {
+    impl<T: Copy + std::ops::AddAssign + std::ops::Sub<Output = T>> FenwickTree<T> {
         /// Constructs a new `FenwickTree`. The size of `FenwickTree` should be specified by `size`.
         pub fn new(size: usize, init: T) -> FenwickTree<T> {
             FenwickTree {

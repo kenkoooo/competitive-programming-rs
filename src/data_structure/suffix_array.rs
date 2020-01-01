@@ -1,13 +1,10 @@
-use std::cmp;
-use std::cmp::Ordering;
-
 pub struct SuffixArray {
     n: usize,
     s: Vec<u8>,
     array: Vec<usize>,
 }
 
-fn compare_node(i: usize, j: usize, k: usize, rank: &Vec<i32>) -> Ordering {
+fn compare_node(i: usize, j: usize, k: usize, rank: &Vec<i32>) -> std::cmp::Ordering {
     if rank[i] != rank[j] {
         rank[i].cmp(&rank[j])
     } else {
@@ -36,7 +33,8 @@ impl SuffixArray {
             tmp[array[0]] = 0;
             for i in 1..(n + 1) {
                 tmp[array[i]] = tmp[array[i - 1]]
-                    + if compare_node(array[i - 1], array[i], k, &rank) == Ordering::Less {
+                    + if compare_node(array[i - 1], array[i], k, &rank) == std::cmp::Ordering::Less
+                    {
                         1
                     } else {
                         0
@@ -61,9 +59,9 @@ impl SuffixArray {
             false
         } else {
             let start = self.array[b];
-            let end = cmp::min(t.len() + start, self.s.len());
+            let end = std::cmp::min(t.len() + start, self.s.len());
             let sub = &self.s[start..end];
-            sub.cmp(t) == Ordering::Equal
+            sub.cmp(t) == std::cmp::Ordering::Equal
         }
     }
 
@@ -75,7 +73,7 @@ impl SuffixArray {
         while b - a > 1 {
             let c = (a + b) / 2;
             let start = self.array[c as usize];
-            let end = cmp::min(start + t.len(), self.s.len());
+            let end = std::cmp::min(start + t.len(), self.s.len());
             let sub = &self.s[start..end];
             if f(sub, t) {
                 a = c;
@@ -87,12 +85,12 @@ impl SuffixArray {
     }
 
     pub fn lower_bound(&self, t: &Vec<u8>) -> usize {
-        let check_function = |sub: &[u8], s: &Vec<u8>| sub.cmp(s) == Ordering::Less;
+        let check_function = |sub: &[u8], s: &Vec<u8>| sub.cmp(s) == std::cmp::Ordering::Less;
         self.binary_search(t, check_function)
     }
 
     pub fn upper_bound(&self, t: &Vec<u8>) -> usize {
-        let check_function = |sub: &[u8], s: &Vec<u8>| sub.cmp(s) != Ordering::Greater;
+        let check_function = |sub: &[u8], s: &Vec<u8>| sub.cmp(s) != std::cmp::Ordering::Greater;
         self.binary_search(t, check_function)
     }
 }
@@ -103,6 +101,7 @@ mod test {
     use crate::data_structure::segment_tree::SegmentTree;
     use crate::utils::test_helper::Tester;
     use std;
+    use std::cmp;
 
     #[test]
     fn small_test() {
@@ -157,21 +156,21 @@ mod test {
                 };
 
                 if !sa.contains(&x) {
-                    sc.write(format!("0\n"));
+                    sc.write("0\n");
                     continue;
                 }
                 let low = sa.lower_bound(&x);
                 let up = sa.upper_bound(&x);
 
                 if !reverse_sa.contains(&y) {
-                    sc.write(format!("0\n"));
+                    sc.write("0\n");
                     continue;
                 }
                 let reverse_low = reverse_sa.lower_bound(&y);
                 let reverse_up = reverse_sa.upper_bound(&y);
 
                 if low >= up || reverse_low >= reverse_up {
-                    sc.write(format!("0\n"));
+                    sc.write("0\n");
                 }
 
                 let s = rmq.query(low, up) as usize;
@@ -179,7 +178,7 @@ mod test {
                 if s + x.len() <= t && s <= t - y.len() {
                     sc.write(format!("{}\n", t - s));
                 } else {
-                    sc.write(format!("0\n"));
+                    sc.write("0\n");
                 }
             }
         });
