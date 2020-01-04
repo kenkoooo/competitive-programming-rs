@@ -1,5 +1,3 @@
-use std;
-
 pub fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec<usize> {
     let n = points.len();
     if n <= 1 {
