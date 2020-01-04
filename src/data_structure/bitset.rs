@@ -1,5 +1,4 @@
 pub mod bitset {
-    use std::ops::{BitOrAssign, Shl};
     const ONE_VALUE_LENGTH: usize = 63;
     const MAXIMUM: u64 = (1u64 << ONE_VALUE_LENGTH as u64) - 1;
 
@@ -14,7 +13,7 @@ pub mod bitset {
         data: Vec<u64>,
     }
 
-    impl BitOrAssign for BitSet {
+    impl std::ops::BitOrAssign for BitSet {
         fn bitor_assign(&mut self, rhs: Self) {
             if self.data.len() < rhs.data.len() {
                 self.data.resize(rhs.data.len(), 0);
@@ -32,7 +31,7 @@ pub mod bitset {
         }
     }
 
-    impl Shl<usize> for BitSet {
+    impl std::ops::Shl<usize> for BitSet {
         type Output = Self;
         fn shl(self, rhs: usize) -> Self {
             self.shift_left(rhs)
