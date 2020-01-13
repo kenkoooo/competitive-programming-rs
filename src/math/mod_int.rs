@@ -16,7 +16,10 @@ pub mod mod_int {
 
     impl Add<Num> for ModInt<Num> {
         type Output = ModInt<Num>;
-        fn add(self, rhs: Num) -> ModInt<Num> {
+        fn add(self, mut rhs: Num) -> ModInt<Num> {
+            if rhs >= MOD {
+                rhs %= MOD;
+            }
             let mut t = rhs + self.0;
             if t >= MOD {
                 t = t - MOD;
@@ -66,7 +69,10 @@ pub mod mod_int {
 
     impl Div<Num> for ModInt<Num> {
         type Output = ModInt<Num>;
-        fn div(self, rhs: Num) -> ModInt<Num> {
+        fn div(self, mut rhs: Num) -> ModInt<Num> {
+            if rhs >= MOD {
+                rhs %= MOD;
+            }
             self * ModInt(rhs).pow(MOD - 2)
         }
     }
@@ -99,7 +105,10 @@ pub mod mod_int {
     impl Mul<Num> for ModInt<Num> {
         type Output = ModInt<Num>;
 
-        fn mul(self, rhs: Num) -> ModInt<Num> {
+        fn mul(self, mut rhs: Num) -> ModInt<Num> {
+            if rhs >= MOD {
+                rhs %= MOD;
+            }
             let t = (self.0 * rhs) % MOD;
             ModInt(t)
         }
@@ -216,5 +225,36 @@ mod test {
             a *= i;
             assert_eq!(a.0, 1);
         }
+    }
+
+    #[test]
+    fn edge_cases() {
+        let a = ModInt(1_000_000_000) * std::usize::MAX;
+        assert_eq!(a.0, 923591986);
+
+        let mut a = ModInt(1_000_000_000);
+        a *= std::usize::MAX;
+        assert_eq!(a.0, 923591986);
+
+        let a = ModInt(1_000_000_000) + std::usize::MAX;
+        assert_eq!(a.0, 582344000);
+
+        let mut a = ModInt(1_000_000_000);
+        a += std::usize::MAX;
+        assert_eq!(a.0, 582344000);
+
+        let a = ModInt(1_000_000_000) - std::usize::MAX;
+        assert_eq!(a.0, 417655993);
+
+        let mut a = ModInt(1_000_000_000);
+        a -= std::usize::MAX;
+        assert_eq!(a.0, 417655993);
+
+        let a = ModInt(1_000_000_000) / std::usize::MAX;
+        assert_eq!(a.0, 605455209);
+
+        let mut a = ModInt(1_000_000_000);
+        a /= std::usize::MAX;
+        assert_eq!(a.0, 605455209);
     }
 }
