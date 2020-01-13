@@ -1,5 +1,5 @@
 pub mod minimum_bounding_circle {
-    pub(crate) fn make_circle(ps: &[Point<f64>]) -> (Point<f64>, f64) {
+    pub fn make_circle(ps: &[Point<f64>]) -> (Point<f64>, f64) {
         let n = ps.len();
         assert!(n >= 2);
 
