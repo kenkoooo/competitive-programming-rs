@@ -1,5 +1,3 @@
-use std::cmp;
-
 pub struct BridgeDetector {
     articulations: Vec<usize>,
     bridges: Vec<(usize, usize)>,
@@ -46,18 +44,18 @@ impl BridgeDetector {
                 // The edge (v->next) is not a backedge.
                 dimension += 1;
                 self.dfs(next, v, graph, root);
-                self.low_link[v] = cmp::min(self.low_link[v], self.low_link[next]);
+                self.low_link[v] = std::cmp::min(self.low_link[v], self.low_link[next]);
                 if v != root && self.order[v] <= self.low_link[next] {
                     is_articulation = true;
                 }
                 if self.order[v] < self.low_link[next] {
-                    let min = cmp::min(v, next);
-                    let max = cmp::max(v, next);
+                    let min = std::cmp::min(v, next);
+                    let max = std::cmp::max(v, next);
                     self.bridges.push((min, max));
                 }
             } else if v == root || next != previous {
-                // The edge (v->next) is a backedge.
-                self.low_link[v] = cmp::min(self.low_link[v], self.order[next]);
+                // The edge (v->next) is a back-edge.
+                self.low_link[v] = std::cmp::min(self.low_link[v], self.order[next]);
             }
         }
 
