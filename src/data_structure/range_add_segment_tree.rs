@@ -10,7 +10,7 @@ pub mod range_add_segment_tree {
 
     impl<T, F> RangeAddSegmentTree<T, F>
     where
-        T: PartialOrd + std::ops::Add<Output = T> + std::ops::Sub<Output = T> + Copy,
+        T: PartialOrd + ::std::ops::Add<Output = T> + ::std::ops::Sub<Output = T> + Copy,
         F: Fn(T, T) -> T + Copy,
     {
         pub fn new(n: usize, init: T, f: F, zero: T) -> Self {
