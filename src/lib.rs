@@ -2,6 +2,9 @@
 //! The Competitive Programming Library in Rust is a set of snippets,
 //! which can be used in programming contests.
 
+#![feature(test)]
+extern crate test;
+
 /// Algorithms related to graph theory.
 pub mod graph;
 
