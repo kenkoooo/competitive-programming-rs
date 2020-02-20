@@ -105,6 +105,60 @@ pub mod primal_dual {
             }
             Some(result)
         }
+
+        pub fn neg_solve(&mut self, source: usize, sink: usize, mut flow: Flow) -> Option<Flow> {
+            let n = self.graph.len();
+            let mut result = 0;
+            while flow > 0 {
+                let mut dist = vec![INF; n];
+                dist[source] = 0;
+                loop {
+                    let mut updated = false;
+                    for v in 0..n {
+                        if dist[v] == INF {
+                            continue;
+                        }
+
+                        for (i, e) in self.graph[v].iter().enumerate() {
+                            if e.residue() == 0 {
+                                continue;
+                            }
+                            if dist[e.to] > dist[v] + e.cost {
+                                dist[e.to] = dist[v] + e.cost;
+                                self.previous_edge[e.to] = (v, i);
+                                updated = true;
+                            }
+                        }
+                    }
+                    if !updated {
+                        break;
+                    }
+                }
+
+                if dist[sink] == INF {
+                    return None;
+                }
+
+                let mut df = flow;
+                let mut v = sink;
+                while v != source {
+                    let (prev_v, prev_e) = self.previous_edge[v];
+                    df = cmp::min(df, self.graph[prev_v][prev_e].residue());
+                    v = prev_v;
+                }
+                flow -= df;
+                result += df * dist[sink];
+                let mut v = sink;
+                while v != source {
+                    let (prev_v, prev_e) = self.previous_edge[v];
+                    self.graph[prev_v][prev_e].flow += df;
+                    let reversed_edge_id = self.graph[prev_v][prev_e].reverse_to;
+                    self.graph[v][reversed_edge_id].flow -= df;
+                    v = prev_v;
+                }
+            }
+            Some(result)
+        }
     }
 }
 
@@ -130,7 +184,7 @@ mod tests {
                 solver.add_edge(u, v, c, d);
             }
 
-            let ans = match solver.solve(0, v - 1, f) {
+            let ans = match solver.neg_solve(0, v - 1, f) {
                 Some(flow) => flow,
                 None => -1,
             };
