@@ -184,6 +184,31 @@ mod tests {
                 solver.add_edge(u, v, c, d);
             }
 
+            let ans = match solver.solve(0, v - 1, f) {
+                Some(flow) => flow,
+                None => -1,
+            };
+            sc.write(format!("{}\n", ans));
+        });
+    }
+
+    #[test]
+    fn solve_grl_6_b_negative() {
+        let tester = Tester::new("./assets/GRL_6_B/in/", "./assets/GRL_6_B/out/");
+        tester.test_solution(|sc| {
+            let v: usize = sc.read();
+            let e: usize = sc.read();
+            let f: i64 = sc.read();
+
+            let mut solver = primal_dual::MinimumCostFlowSolver::new(v);
+            for _ in 0..e {
+                let u: usize = sc.read();
+                let v: usize = sc.read();
+                let c: i64 = sc.read();
+                let d: i64 = sc.read();
+                solver.add_edge(u, v, c, d);
+            }
+
             let ans = match solver.neg_solve(0, v - 1, f) {
                 Some(flow) => flow,
                 None => -1,
