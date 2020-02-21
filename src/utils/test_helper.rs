@@ -5,8 +5,8 @@ use std::io::Read;
 use std::str;
 
 pub(crate) struct Tester {
-    input: Vec<Vec<u8>>,
-    output: Vec<Vec<u8>>,
+    input: Vec<(String, Vec<u8>)>,
+    output: Vec<(String, Vec<u8>)>,
 }
 
 impl Tester {
@@ -20,7 +20,10 @@ impl Tester {
     where
         F: Fn(&mut IO<&[u8], &mut Vec<u8>>),
     {
-        for (input, output) in self.input.into_iter().zip(self.output) {
+        for ((input_label, input), (output_label, output)) in
+            self.input.into_iter().zip(self.output)
+        {
+            eprintln!("Testing {} {}", input_label, output_label);
             let mut writer = vec![];
             {
                 let mut sc = IO::new(&input[..], &mut writer);
@@ -38,11 +41,17 @@ fn read_file(filepath: &str) -> Vec<u8> {
     buf
 }
 
-fn read_from_directory(directory_path: &str) -> Vec<Vec<u8>> {
+fn read_from_directory(directory_path: &str) -> Vec<(String, Vec<u8>)> {
     let mut filenames: Vec<String> = fs::read_dir(directory_path)
         .unwrap()
         .map(|result| result.unwrap().path().display().to_string())
         .collect();
     filenames.sort();
-    filenames.into_iter().map(|file| read_file(&file)).collect()
+    filenames
+        .into_iter()
+        .map(|file| {
+            let data = read_file(&file);
+            (file, data)
+        })
+        .collect()
 }
