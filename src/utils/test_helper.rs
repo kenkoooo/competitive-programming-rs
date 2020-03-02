@@ -32,6 +32,28 @@ impl Tester {
             assert_eq!(writer, output);
         }
     }
+    pub(crate) fn test_solution_with<F1, F2>(self, solution: F1, assertion: F2)
+    where
+        F1: Fn(&mut IO<&[u8], &mut Vec<u8>>),
+        F2: Fn(&mut IO<&[u8], &mut Vec<u8>>, &mut IO<&[u8], &mut Vec<u8>>),
+    {
+        for ((input_label, input), (output_label, output)) in
+            self.input.into_iter().zip(self.output)
+        {
+            eprintln!("Testing {} {}", input_label, output_label);
+            let mut writer = vec![];
+            {
+                let mut sc = IO::new(&input[..], &mut writer);
+                solution(&mut sc);
+            }
+
+            let mut actual_writer = vec![];
+            let mut expected_writer = vec![];
+            let mut actual = IO::new(&writer[..], &mut actual_writer);
+            let mut expected = IO::new(&output[..], &mut expected_writer);
+            assertion(&mut expected, &mut actual);
+        }
+    }
 }
 
 fn read_file(filepath: &str) -> Vec<u8> {
