@@ -15,6 +15,7 @@ pub mod z_algorithm {
                     r += 1;
                 }
                 z_array[i] = r - l - 1;
+                r -= 1;
             } else {
                 if z_array[i - l] < r - i {
                     z_array[i] = z_array[i - l];
@@ -24,6 +25,7 @@ pub mod z_algorithm {
                         r += 1;
                     }
                     z_array[i] = r - l - 1;
+                    r -= 1;
                 }
             }
         }
@@ -57,6 +59,7 @@ mod tests {
             for i in 0..n {
                 let l = z_array[i];
                 assert_eq!(&t[0..l], &t[i..(i + l)]);
+                assert!(i + l >= t.len() || t[l..(l + 1)] != t[(i + l)..(i + l + 1)]);
             }
         }
     }
