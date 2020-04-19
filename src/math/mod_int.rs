@@ -127,7 +127,11 @@ pub mod mod_int {
     }
 
     impl ModInt<Num> {
-        pub fn pow(self, e: usize) -> ModInt<Num> {
+        pub fn new(v: Num) -> Self {
+            Self(v % MOD)
+        }
+
+        pub fn pow(self, e: Num) -> ModInt<Num> {
             let mut result = ModInt(1);
             let mut cur = self;
             let mut e = e;
@@ -256,5 +260,11 @@ mod test {
         let mut a = ModInt(1_000_000_000);
         a /= std::usize::MAX;
         assert_eq!(a.0, 605455209);
+    }
+
+    #[test]
+    fn overflow_guard() {
+        let a = ModInt::new(MOD * 10);
+        assert_eq!(a.0, 0);
     }
 }
