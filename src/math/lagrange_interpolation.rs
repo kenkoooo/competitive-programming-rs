@@ -51,6 +51,8 @@ mod tests {
     use crate::math::mod_int::mod_int::ModInt;
     use rand::{thread_rng, Rng};
 
+    const MOD: u64 = 1e9 as u64 + 7;
+
     #[test]
     fn test_lagrange_interpolation() {
         let mut rng = thread_rng();
@@ -60,19 +62,19 @@ mod tests {
             let mut xs = vec![];
             let mut ys = vec![];
             for _ in 0..n {
-                xs.push(ModInt::new(rng.gen()));
-                ys.push(ModInt::new(rng.gen()));
+                xs.push(ModInt::new(rng.gen(), MOD));
+                ys.push(ModInt::new(rng.gen(), MOD));
             }
 
-            let c = lagrange_interpolation(&xs, &ys, ModInt(1), ModInt(0));
+            let c = lagrange_interpolation(&xs, &ys, ModInt::new(1, MOD), ModInt::new(0, MOD));
 
             for i in 0..n {
-                let mut y = ModInt(0);
+                let mut y = ModInt::new(0, MOD);
                 let x = xs[i];
                 for i in 0..n {
-                    y += x.pow(i) * c[i];
+                    y += x.pow(i as u64) * c[i];
                 }
-                assert_eq!(y.0, ys[i].0);
+                assert_eq!(y.v, ys[i].v);
             }
         }
     }
