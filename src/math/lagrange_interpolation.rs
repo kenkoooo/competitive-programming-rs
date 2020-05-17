@@ -66,15 +66,15 @@ mod tests {
                 ys.push(ModInt::new(rng.gen(), MOD));
             }
 
-            let c = lagrange_interpolation(&xs, &ys, ModInt(1, MOD), ModInt(0, MOD));
+            let c = lagrange_interpolation(&xs, &ys, ModInt::new(1, MOD), ModInt::new(0, MOD));
 
             for i in 0..n {
-                let mut y = ModInt(0, MOD);
+                let mut y = ModInt::new(0, MOD);
                 let x = xs[i];
                 for i in 0..n {
                     y += x.pow(i as u64) * c[i];
                 }
-                assert_eq!(y.0, ys[i].0);
+                assert_eq!(y.v, ys[i].v);
             }
         }
     }

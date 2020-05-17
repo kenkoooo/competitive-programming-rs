@@ -2,7 +2,10 @@ pub mod mod_int {
     use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, Sub, SubAssign};
 
     #[derive(Clone, Copy)]
-    pub struct ModInt<T: Copy + Clone>(pub T, pub T);
+    pub struct ModInt<T: Copy + Clone> {
+        pub v: T,
+        pub modulo: T,
+    }
 
     impl<T> Add<T> for ModInt<T>
     where
@@ -10,14 +13,17 @@ pub mod mod_int {
     {
         type Output = ModInt<T>;
         fn add(self, mut rhs: T) -> ModInt<T> {
-            if rhs >= self.1 {
-                rhs = rhs % self.1;
+            if rhs >= self.modulo {
+                rhs = rhs % self.modulo;
             }
-            let mut t = rhs + self.0;
-            if t >= self.1 {
-                t = t - self.1;
+            let mut t = rhs + self.v;
+            if t >= self.modulo {
+                t = t - self.modulo;
             }
-            ModInt(t, self.1)
+            ModInt {
+                v: t,
+                modulo: self.modulo,
+            }
         }
     }
 
@@ -28,7 +34,7 @@ pub mod mod_int {
     {
         type Output = ModInt<T>;
         fn add(self, rhs: ModInt<T>) -> ModInt<T> {
-            self + rhs.0
+            self + rhs.v
         }
     }
 
@@ -38,13 +44,20 @@ pub mod mod_int {
     {
         type Output = ModInt<T>;
         fn sub(self, rhs: T) -> ModInt<T> {
-            let rhs = if rhs >= self.1 { rhs % self.1 } else { rhs };
-            let value = if self.0 < rhs {
-                self.0 + self.1
+            let rhs = if rhs >= self.modulo {
+                rhs % self.modulo
             } else {
-                self.0
+                rhs
             };
-            ModInt(value - rhs, self.1)
+            let value = if self.v < rhs {
+                self.v + self.modulo
+            } else {
+                self.v
+            };
+            ModInt {
+                v: value - rhs,
+                modulo: self.modulo,
+            }
         }
     }
 
@@ -55,7 +68,7 @@ pub mod mod_int {
     {
         type Output = ModInt<T>;
         fn sub(self, rhs: ModInt<T>) -> ModInt<T> {
-            self - rhs.0
+            self - rhs.v
         }
     }
 
@@ -101,10 +114,14 @@ pub mod mod_int {
     impl Div<u64> for ModInt<u64> {
         type Output = ModInt<u64>;
         fn div(self, mut rhs: u64) -> ModInt<u64> {
-            if rhs >= self.1 {
-                rhs %= self.1;
+            if rhs >= self.modulo {
+                rhs %= self.modulo;
             }
-            self * ModInt(rhs, self.1).pow(self.1 - 2)
+            self * ModInt {
+                v: rhs,
+                modulo: self.modulo,
+            }
+            .pow(self.modulo - 2)
         }
     }
 
@@ -115,7 +132,7 @@ pub mod mod_int {
     {
         type Output = ModInt<T>;
         fn div(self, rhs: ModInt<T>) -> ModInt<T> {
-            self / rhs.0
+            self / rhs.v
         }
     }
 
@@ -145,11 +162,14 @@ pub mod mod_int {
         type Output = ModInt<T>;
 
         fn mul(self, mut rhs: T) -> ModInt<T> {
-            if rhs >= self.1 {
-                rhs = rhs % self.1;
+            if rhs >= self.modulo {
+                rhs = rhs % self.modulo;
             }
-            let t = (self.0 * rhs) % self.1;
-            ModInt(t, self.1)
+            let t = (self.v * rhs) % self.modulo;
+            ModInt {
+                v: t,
+                modulo: self.modulo,
+            }
         }
     }
     impl<T> Mul<ModInt<T>> for ModInt<T>
@@ -159,7 +179,7 @@ pub mod mod_int {
     {
         type Output = ModInt<T>;
         fn mul(self, rhs: ModInt<T>) -> ModInt<T> {
-            self * rhs.0
+            self * rhs.v
         }
     }
 
@@ -185,11 +205,14 @@ pub mod mod_int {
 
     impl ModInt<u64> {
         pub fn new(v: u64, modulo: u64) -> Self {
-            Self(v % modulo, modulo)
+            Self {
+                v: v % modulo,
+                modulo,
+            }
         }
 
         pub fn pow(self, e: u64) -> ModInt<u64> {
-            let mut result = ModInt(1, self.1);
+            let mut result = ModInt::new(1, self.modulo);
             let mut cur = self;
             let mut e = e;
             while e > 0 {
@@ -219,31 +242,31 @@ mod test {
             let x: u64 = between.ind_sample(&mut rng);
             let y: u64 = between.ind_sample(&mut rng);
 
-            let mx = ModInt(x, MOD);
-            let my = ModInt(y, MOD);
+            let mx = ModInt::new(x, MOD);
+            let my = ModInt::new(y, MOD);
 
-            assert_eq!((mx + my).0, (x + y) % MOD);
-            assert_eq!((mx + y).0, (x + y) % MOD);
-            assert_eq!((mx - my).0, (x + MOD - y) % MOD);
-            assert_eq!((mx - y).0, (x + MOD - y) % MOD);
+            assert_eq!((mx + my).v, (x + y) % MOD);
+            assert_eq!((mx + y).v, (x + y) % MOD);
+            assert_eq!((mx - my).v, (x + MOD - y) % MOD);
+            assert_eq!((mx - y).v, (x + MOD - y) % MOD);
 
             let mut x = x;
             let mut mx = mx;
             x += y;
             mx += my;
-            assert_eq!(mx.0, x % MOD);
+            assert_eq!(mx.v, x % MOD);
 
             mx += y;
             x += y;
-            assert_eq!(mx.0, x % MOD);
+            assert_eq!(mx.v, x % MOD);
 
             mx -= my;
             x = (x + MOD - y % MOD) % MOD;
-            assert_eq!(mx.0, x);
+            assert_eq!(mx.v, x);
 
             mx -= y;
             x = (x + MOD - y % MOD) % MOD;
-            assert_eq!(mx.0, x);
+            assert_eq!(mx.v, x);
         }
     }
 
@@ -255,73 +278,73 @@ mod test {
             let x: u64 = between.ind_sample(&mut rng);
             let y: u64 = between.ind_sample(&mut rng);
 
-            let mx = ModInt(x, MOD);
-            let my = ModInt(y, MOD);
+            let mx = ModInt::new(x, MOD);
+            let my = ModInt::new(y, MOD);
 
-            assert_eq!((mx * my).0, (x * y) % MOD);
-            assert_eq!((mx * y).0, (x * y) % MOD);
+            assert_eq!((mx * my).v, (x * y) % MOD);
+            assert_eq!((mx * y).v, (x * y) % MOD);
         }
     }
 
     #[test]
     fn zero_test() {
-        let a = ModInt(1_000_000_000, MOD);
-        let b = ModInt(7, MOD);
+        let a = ModInt::new(1_000_000_000, MOD);
+        let b = ModInt::new(7, MOD);
         let c = a + b;
-        assert_eq!(c.0, 0);
+        assert_eq!(c.v, 0);
     }
 
     #[test]
     fn pow_test() {
-        let a = ModInt(3, MOD);
+        let a = ModInt::new(3, MOD);
         let a = a.pow(4);
-        assert_eq!(a.0, 81);
+        assert_eq!(a.v, 81);
     }
 
     #[test]
     fn div_test() {
         for i in 1..100000 {
-            let mut a = ModInt(1, MOD);
+            let mut a = ModInt::new(1, MOD);
             a /= i;
             a *= i;
-            assert_eq!(a.0, 1);
+            assert_eq!(a.v, 1);
         }
     }
 
     #[test]
     fn edge_cases() {
-        let a = ModInt(1_000_000_000, MOD) * std::u64::MAX;
-        assert_eq!(a.0, 923591986);
+        let a = ModInt::new(1_000_000_000, MOD) * std::u64::MAX;
+        assert_eq!(a.v, 923591986);
 
-        let mut a = ModInt(1_000_000_000, MOD);
+        let mut a = ModInt::new(1_000_000_000, MOD);
         a *= std::u64::MAX;
-        assert_eq!(a.0, 923591986);
+        assert_eq!(a.v, 923591986);
 
-        let a = ModInt(1_000_000_000, MOD) + std::u64::MAX;
-        assert_eq!(a.0, 582344000);
+        let a = ModInt::new(1_000_000_000, MOD) + std::u64::MAX;
+        assert_eq!(a.v, 582344000);
 
-        let mut a = ModInt(1_000_000_000, MOD);
+        let mut a = ModInt::new(1_000_000_000, MOD);
         a += std::u64::MAX;
-        assert_eq!(a.0, 582344000);
+        assert_eq!(a.v, 582344000);
 
-        let a = ModInt(1_000_000_000, MOD) - std::u64::MAX;
-        assert_eq!(a.0, 417655993);
+        let a = ModInt::new(1_000_000_000, MOD) - std::u64::MAX;
+        assert_eq!(a.v, 417655993);
 
-        let mut a = ModInt(1_000_000_000, MOD);
+        let mut a = ModInt::new(1_000_000_000, MOD);
         a -= std::u64::MAX;
-        assert_eq!(a.0, 417655993);
+        assert_eq!(a.v, 417655993);
 
-        let a = ModInt(1_000_000_000, MOD) / std::u64::MAX;
-        assert_eq!(a.0, 605455209);
+        let a = ModInt::new(1_000_000_000, MOD) / std::u64::MAX;
+        assert_eq!(a.v, 605455209);
 
-        let mut a = ModInt(1_000_000_000, MOD);
+        let mut a = ModInt::new(1_000_000_000, MOD);
         a /= std::u64::MAX;
-        assert_eq!(a.0, 605455209);
+        assert_eq!(a.v, 605455209);
     }
 
     #[test]
     fn overflow_guard() {
         let a = ModInt::new(MOD * 10, MOD);
-        assert_eq!(a.0, 0);
+        assert_eq!(a.v, 0);
     }
 }
