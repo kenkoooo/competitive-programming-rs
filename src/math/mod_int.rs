@@ -111,20 +111,6 @@ pub mod mod_int {
         }
     }
 
-    impl Div<u64> for ModInt<u64> {
-        type Output = ModInt<u64>;
-        fn div(self, mut rhs: u64) -> ModInt<u64> {
-            if rhs >= self.modulo {
-                rhs %= self.modulo;
-            }
-            self * ModInt {
-                v: rhs,
-                modulo: self.modulo,
-            }
-            .pow(self.modulo - 2)
-        }
-    }
-
     impl<T> Div<ModInt<T>> for ModInt<T>
     where
         T: Clone + Copy,
@@ -203,16 +189,13 @@ pub mod mod_int {
         }
     }
 
-    impl ModInt<u64> {
-        pub fn new(v: u64, modulo: u64) -> Self {
-            Self {
-                v: v % modulo,
-                modulo,
-            }
-        }
-
-        pub fn pow(self, e: u64) -> ModInt<u64> {
-            let mut result = ModInt::new(1, self.modulo);
+    impl<T> ModInt<T>
+    where
+        T: Clone + Copy,
+        ModInt<T>: Mul<ModInt<T>, Output = ModInt<T>>,
+    {
+        pub fn general_pow(self, e: u64, one: ModInt<T>) -> ModInt<T> {
+            let mut result = one;
             let mut cur = self;
             let mut e = e;
             while e > 0 {
@@ -223,6 +206,33 @@ pub mod mod_int {
                 cur *= cur;
             }
             result
+        }
+    }
+
+    impl Div<u64> for ModInt<u64> {
+        type Output = ModInt<u64>;
+        fn div(self, mut rhs: u64) -> ModInt<u64> {
+            if rhs >= self.modulo {
+                rhs %= self.modulo;
+            }
+            self * ModInt {
+                v: rhs,
+                modulo: self.modulo,
+            }
+            .pow(self.modulo - 2)
+        }
+    }
+
+    impl ModInt<u64> {
+        pub fn new(v: u64, modulo: u64) -> Self {
+            Self {
+                v: v % modulo,
+                modulo,
+            }
+        }
+
+        pub fn pow(self, e: u64) -> ModInt<u64> {
+            self.general_pow(e, ModInt::new(1, self.modulo))
         }
     }
 }
