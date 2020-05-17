@@ -2,15 +2,15 @@ pub mod max_rectangle {
     use std::cmp;
     use std::collections::VecDeque;
 
-    fn calc(hist: &Vec<usize>) -> usize {
+    fn calc(hist: &[usize]) -> usize {
         let n = hist.len();
         let mut ans = 0;
         let mut q: VecDeque<(usize, usize)> = VecDeque::new();
 
-        for i in 0..n {
+        for (i, &hist) in hist.iter().enumerate() {
             let mut reachable_min = i;
             while let Some((pos, height)) = q.pop_front() {
-                if height <= hist[i] {
+                if height <= hist {
                     q.push_front((pos, height));
                     break;
                 }
@@ -18,8 +18,8 @@ pub mod max_rectangle {
                 ans = cmp::max(ans, (i - reachable_min) * height);
             }
 
-            if q.is_empty() || q.iter().next().unwrap().1 < hist[i] {
-                q.push_front((reachable_min, hist[i]));
+            if q.is_empty() || q.iter().next().unwrap().1 < hist {
+                q.push_front((reachable_min, hist));
             }
         }
         while let Some((pos, height)) = q.pop_front() {
@@ -28,7 +28,7 @@ pub mod max_rectangle {
         ans
     }
 
-    pub fn maximize(map: &Vec<Vec<bool>>) -> usize {
+    pub fn maximize(map: &[Vec<bool>]) -> usize {
         let h = map.len();
         let w = map[0].len();
         let mut hist = vec![vec![0; w]; h];
@@ -46,8 +46,8 @@ pub mod max_rectangle {
         }
 
         let mut ans = 0;
-        for i in 0..h {
-            ans = cmp::max(ans, calc(&hist[i]));
+        for hist in hist.iter() {
+            ans = cmp::max(ans, calc(hist));
         }
         ans
     }

@@ -6,7 +6,7 @@ impl<R: std::io::Read, W: std::io::Write> IO<R, W> {
     }
     pub fn write<S: ToString>(&mut self, s: S) {
         use std::io::Write;
-        self.1.write(s.to_string().as_bytes()).unwrap();
+        self.1.write_all(s.to_string().as_bytes()).unwrap();
     }
     pub fn read<T: std::str::FromStr>(&mut self) -> T {
         use std::io::Read;

@@ -1,15 +1,27 @@
 pub mod mod_int {
     use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, Sub, SubAssign};
 
-    #[derive(Clone, Copy)]
-    pub struct ModInt<T: Copy + Clone> {
+    pub struct ModInt<T> {
         pub v: T,
         pub modulo: T,
     }
 
+    impl<T> Copy for ModInt<T> where T: Copy {}
+    impl<T> Clone for ModInt<T>
+    where
+        T: Copy,
+    {
+        fn clone(&self) -> Self {
+            ModInt {
+                v: self.v,
+                modulo: self.modulo,
+            }
+        }
+    }
+
     impl<T> Add<T> for ModInt<T>
     where
-        T: Add<Output = T> + Sub<Output = T> + Rem<Output = T> + Clone + Copy + PartialOrd,
+        T: Add<Output = T> + Sub<Output = T> + Rem<Output = T> + Copy + PartialOrd,
     {
         type Output = ModInt<T>;
         fn add(self, mut rhs: T) -> ModInt<T> {
@@ -29,7 +41,7 @@ pub mod mod_int {
 
     impl<T> Add<ModInt<T>> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Add<T, Output = ModInt<T>>,
     {
         type Output = ModInt<T>;
@@ -40,7 +52,7 @@ pub mod mod_int {
 
     impl<T> Sub<T> for ModInt<T>
     where
-        T: Add<Output = T> + Sub<Output = T> + Rem<Output = T> + Clone + Copy + PartialOrd,
+        T: Add<Output = T> + Sub<Output = T> + Rem<Output = T> + Copy + PartialOrd,
     {
         type Output = ModInt<T>;
         fn sub(self, rhs: T) -> ModInt<T> {
@@ -63,7 +75,7 @@ pub mod mod_int {
 
     impl<T> Sub<ModInt<T>> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Sub<T, Output = ModInt<T>>,
     {
         type Output = ModInt<T>;
@@ -74,7 +86,7 @@ pub mod mod_int {
 
     impl<T> AddAssign<T> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Add<T, Output = ModInt<T>>,
     {
         fn add_assign(&mut self, other: T) {
@@ -83,7 +95,7 @@ pub mod mod_int {
     }
     impl<T> AddAssign<ModInt<T>> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Add<ModInt<T>, Output = ModInt<T>>,
     {
         fn add_assign(&mut self, other: ModInt<T>) {
@@ -93,7 +105,7 @@ pub mod mod_int {
 
     impl<T> SubAssign<T> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Sub<T, Output = ModInt<T>>,
     {
         fn sub_assign(&mut self, other: T) {
@@ -103,7 +115,7 @@ pub mod mod_int {
 
     impl<T> SubAssign<ModInt<T>> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Sub<ModInt<T>, Output = ModInt<T>>,
     {
         fn sub_assign(&mut self, other: ModInt<T>) {
@@ -113,7 +125,7 @@ pub mod mod_int {
 
     impl<T> Div<ModInt<T>> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Div<T, Output = ModInt<T>>,
     {
         type Output = ModInt<T>;
@@ -124,7 +136,7 @@ pub mod mod_int {
 
     impl<T> DivAssign<T> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Div<T, Output = ModInt<T>>,
     {
         fn div_assign(&mut self, rhs: T) {
@@ -133,7 +145,7 @@ pub mod mod_int {
     }
     impl<T> DivAssign<ModInt<T>> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Div<ModInt<T>, Output = ModInt<T>>,
     {
         fn div_assign(&mut self, rhs: ModInt<T>) {
@@ -143,7 +155,7 @@ pub mod mod_int {
 
     impl<T> Mul<T> for ModInt<T>
     where
-        T: Mul<Output = T> + Rem<Output = T> + Clone + Copy + PartialOrd,
+        T: Mul<Output = T> + Rem<Output = T> + Copy + PartialOrd,
     {
         type Output = ModInt<T>;
 
@@ -160,7 +172,7 @@ pub mod mod_int {
     }
     impl<T> Mul<ModInt<T>> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Mul<T, Output = ModInt<T>>,
     {
         type Output = ModInt<T>;
@@ -171,7 +183,7 @@ pub mod mod_int {
 
     impl<T> MulAssign<T> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Mul<T, Output = ModInt<T>>,
     {
         fn mul_assign(&mut self, rhs: T) {
@@ -181,7 +193,7 @@ pub mod mod_int {
 
     impl<T> MulAssign<ModInt<T>> for ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Mul<ModInt<T>, Output = ModInt<T>>,
     {
         fn mul_assign(&mut self, rhs: ModInt<T>) {
@@ -191,7 +203,7 @@ pub mod mod_int {
 
     impl<T> ModInt<T>
     where
-        T: Clone + Copy,
+        T: Copy,
         ModInt<T>: Mul<ModInt<T>, Output = ModInt<T>>,
     {
         pub fn general_pow(self, e: u64, one: ModInt<T>) -> ModInt<T> {

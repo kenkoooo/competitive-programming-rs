@@ -8,7 +8,7 @@ pub struct BridgeDetector {
 }
 
 impl BridgeDetector {
-    pub fn new(graph: &Vec<Vec<usize>>) -> Self {
+    pub fn new(graph: &[Vec<usize>]) -> Self {
         let n = graph.len();
         let mut d = BridgeDetector {
             articulations: vec![],
@@ -22,7 +22,7 @@ impl BridgeDetector {
         d
     }
 
-    fn run(&mut self, graph: &Vec<Vec<usize>>) {
+    fn run(&mut self, graph: &[Vec<usize>]) {
         let n = graph.len();
         for i in 0..n {
             if !self.visit[i] {
@@ -31,7 +31,7 @@ impl BridgeDetector {
         }
     }
 
-    fn dfs(&mut self, v: usize, previous: usize, graph: &Vec<Vec<usize>>, root: usize) {
+    fn dfs(&mut self, v: usize, previous: usize, graph: &[Vec<usize>], root: usize) {
         self.visit[v] = true;
         self.order[v] = self.k;
         self.k += 1;

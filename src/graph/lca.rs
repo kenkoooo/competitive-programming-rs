@@ -7,7 +7,7 @@ pub mod lca {
     }
 
     impl LowestCommonAncestor {
-        pub fn new(graph: &Vec<Vec<usize>>) -> Self {
+        pub fn new(graph: &[Vec<usize>]) -> Self {
             let num_v = graph.len();
             let root = 0;
             let mut depth = vec![0; num_v];
@@ -83,7 +83,7 @@ pub mod lca {
                     v = self.parent[k][v];
                 }
             }
-            return self.parent[0][u];
+            self.parent[0][u]
         }
 
         pub fn get_dist(&self, u: usize, v: usize) -> usize {

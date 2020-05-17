@@ -1,4 +1,4 @@
-pub fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec<usize> {
+pub fn extract_convex_hull(points: &[Point], contain_on_segment: bool) -> Vec<usize> {
     let n = points.len();
     if n <= 1 {
         return vec![0];
@@ -43,7 +43,7 @@ pub fn extract_convex_hull(points: &Vec<Point>, contain_on_segment: bool) -> Vec
     }
 
     qs.pop();
-    return qs;
+    qs
 }
 
 #[derive(Debug, Copy, Clone)]

@@ -40,7 +40,7 @@ impl UnionFind {
         self.sizes[large] += self.sizes[small];
         self.sizes[small] = 0;
         self.size -= 1;
-        return true;
+        true
     }
 }
 

@@ -27,11 +27,9 @@ where
 
     pub fn get_sum(&self, y1: usize, x1: usize, y2: usize, x2: usize) -> T {
         assert!(y1 <= y2 && x1 <= x2);
-        assert!(y2 <= self.ny - 1);
-        assert!(x2 <= self.nx - 1);
-        return self.sum[y2 + 1][x2 + 1] + self.sum[y1][x1]
-            - self.sum[y1][x2 + 1]
-            - self.sum[y2 + 1][x1];
+        assert!(y2 < self.ny);
+        assert!(x2 < self.nx);
+        self.sum[y2 + 1][x2 + 1] + self.sum[y1][x1] - self.sum[y1][x2 + 1] - self.sum[y2 + 1][x1]
     }
 }
 

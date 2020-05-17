@@ -1,7 +1,7 @@
 pub mod strongly_connected_components {
     use std::collections::VecDeque;
 
-    pub fn decompose(graph: &Vec<Vec<usize>>) -> Vec<usize> {
+    pub fn decompose(graph: &[Vec<usize>]) -> Vec<usize> {
         let mut vs = Vec::new();
         let num_v = graph.len();
         let mut cmp = vec![0; num_v];
@@ -70,7 +70,7 @@ pub mod strongly_connected_components {
             k += 1;
         }
 
-        return cmp;
+        cmp
     }
 }
 

@@ -1,6 +1,6 @@
 pub mod bellman_ford {
     pub fn shortest_path(
-        graph: &Vec<Vec<(usize, i64)>>,
+        graph: &[Vec<(usize, i64)>],
         start: usize,
         inf: i64,
     ) -> (Vec<i64>, Vec<bool>) {
@@ -36,7 +36,7 @@ pub mod bellman_ford {
             }
         }
 
-        return (dist, negative);
+        (dist, negative)
     }
 }
 

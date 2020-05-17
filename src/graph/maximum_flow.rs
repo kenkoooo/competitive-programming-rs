@@ -72,8 +72,7 @@ pub mod dinitz {
                 }
                 self.iter[v] += 1;
             }
-
-            return 0;
+            0
         }
 
         fn bfs(&mut self, s: usize) {
