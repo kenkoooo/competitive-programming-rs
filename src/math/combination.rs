@@ -5,7 +5,7 @@ pub struct Combination {
 }
 
 impl Combination {
-    pub fn new(max: usize, modulo: usize) -> Combination {
+    pub fn new(max: usize, modulo: usize) -> Self {
         let mut inv = vec![0; max + 1];
         let mut fact = vec![0; max + 1];
         let mut inv_fact = vec![0; max + 1];
@@ -21,10 +21,10 @@ impl Combination {
         for i in 0..max {
             inv_fact[i + 1] = inv_fact[i] * inv[i + 1] % modulo;
         }
-        Combination {
-            fact: fact,
-            inv_fact: inv_fact,
-            modulo: modulo,
+        Self {
+            fact,
+            inv_fact,
+            modulo,
         }
     }
 

@@ -1,8 +1,6 @@
 language: rust
 rust:
-# Dropped supports to use Bencher
-#  - 1.35.0 # for Codeforces
-#  - stable
+  - stable
   - nightly
 script:
   - cargo build --release
