@@ -21,6 +21,53 @@ pub mod mod_int {
         }
     }
 
+    impl<T> ModInt<T> {
+        fn new_unchecked(v: T, modulo: T) -> Self {
+            Self { v, m: modulo }
+        }
+    }
+
+    impl<T> ModInt<T>
+    where
+        T: Copy + RemAssign + PartialOrd,
+    {
+        pub fn new(mut v: T, modulo: T) -> Self {
+            if v >= modulo {
+                v %= modulo;
+            }
+            Self::new_unchecked(v, modulo)
+        }
+    }
+
+    impl<T> ModInt<T>
+    where
+        T: Copy
+            + Sub<Output = T>
+            + ShrAssign
+            + BitAnd<Output = T>
+            + PartialEq
+            + PartialOrd
+            + Div<Output = T>
+            + RemAssign,
+        ModInt<T>: MulAssign,
+    {
+        pub fn pow(self, e: T) -> Self {
+            let zero = self.modulo() - self.modulo();
+            let one = self.modulo() / self.modulo();
+            let mut e = e;
+            let mut result = Self::new_unchecked(one, self.modulo());
+            let mut cur = self;
+            while e > zero {
+                if e & one == one {
+                    result *= cur;
+                }
+                e >>= one;
+                cur *= cur;
+            }
+            result
+        }
+    }
+
     impl<T> Copy for ModInt<T> where T: Copy {}
     impl<T> Clone for ModInt<T>
     where
@@ -224,53 +271,6 @@ pub mod mod_int {
             let one = self.modulo() / self.modulo();
             let two = one + one;
             self * Self::new_unchecked(rhs, self.modulo()).pow(self.modulo() - two)
-        }
-    }
-
-    impl<T> ModInt<T> {
-        fn new_unchecked(v: T, modulo: T) -> Self {
-            Self { v, m: modulo }
-        }
-    }
-
-    impl<T> ModInt<T>
-    where
-        T: Copy + RemAssign + PartialOrd,
-    {
-        pub fn new(mut v: T, modulo: T) -> Self {
-            if v >= modulo {
-                v %= modulo;
-            }
-            Self::new_unchecked(v, modulo)
-        }
-    }
-
-    impl<T> ModInt<T>
-    where
-        T: Copy
-            + Sub<Output = T>
-            + ShrAssign
-            + BitAnd<Output = T>
-            + PartialEq
-            + PartialOrd
-            + Div<Output = T>
-            + RemAssign,
-        ModInt<T>: MulAssign,
-    {
-        pub fn pow(self, e: T) -> Self {
-            let zero = self.modulo() - self.modulo();
-            let one = self.modulo() / self.modulo();
-            let mut e = e;
-            let mut result = Self::new_unchecked(one, self.modulo());
-            let mut cur = self;
-            while e > zero {
-                if e & one == one {
-                    result *= cur;
-                }
-                e >>= one;
-                cur *= cur;
-            }
-            result
         }
     }
 }
