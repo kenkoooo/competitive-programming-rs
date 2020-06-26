@@ -74,7 +74,7 @@ mod tests {
                 for i in 0..n {
                     y += x.pow(i as u64) * c[i];
                 }
-                assert_eq!(y.v, ys[i].v);
+                assert_eq!(y.value(), ys[i].value());
             }
         }
     }
