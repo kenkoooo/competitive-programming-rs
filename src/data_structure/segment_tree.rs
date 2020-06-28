@@ -18,8 +18,8 @@ where
         SegmentTree {
             seg: vec![initial_value; m * 2],
             n: m,
-            f: f,
-            initial_value: initial_value,
+            f,
+            initial_value,
         }
     }
 

@@ -17,8 +17,8 @@ pub mod treap {
             Some(Box::new(Node {
                 left: None,
                 right: None,
-                key: key,
-                priority: priority,
+                key,
+                priority,
                 count: 1,
             }))
         }
@@ -198,12 +198,10 @@ pub mod treap {
         match node {
             Some(c) => {
                 let left = count(&c.left);
-                if left == r {
-                    node
-                } else if left < r {
-                    rank(&c.right, r - left - 1)
-                } else {
-                    rank(&c.left, r)
+                match left.cmp(&r) {
+                    std::cmp::Ordering::Equal => node,
+                    std::cmp::Ordering::Less => rank(&c.right, r - left - 1),
+                    std::cmp::Ordering::Greater => rank(&c.left, r),
                 }
             }
             None => panic!(),

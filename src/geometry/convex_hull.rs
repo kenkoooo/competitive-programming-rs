@@ -83,7 +83,7 @@ mod test {
             for _ in 0..n {
                 let x: f64 = sc.read();
                 let y: f64 = sc.read();
-                points.push(Point { x: x, y: y });
+                points.push(Point { x, y });
             }
 
             let convex_hull = extract_convex_hull(&points, true);

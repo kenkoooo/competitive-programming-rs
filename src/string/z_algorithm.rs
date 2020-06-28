@@ -16,17 +16,15 @@ pub mod z_algorithm {
                 }
                 z_array[i] = r - l - 1;
                 r -= 1;
+            } else if z_array[i - l] < r - i {
+                z_array[i] = z_array[i - l];
             } else {
-                if z_array[i - l] < r - i {
-                    z_array[i] = z_array[i - l];
-                } else {
-                    l = i;
-                    while r <= n && s[r - 1 - l] == s[r - 1] {
-                        r += 1;
-                    }
-                    z_array[i] = r - l - 1;
-                    r -= 1;
+                l = i;
+                while r <= n && s[r - 1 - l] == s[r - 1] {
+                    r += 1;
                 }
+                z_array[i] = r - l - 1;
+                r -= 1;
             }
         }
         z_array[0] = n;

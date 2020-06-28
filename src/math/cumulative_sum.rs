@@ -18,11 +18,7 @@ where
                 sum[i + 1][j + 1] = a[i][j] + sum[i][j + 1] + sum[i + 1][j] - sum[i][j];
             }
         }
-        CumulativeSum {
-            ny: ny,
-            nx: nx,
-            sum: sum,
-        }
+        CumulativeSum { ny, nx, sum }
     }
 
     pub fn get_sum(&self, y1: usize, x1: usize, y2: usize, x2: usize) -> T {

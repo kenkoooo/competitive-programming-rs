@@ -40,9 +40,7 @@ impl SuffixArray {
                         0
                     }
             }
-            for i in 0..(n + 1) {
-                rank[i] = tmp[i];
-            }
+            rank[..(n + 1)].clone_from_slice(&tmp[..(n + 1)]);
             k *= 2;
         }
 
@@ -53,7 +51,7 @@ impl SuffixArray {
         }
     }
 
-    pub fn contains(&self, t: &Vec<u8>) -> bool {
+    pub fn contains(&self, t: &[u8]) -> bool {
         let b = self.lower_bound(t);
         if b >= self.array.len() {
             false
@@ -160,9 +158,9 @@ mod test {
 
             let m: usize = sc.read();
             for _ in 0..m {
-                let x = sc.read::<String>().bytes().collect();
+                let x = sc.read::<String>().bytes().collect::<Vec<_>>();
                 let y = {
-                    let mut y: Vec<u8> = sc.read::<String>().bytes().collect();
+                    let mut y: Vec<u8> = sc.read::<String>().bytes().collect::<Vec<_>>();
                     y.reverse();
                     y
                 };

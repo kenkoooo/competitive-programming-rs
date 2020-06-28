@@ -24,7 +24,7 @@ pub mod sparse_table {
                 }
             }
 
-            Self { data: data, op: op }
+            Self { data, op }
         }
 
         /// get the result for [l, r)
