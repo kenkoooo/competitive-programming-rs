@@ -13,13 +13,11 @@ where
 
     let mut all_c = vec![zero; n + 1];
     all_c[0] = one;
-    for i in 0..n {
+    for &x in xs.iter() {
         let mut next = vec![zero; n + 1];
+        next[1..(n + 1)].clone_from_slice(&all_c[..n]);
         for j in 0..n {
-            next[j + 1] = all_c[j];
-        }
-        for j in 0..n {
-            next[j] -= xs[i] * all_c[j];
+            next[j] -= x * all_c[j];
         }
         all_c = next;
     }

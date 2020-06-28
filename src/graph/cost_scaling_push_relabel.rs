@@ -190,7 +190,7 @@ pub mod cost_scaling_push_relabel {
                 }
             }
 
-            assert_ne!(min_potential, INF_POTENTIAL);
+            assert!(min_potential < INF_POTENTIAL);
             self.nodes[from].potential = min_potential;
         }
     }

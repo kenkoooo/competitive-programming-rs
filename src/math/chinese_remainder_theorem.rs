@@ -10,19 +10,19 @@ pub fn extended_gcd(a: i64, b: i64, p: &mut i64, q: &mut i64) -> i64 {
     }
 }
 
-pub fn chinese_remainder_theorem(b: &Vec<i64>, modulo: &Vec<i64>) -> Option<(i64, i64)> {
-    let (mut r, mut m) = (0, 1);
+pub fn chinese_remainder_theorem(b: &[i64], modulo: &[i64]) -> Option<(i64, i64)> {
+    let (mut result, mut m) = (0, 1);
     for i in 0..b.len() {
         let (mut p, mut q) = (0, 0);
         let d = extended_gcd(m, modulo[i], &mut p, &mut q);
-        if (b[i] - r) % d != 0 {
+        if (b[i] - result) % d != 0 {
             return None;
         }
-        let tmp = ((b[i] - r) / d * p) % (modulo[i] / d);
-        r += m * tmp;
+        let tmp = ((b[i] - result) / d * p) % (modulo[i] / d);
+        result += m * tmp;
         m *= modulo[i] / d;
     }
-    Some(((r % m + m) % m, m))
+    Some(((result % m + m) % m, m))
 }
 
 #[cfg(test)]

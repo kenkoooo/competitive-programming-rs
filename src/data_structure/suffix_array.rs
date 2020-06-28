@@ -63,23 +63,23 @@ impl SuffixArray {
         }
     }
 
-    fn binary_search<F>(&self, t: &[u8], f: F) -> usize
+    fn binary_search<F>(&self, string: &[u8], f: F) -> usize
     where
         F: Fn(&[u8], &[u8]) -> bool,
     {
-        let (mut a, mut b) = (-1, self.n as i32 + 1);
-        while b - a > 1 {
-            let c = (a + b) / 2;
-            let start = self.array[c as usize];
-            let end = std::cmp::min(start + t.len(), self.s.len());
-            let sub = &self.s[start..end];
-            if f(sub, t) {
-                a = c;
+        let (mut ng, mut ok) = (-1, self.n as i32 + 1);
+        while ok - ng > 1 {
+            let pos = (ng + ok) / 2;
+            let start = self.array[pos as usize];
+            let end = std::cmp::min(start + string.len(), self.s.len());
+            let substring = &self.s[start..end];
+            if f(substring, string) {
+                ng = pos;
             } else {
-                b = c;
+                ok = pos;
             }
         }
-        b as usize
+        ok as usize
     }
 
     pub fn lower_bound(&self, t: &[u8]) -> usize {

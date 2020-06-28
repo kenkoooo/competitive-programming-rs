@@ -8,8 +8,8 @@ impl<T> CumulativeSum<T>
 where
     T: Copy + std::ops::Add<Output = T> + std::ops::Sub<Output = T>,
 {
-    pub fn new(a: &Vec<Vec<T>>, init: T) -> CumulativeSum<T> {
-        assert!(a.len() > 0);
+    pub fn new(a: &[Vec<T>], init: T) -> CumulativeSum<T> {
+        assert!(!a.is_empty());
         let ny = a.len();
         let nx = a[0].len();
         let mut sum = vec![vec![init; nx + 1]; ny + 1];

@@ -1,7 +1,8 @@
 //! # The Competitive Programming Library in Rust
 //! The Competitive Programming Library in Rust is a set of snippets,
 //! which can be used in programming contests.
-
+#![allow(clippy::module_inception)]
+#![allow(clippy::suspicious_arithmetic_impl)]
 /// Algorithms related to graph theory.
 pub mod graph;
 

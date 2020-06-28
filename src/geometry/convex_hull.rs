@@ -6,7 +6,7 @@ pub fn extract_convex_hull(points: &[Point], contain_on_segment: bool) -> Vec<us
 
     let mut ps: Vec<usize> = (0..n).collect();
     ps.sort_by(|&a, &b| {
-        if points[a].x == points[b].x {
+        if (points[a].x - points[b].x).abs() < std::f64::EPSILON {
             points[a].y.partial_cmp(&points[b].y).unwrap()
         } else {
             points[a].x.partial_cmp(&points[b].x).unwrap()

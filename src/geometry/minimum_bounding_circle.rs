@@ -31,10 +31,10 @@ pub mod minimum_bounding_circle {
         let ec = (a - b).norm();
         let s = (b - a).det(&(c - a));
 
-        let p = (a * ea * (eb + ec - ea) + b * eb * (ec + ea - eb) + c * ec * (ea + eb - ec))
+        let center = (a * ea * (eb + ec - ea) + b * eb * (ec + ea - eb) + c * ec * (ea + eb - ec))
             / (s * s * 4.0);
-        let r2 = (p - a).norm();
-        (p, r2)
+        let r2 = (center - a).norm();
+        (center, r2)
     }
 
     fn make_circle2(a: Point<f64>, b: Point<f64>) -> (Point<f64>, f64) {
