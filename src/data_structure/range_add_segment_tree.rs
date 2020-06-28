@@ -2,8 +2,8 @@ pub mod range_add_segment_tree {
     type Range = std::ops::Range<usize>;
 
     pub struct RangeAddSegmentTree<T, F> {
-        seg: Vec<T>,
-        seg_add: Vec<T>,
+        data: Vec<T>,
+        lazy: Vec<T>,
         size: usize,
         f: F,
         init: T,
@@ -17,8 +17,8 @@ pub mod range_add_segment_tree {
         pub fn new(n: usize, init: T, f: F, zero: T) -> Self {
             let size = n.next_power_of_two();
             RangeAddSegmentTree {
-                seg: vec![init; size * 2],
-                seg_add: vec![zero; size * 2],
+                data: vec![init; size * 2],
+                lazy: vec![zero; size * 2],
                 size,
                 init,
                 f,
@@ -34,12 +34,12 @@ pub mod range_add_segment_tree {
                 return;
             }
             if add_range.start <= seg_range.start && seg_range.end <= add_range.end {
-                self.seg_add[k] = self.seg_add[k] + value;
+                self.lazy[k] = self.lazy[k] + value;
                 while k > 0 {
                     k = (k - 1) / 2;
-                    self.seg[k] = (self.f)(
-                        self.seg[k * 2 + 1] + self.seg_add[k * 2 + 1],
-                        self.seg[k * 2 + 2] + self.seg_add[k * 2 + 2],
+                    self.data[k] = (self.f)(
+                        self.data[k * 2 + 1] + self.lazy[k * 2 + 1],
+                        self.data[k * 2 + 2] + self.lazy[k * 2 + 2],
                     );
                 }
             } else {
@@ -52,11 +52,11 @@ pub mod range_add_segment_tree {
         pub fn update(&mut self, pos: usize, value: T) {
             let cur = self.get(pos, pos + 1);
             let mut k = pos + self.size - 1;
-            let raw = self.seg[k];
-            self.seg[k] = raw + value - cur;
+            let raw = self.data[k];
+            self.data[k] = raw + value - cur;
             while k > 0 {
                 k = (k - 1) / 2;
-                self.seg[k] = (self.f)(self.seg[k * 2 + 1], self.seg[k * 2 + 2]);
+                self.data[k] = (self.f)(self.data[k * 2 + 1], self.data[k * 2 + 2]);
             }
         }
 
@@ -68,12 +68,12 @@ pub mod range_add_segment_tree {
             if get_range.end <= seg_range.start || seg_range.end <= get_range.start {
                 self.init
             } else if get_range.start <= seg_range.start && seg_range.end <= get_range.end {
-                self.seg[k] + self.seg_add[k]
+                self.data[k] + self.lazy[k]
             } else {
                 let mid = (seg_range.start + seg_range.end) / 2;
                 let x = self.get_from_range(get_range.clone(), k * 2 + 1, seg_range.start..mid);
                 let y = self.get_from_range(get_range, k * 2 + 2, mid..seg_range.end);
-                (self.f)(x, y) + self.seg_add[k]
+                (self.f)(x, y) + self.lazy[k]
             }
         }
     }
