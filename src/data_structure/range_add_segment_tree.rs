@@ -25,8 +25,8 @@ pub mod range_add_segment_tree {
             }
         }
 
-        pub fn add(&mut self, a: usize, b: usize, value: T) {
-            self.add_to_range(a..b, value, 0, 0..self.size);
+        pub fn add(&mut self, range: Range, value: T) {
+            self.add_to_range(range, value, 0, 0..self.size);
         }
 
         fn add_to_range(&mut self, add_range: Range, value: T, mut k: usize, seg_range: Range) {
@@ -50,7 +50,7 @@ pub mod range_add_segment_tree {
         }
 
         pub fn update(&mut self, pos: usize, value: T) {
-            let cur = self.get(pos, pos + 1);
+            let cur = self.get(pos..(pos + 1));
             let mut k = pos + self.size - 1;
             let raw = self.data[k];
             self.data[k] = raw + value - cur;
@@ -60,8 +60,8 @@ pub mod range_add_segment_tree {
             }
         }
 
-        pub fn get(&self, a: usize, b: usize) -> T {
-            self.get_from_range(a..b, 0, 0..self.size)
+        pub fn get(&self, range: Range) -> T {
+            self.get_from_range(range, 0, 0..self.size)
         }
 
         fn get_from_range(&self, get_range: Range, k: usize, seg_range: Range) -> T {
@@ -108,17 +108,17 @@ mod test {
         for i in from..to {
             values[i] += add;
         }
-        seg_min.add(from, to, add);
+        seg_min.add(from..to, add);
 
         let pos = 2;
         let value = 1;
-        let cur = seg_min.get(pos, pos + 1);
+        let cur = seg_min.get(pos..(pos + 1));
         seg_min.update(pos, cur - value);
         values[pos] -= value;
 
         for l in 0..n {
             for r in (l + 1)..(n + 1) {
-                let min1 = seg_min.get(l, r);
+                let min1 = seg_min.get(l..r);
                 let &min2 = values[l..r].iter().min().unwrap();
                 assert_eq!(min1, min2);
             }
@@ -151,8 +151,8 @@ mod test {
         for l in 0..n {
             for r in (l + 1)..n {
                 let value = rand::thread_rng().gen::<i16>() as i64;
-                seg_min.add(l, r, value);
-                seg_max.add(l, r, value);
+                seg_min.add(l..r, value);
+                seg_max.add(l..r, value);
 
                 for i in l..r {
                     array[i] += value;
@@ -167,8 +167,8 @@ mod test {
                             max = cmp::max(max, array[i]);
                         }
 
-                        assert_eq!(seg_min.get(l, r), min);
-                        assert_eq!(seg_max.get(l, r), max);
+                        assert_eq!(seg_min.get(l..r), min);
+                        assert_eq!(seg_max.get(l..r), max);
                     }
                 }
             }
