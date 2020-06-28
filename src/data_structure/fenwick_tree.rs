@@ -14,7 +14,7 @@ pub mod fenwick_tree {
             FenwickTree {
                 n: size + 1,
                 data: vec![init; size + 1],
-                init: init,
+                init,
             }
         }
 

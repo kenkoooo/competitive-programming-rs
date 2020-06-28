@@ -56,9 +56,9 @@ pub mod lca {
             }
 
             LowestCommonAncestor {
-                parent: parent,
-                depth: depth,
-                log_v: log_v,
+                parent,
+                depth,
+                log_v,
             }
         }
 

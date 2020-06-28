@@ -41,7 +41,7 @@ pub mod fibonacci_heap {
             Self {
                 nodes: Vec::new(),
                 min_index: 0,
-                ordering: ordering,
+                ordering,
             }
         }
         pub fn push(&mut self, x: T) {

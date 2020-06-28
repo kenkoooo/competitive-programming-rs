@@ -18,10 +18,7 @@ pub mod rolling_hash {
                 pow[i + 1] = modulo(mod_mul(pow[i], base));
                 hash[i + 1] = modulo(mod_mul(hash[i], base) + s[i] as u64);
             }
-            RollingHash {
-                hash: hash,
-                pow: pow,
-            }
+            RollingHash { hash, pow }
         }
 
         /// Get hash of [l, r)

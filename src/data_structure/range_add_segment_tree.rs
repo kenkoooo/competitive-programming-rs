@@ -18,9 +18,9 @@ pub mod range_add_segment_tree {
             RangeAddSegmentTree {
                 seg: vec![init; num * 2],
                 seg_add: vec![zero; num * 2],
-                num: num,
-                init: init,
-                f: f,
+                num,
+                init,
+                f,
             }
         }
 

@@ -23,7 +23,7 @@ pub mod dinitz {
                 g.push(Vec::new());
             }
             Dinitz {
-                g: g,
+                g,
                 level: vec![0; v],
                 iter: vec![0; v],
             }
@@ -33,9 +33,9 @@ pub mod dinitz {
             let to_len = self.g[to].len();
             let from_len = self.g[from].len();
             self.g[from].push(Edge {
-                to: to,
+                to,
                 rev: to_len,
-                cap: cap,
+                cap,
             });
             self.g[to].push(Edge {
                 to: from,
@@ -44,29 +44,20 @@ pub mod dinitz {
             });
         }
 
-        fn dfs(&mut self, v: usize, t: usize, f: i64) -> i64 {
-            if v == t {
-                return f;
+        fn dfs(&mut self, v: usize, sink: usize, flow: i64) -> i64 {
+            if v == sink {
+                return flow;
             }
             while self.iter[v] < self.g[v].len() {
-                let (e_cap, e_to, e_rev);
-                {
-                    let ref e = self.g[v][self.iter[v]];
-                    e_cap = e.cap;
-                    e_to = e.to;
-                    e_rev = e.rev;
-                }
+                let e = &self.g[v][self.iter[v]];
+                let (e_cap, e_to, e_rev) = (e.cap, e.to, e.rev);
                 if e_cap > 0 && self.level[v] < self.level[e_to] {
-                    let d = self.dfs(e_to, t, cmp::min(f, e_cap));
+                    let d = self.dfs(e_to, sink, cmp::min(flow, e_cap));
                     if d > 0 {
-                        {
-                            let ref mut e = self.g[v][self.iter[v]];
-                            e.cap -= d;
-                        }
-                        {
-                            let ref mut rev_edge = self.g[e_to][e_rev];
-                            rev_edge.cap += d;
-                        }
+                        let ref mut e = self.g[v][self.iter[v]];
+                        e.cap -= d;
+                        let ref mut rev_edge = self.g[e_to][e_rev];
+                        rev_edge.cap += d;
                         return d;
                     }
                 }

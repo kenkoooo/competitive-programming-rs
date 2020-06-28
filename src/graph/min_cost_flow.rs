@@ -36,19 +36,19 @@ pub mod primal_dual {
             let reverse_from = self.graph[to].len();
             let reverse_to = self.graph[from].len();
             self.graph[from].push(Edge {
-                to: to,
-                capacity: capacity,
+                to,
+                capacity,
                 flow: 0,
-                cost: cost,
+                cost,
                 reverse_to: reverse_from,
                 is_reversed: false,
             });
             self.graph[to].push(Edge {
                 to: from,
-                capacity: capacity,
+                capacity,
                 flow: capacity,
                 cost: -cost,
-                reverse_to: reverse_to,
+                reverse_to,
                 is_reversed: true,
             });
         }
