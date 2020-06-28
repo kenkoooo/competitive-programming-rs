@@ -183,8 +183,8 @@ mod test {
                     sc.write("0\n");
                 }
 
-                let s = rmq.query(low, up) as usize;
-                let t = n - reverse_rmq.query(reverse_low, reverse_up) as usize;
+                let s = rmq.query(low..up) as usize;
+                let t = n - reverse_rmq.query(reverse_low..reverse_up) as usize;
                 if s + x.len() <= t && s <= t - y.len() {
                     sc.write(format!("{}\n", t - s));
                 } else {

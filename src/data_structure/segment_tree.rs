@@ -33,24 +33,25 @@ where
         }
     }
 
-    /// Get the minimum value in the array in the range [a, b)
-    ///
-    /// # Panics
-    ///
-    /// Panics if `a >= b`.
-    pub fn query(&self, a: usize, b: usize) -> T {
-        assert!(a < b);
-        self.query_range(a, b, 0, 0, self.n)
+    /// Get the minimum value in the array in the range
+    pub fn query(&self, range: std::ops::Range<usize>) -> T {
+        self.query_range(range, 0, 0..self.n)
     }
 
-    fn query_range(&self, a: usize, b: usize, k: usize, l: usize, r: usize) -> T {
-        if r <= a || b <= l {
+    fn query_range(
+        &self,
+        range: std::ops::Range<usize>,
+        k: usize,
+        seg_range: std::ops::Range<usize>,
+    ) -> T {
+        if seg_range.end <= range.start || range.end <= seg_range.start {
             self.initial_value
-        } else if a <= l && r <= b {
+        } else if range.start <= seg_range.start && seg_range.end <= range.end {
             self.seg[k]
         } else {
-            let x = self.query_range(a, b, k * 2 + 1, l, (l + r) >> 1);
-            let y = self.query_range(a, b, k * 2 + 2, (l + r) >> 1, r);
+            let mid = (seg_range.start + seg_range.end) >> 1;
+            let x = self.query_range(range.clone(), k * 2 + 1, seg_range.start..mid);
+            let y = self.query_range(range, k * 2 + 2, mid..seg_range.end);
             (self.f)(x, y)
         }
     }
@@ -80,8 +81,8 @@ mod test {
                 minimum = cmp::min(minimum, arr[j]);
             }
             seg.update(i, arr[i]);
-            assert_eq!(seg.query(0, n), minimum);
-            assert_eq!(seg.query(0, i + 1), minimum);
+            assert_eq!(seg.query(0..n), minimum);
+            assert_eq!(seg.query(0..(i + 1)), minimum);
         }
     }
 
@@ -102,7 +103,7 @@ mod test {
             for i in 0..n {
                 minimum = cmp::min(minimum, arr[i]);
             }
-            assert_eq!(seg.query(0, n), minimum);
+            assert_eq!(seg.query(0..n), minimum);
         }
     }
 }
