@@ -4,7 +4,7 @@ pub struct SuffixArray {
     array: Vec<usize>,
 }
 
-fn compare_node(i: usize, j: usize, k: usize, rank: &Vec<i32>) -> std::cmp::Ordering {
+fn compare_node(i: usize, j: usize, k: usize, rank: &[i32]) -> std::cmp::Ordering {
     if rank[i] != rank[j] {
         rank[i].cmp(&rank[j])
     } else {
@@ -15,7 +15,7 @@ fn compare_node(i: usize, j: usize, k: usize, rank: &Vec<i32>) -> std::cmp::Orde
 }
 
 impl SuffixArray {
-    pub fn new(s: &Vec<u8>) -> SuffixArray {
+    pub fn new(s: &[u8]) -> SuffixArray {
         let n = s.len();
         let mut rank = vec![0; n + 1];
         let mut array = vec![0; n + 1];
@@ -47,9 +47,9 @@ impl SuffixArray {
         }
 
         SuffixArray {
-            n: n,
-            array: array,
-            s: s.clone(),
+            n,
+            array,
+            s: Vec::from(s),
         }
     }
 
@@ -65,9 +65,9 @@ impl SuffixArray {
         }
     }
 
-    fn binary_search<F>(&self, t: &Vec<u8>, f: F) -> usize
+    fn binary_search<F>(&self, t: &[u8], f: F) -> usize
     where
-        F: Fn(&[u8], &Vec<u8>) -> bool,
+        F: Fn(&[u8], &[u8]) -> bool,
     {
         let (mut a, mut b) = (-1, self.n as i32 + 1);
         while b - a > 1 {
@@ -84,13 +84,13 @@ impl SuffixArray {
         b as usize
     }
 
-    pub fn lower_bound(&self, t: &Vec<u8>) -> usize {
-        let check_function = |sub: &[u8], s: &Vec<u8>| sub.cmp(s) == std::cmp::Ordering::Less;
+    pub fn lower_bound(&self, t: &[u8]) -> usize {
+        let check_function = |sub: &[u8], s: &[u8]| sub.cmp(s) == std::cmp::Ordering::Less;
         self.binary_search(t, check_function)
     }
 
-    pub fn upper_bound(&self, t: &Vec<u8>) -> usize {
-        let check_function = |sub: &[u8], s: &Vec<u8>| sub.cmp(s) != std::cmp::Ordering::Greater;
+    pub fn upper_bound(&self, t: &[u8]) -> usize {
+        let check_function = |sub: &[u8], s: &[u8]| sub.cmp(s) != std::cmp::Ordering::Greater;
         self.binary_search(t, check_function)
     }
 }
@@ -105,21 +105,33 @@ mod test {
 
     #[test]
     fn small_test() {
-        let string = "abcdeabcde".to_owned().bytes().collect();
+        let string = "abcdeabcde".to_owned().bytes().collect::<Vec<_>>();
         let sa = SuffixArray::new(&string);
-        assert_eq!(sa.lower_bound(&"a".to_owned().bytes().collect()), 1);
-        assert_eq!(sa.upper_bound(&"a".to_owned().bytes().collect()), 3);
+        assert_eq!(
+            sa.lower_bound(&"a".to_owned().bytes().collect::<Vec<_>>()),
+            1
+        );
+        assert_eq!(
+            sa.upper_bound(&"a".to_owned().bytes().collect::<Vec<_>>()),
+            3
+        );
 
-        assert!(sa.contains(&"abcde".to_owned().bytes().collect()));
-        assert!(!sa.contains(&"abce".to_owned().bytes().collect()));
+        assert!(sa.contains(&"abcde".to_owned().bytes().collect::<Vec<_>>()));
+        assert!(!sa.contains(&"abce".to_owned().bytes().collect::<Vec<_>>()));
     }
 
     #[test]
     fn corner_case() {
-        let string = "cba".to_owned().bytes().collect();
+        let string = "cba".to_owned().bytes().collect::<Vec<_>>();
         let sa = SuffixArray::new(&string);
-        assert_eq!(sa.lower_bound(&"c".to_owned().bytes().collect()), 3);
-        assert_eq!(sa.upper_bound(&"c".to_owned().bytes().collect()), 4);
+        assert_eq!(
+            sa.lower_bound(&"c".to_owned().bytes().collect::<Vec<_>>()),
+            3
+        );
+        assert_eq!(
+            sa.upper_bound(&"c".to_owned().bytes().collect::<Vec<_>>()),
+            4
+        );
     }
 
     #[test]

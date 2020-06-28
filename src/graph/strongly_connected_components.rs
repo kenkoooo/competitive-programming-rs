@@ -7,8 +7,9 @@ pub mod strongly_connected_components {
         let mut cmp = vec![0; num_v];
 
         let mut reverse_graph = vec![vec![]; num_v];
-        for i in 0..num_v {
-            for &v in graph[i].iter() {
+
+        for (i, edges) in graph.iter().enumerate() {
+            for &v in edges.iter() {
                 reverse_graph[v].push(i);
             }
         }

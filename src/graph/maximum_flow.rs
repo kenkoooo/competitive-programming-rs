@@ -54,10 +54,8 @@ pub mod dinitz {
                 if e_cap > 0 && self.level[v] < self.level[e_to] {
                     let d = self.dfs(e_to, sink, cmp::min(flow, e_cap));
                     if d > 0 {
-                        let ref mut e = self.g[v][self.iter[v]];
-                        e.cap -= d;
-                        let ref mut rev_edge = self.g[e_to][e_rev];
-                        rev_edge.cap += d;
+                        self.g[v][self.iter[v]].cap -= d;
+                        self.g[e_to][e_rev].cap += d;
                         return d;
                     }
                 }
