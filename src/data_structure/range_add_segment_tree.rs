@@ -1,9 +1,10 @@
 pub mod range_add_segment_tree {
+    type Range = std::ops::Range<usize>;
 
     pub struct RangeAddSegmentTree<T, F> {
         seg: Vec<T>,
         seg_add: Vec<T>,
-        num: usize,
+        size: usize,
         f: F,
         init: T,
     }
@@ -14,34 +15,25 @@ pub mod range_add_segment_tree {
         F: Fn(T, T) -> T + Copy,
     {
         pub fn new(n: usize, init: T, f: F, zero: T) -> Self {
-            let num = n.next_power_of_two();
+            let size = n.next_power_of_two();
             RangeAddSegmentTree {
-                seg: vec![init; num * 2],
-                seg_add: vec![zero; num * 2],
-                num,
+                seg: vec![init; size * 2],
+                seg_add: vec![zero; size * 2],
+                size,
                 init,
                 f,
             }
         }
 
-        /// add to [a, b)
         pub fn add(&mut self, a: usize, b: usize, value: T) {
-            self.add_to_range(a, b, value, 0, 0, self.num);
+            self.add_to_range(a..b, value, 0, 0..self.size);
         }
 
-        fn add_to_range(
-            &mut self,
-            a: usize,
-            b: usize,
-            value: T,
-            mut k: usize,
-            left: usize,
-            right: usize,
-        ) {
-            if b <= left || right <= a {
+        fn add_to_range(&mut self, add_range: Range, value: T, mut k: usize, seg_range: Range) {
+            if add_range.end <= seg_range.start || seg_range.end <= add_range.start {
                 return;
             }
-            if a <= left && right <= b {
+            if add_range.start <= seg_range.start && seg_range.end <= add_range.end {
                 self.seg_add[k] = self.seg_add[k] + value;
                 while k > 0 {
                     k = (k - 1) / 2;
@@ -51,14 +43,15 @@ pub mod range_add_segment_tree {
                     );
                 }
             } else {
-                self.add_to_range(a, b, value, k * 2 + 1, left, (left + right) / 2);
-                self.add_to_range(a, b, value, k * 2 + 2, (left + right) / 2, right);
+                let mid = (seg_range.start + seg_range.end) / 2;
+                self.add_to_range(add_range.clone(), value, k * 2 + 1, seg_range.start..mid);
+                self.add_to_range(add_range, value, k * 2 + 2, mid..seg_range.end);
             }
         }
 
         pub fn update(&mut self, pos: usize, value: T) {
             let cur = self.get(pos, pos + 1);
-            let mut k = pos + self.num - 1;
+            let mut k = pos + self.size - 1;
             let raw = self.seg[k];
             self.seg[k] = raw + value - cur;
             while k > 0 {
@@ -68,18 +61,18 @@ pub mod range_add_segment_tree {
         }
 
         pub fn get(&self, a: usize, b: usize) -> T {
-            self.get_from_range(a, b, 0, 0, self.num)
+            self.get_from_range(a..b, 0, 0..self.size)
         }
 
-        fn get_from_range(&self, a: usize, b: usize, k: usize, left: usize, right: usize) -> T {
-            if b <= left || right <= a {
+        fn get_from_range(&self, get_range: Range, k: usize, seg_range: Range) -> T {
+            if get_range.end <= seg_range.start || seg_range.end <= get_range.start {
                 self.init
-            } else if a <= left && right <= b {
+            } else if get_range.start <= seg_range.start && seg_range.end <= get_range.end {
                 self.seg[k] + self.seg_add[k]
             } else {
-                let mid = (left + right) / 2;
-                let x = self.get_from_range(a, b, k * 2 + 1, left, mid);
-                let y = self.get_from_range(a, b, k * 2 + 2, mid, right);
+                let mid = (seg_range.start + seg_range.end) / 2;
+                let x = self.get_from_range(get_range.clone(), k * 2 + 1, seg_range.start..mid);
+                let y = self.get_from_range(get_range, k * 2 + 2, mid..seg_range.end);
                 (self.f)(x, y) + self.seg_add[k]
             }
         }
