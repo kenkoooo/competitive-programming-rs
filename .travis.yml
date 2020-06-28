@@ -2,6 +2,7 @@ language: rust
 rust:
   - stable
   - nightly
+  - 1.42.0
 script:
   - cargo build --release
   - cargo test --release
