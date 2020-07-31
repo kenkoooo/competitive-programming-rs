@@ -23,7 +23,7 @@ pub mod persistent_array {
         }
     }
 
-    pub fn set<T: Clone + Copy>(index: usize, data: T, node: Rc<Node<T>>) -> Rc<Node<T>> {
+    pub fn set<T: Clone>(index: usize, data: T, node: Rc<Node<T>>) -> Rc<Node<T>> {
         if index == 0 {
             let new_node = Node::new(Some(data), node.children.clone());
             Rc::new(new_node)
