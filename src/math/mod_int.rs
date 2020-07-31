@@ -278,17 +278,17 @@ pub mod mod_int {
 #[cfg(test)]
 mod test {
     use super::mod_int::*;
-    use rand::distributions::{IndependentSample, Range};
+    use rand::distributions::Uniform;
+    use rand::Rng;
 
     const MOD: u64 = 1_000_000_007;
 
     #[test]
     fn random_add_sub() {
-        let between = Range::new(0, MOD);
         let mut rng = rand::thread_rng();
         for _ in 0..1000 {
-            let x: u64 = between.ind_sample(&mut rng);
-            let y: u64 = between.ind_sample(&mut rng);
+            let x: u64 = rng.sample(Uniform::from(0..MOD));
+            let y: u64 = rng.sample(Uniform::from(0..MOD));
 
             let mx = ModInt::new(x, MOD);
             let my = ModInt::new(y, MOD);
@@ -320,11 +320,10 @@ mod test {
 
     #[test]
     fn random_mul() {
-        let between = Range::new(0, MOD);
         let mut rng = rand::thread_rng();
         for _ in 0..1000 {
-            let x: u64 = between.ind_sample(&mut rng);
-            let y: u64 = between.ind_sample(&mut rng);
+            let x: u64 = rng.sample(Uniform::from(0..MOD));
+            let y: u64 = rng.sample(Uniform::from(0..MOD));
 
             let mx = ModInt::new(x, MOD);
             let my = ModInt::new(y, MOD);

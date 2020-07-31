@@ -32,21 +32,21 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use rand::distributions::{IndependentSample, Range};
+    use rand::distributions::Uniform;
+    use rand::Rng;
 
     #[test]
     fn random_array() {
         let h = 30;
         let w = 20;
 
-        let between = Range::new(10, 10000);
         let mut rng = rand::thread_rng();
 
         for _ in 0..10 {
             let mut array = vec![vec![0; w]; h];
             for i in 0..h {
                 for j in 0..w {
-                    array[i][j] = between.ind_sample(&mut rng);
+                    array[i][j] = rng.sample(Uniform::from(10..10000));
                 }
             }
 

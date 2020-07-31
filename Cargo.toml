@@ -1,6 +1,6 @@
 [package]
 name = "competitive-programming-rs"
-version = "20.0.0"
+version = "21.0.0"
 authors = ["kenkoooo"]
 description = "Competitive Programming Library in Rust"
 license-file = "LICENSE"
@@ -12,4 +12,4 @@ exclude = ["assets/*"]
 edition = "2018"
 
 [dependencies]
-rand = "0.4.2"
+rand = "0.7.3"

@@ -47,20 +47,20 @@ pub mod rolling_hash {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand::distributions::{IndependentSample, Range};
+    use rand::distributions::Uniform;
+    use rand::Rng;
 
     const BASE: u64 = 1_000_000_007;
 
     #[test]
     fn test_rolling_hash() {
         let n = 30;
-        let between = Range::new(0, 26);
         let mut rng = rand::thread_rng();
 
         for _ in 0..100 {
             let mut s = String::new();
             for _ in 0..n {
-                let c = (between.ind_sample(&mut rng) as u8 + 'a' as u8) as char;
+                let c = (rng.sample(Uniform::from(0..26)) as u8 + 'a' as u8) as char;
                 s.push(c);
             }
 
