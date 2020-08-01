@@ -23,30 +23,38 @@ pub mod persistent_array {
         }
     }
 
-    pub fn set<T: Clone>(index: usize, data: T, node: Rc<Node<T>>) -> Rc<Node<T>> {
+    pub fn set<T: Clone>(index: usize, data: T, node: Option<Rc<Node<T>>>) -> Rc<Node<T>> {
         if index == 0 {
-            let new_node = Node::new(Some(data), node.children.clone());
-            Rc::new(new_node)
-        } else {
-            let a = match node.children[index % N].as_ref() {
-                Some(next_node) => set(index / N, data, next_node.clone()),
-                None => {
-                    let intermediate_node = Node::default();
-                    set(index / N, data, Rc::new(intermediate_node))
+            match node {
+                Some(node) => {
+                    let new_node = Node::new(Some(data), node.children.clone());
+                    Rc::new(new_node)
                 }
+                None => Rc::new(Node::new(Some(data), Default::default())),
+            }
+        } else {
+            let child = match node
+                .as_ref()
+                .and_then(|node| node.children[index % N].as_ref())
+            {
+                Some(next_node) => set(index / N, data, Some(next_node.clone())),
+                None => set(index / N, data, None),
             };
-            let mut new_node = node.as_ref().clone();
-            new_node.children[index % N] = Some(a);
+            let mut new_node = match node {
+                Some(node) => node.as_ref().clone(),
+                None => Node::default(),
+            };
+            new_node.children[index % N] = Some(child);
             Rc::new(new_node)
         }
     }
 
-    pub fn get<T: Clone>(index: usize, node: Rc<Node<T>>) -> Option<T> {
+    pub fn get<T: Clone>(index: usize, node: &Rc<Node<T>>) -> Option<T> {
         if index == 0 {
             node.data.clone()
         } else {
             match node.children[index % N].as_ref() {
-                Some(next_node) => get(index / N, next_node.clone()),
+                Some(next_node) => get(index / N, next_node),
                 None => None,
             }
         }
@@ -74,11 +82,11 @@ mod tests {
             let pos = rng.sample(Uniform::from(0..n));
             let value: i64 = rng.gen();
             new_vec[pos] = Some(value);
-            let new_node = set(pos, value, node);
+            let new_node = set(pos, value, Some(node));
 
             for i in 0..n {
                 let expected = new_vec[i];
-                let actual = get(i, new_node.clone());
+                let actual = get(i, &new_node);
                 assert_eq!(expected, actual);
             }
             vs.push(new_vec.clone());
@@ -86,10 +94,10 @@ mod tests {
 
             let value: i64 = rng.gen();
             new_vec[pos] = Some(value);
-            let new_node = set(pos, value, new_node);
+            let new_node = set(pos, value, Some(new_node));
             for i in 0..n {
                 let expected = new_vec[i];
-                let actual = get(i, new_node.clone());
+                let actual = get(i, &new_node);
                 assert_eq!(expected, actual);
             }
             vs.push(new_vec.clone());
