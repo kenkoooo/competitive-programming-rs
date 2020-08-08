@@ -1,8 +1,4 @@
 pub mod dinitz {
-    use std::cmp;
-    use std::collections::VecDeque;
-    use std::i64;
-    use std::usize;
 
     struct Edge {
         pub to: usize,
@@ -12,8 +8,6 @@ pub mod dinitz {
 
     pub struct Dinitz {
         g: Vec<Vec<Edge>>,
-        level: Vec<i32>,
-        iter: Vec<usize>,
     }
 
     impl Dinitz {
@@ -22,11 +16,7 @@ pub mod dinitz {
             for _ in 0..v {
                 g.push(Vec::new());
             }
-            Dinitz {
-                g,
-                level: vec![0; v],
-                iter: vec![0; v],
-            }
+            Dinitz { g }
         }
 
         pub fn add_edge(&mut self, from: usize, to: usize, cap: i64) {
@@ -44,54 +34,62 @@ pub mod dinitz {
             });
         }
 
-        fn dfs(&mut self, v: usize, sink: usize, flow: i64) -> i64 {
+        fn dfs(
+            &mut self,
+            v: usize,
+            sink: usize,
+            flow: i64,
+            level: &[i32],
+            iter: &mut [usize],
+        ) -> i64 {
             if v == sink {
                 return flow;
             }
-            while self.iter[v] < self.g[v].len() {
-                let e = &self.g[v][self.iter[v]];
-                let (e_cap, e_to, e_rev) = (e.cap, e.to, e.rev);
-                if e_cap > 0 && self.level[v] < self.level[e_to] {
-                    let d = self.dfs(e_to, sink, cmp::min(flow, e_cap));
-                    if d > 0 {
-                        self.g[v][self.iter[v]].cap -= d;
-                        self.g[e_to][e_rev].cap += d;
-                        return d;
+            while iter[v] < self.g[v].len() {
+                let flow = std::cmp::min(flow, self.g[v][iter[v]].cap);
+                let to = self.g[v][iter[v]].to;
+                if flow > 0 && level[v] < level[to] {
+                    let flowed = self.dfs(to, sink, flow, level, iter);
+                    if flowed > 0 {
+                        let rev = self.g[v][iter[v]].rev;
+                        self.g[v][iter[v]].cap -= flowed;
+                        self.g[to][rev].cap += flowed;
+                        return flowed;
                     }
                 }
-                self.iter[v] += 1;
+                iter[v] += 1;
             }
             0
         }
 
-        fn bfs(&mut self, s: usize) {
-            let v = self.level.len();
-            self.level = vec![-1; v];
-            self.level[s] = 0;
-            let mut deque = VecDeque::new();
+        fn bfs(&self, s: usize) -> Vec<i32> {
+            let v = self.g.len();
+            let mut level = vec![-1; v];
+            level[s] = 0;
+            let mut deque = std::collections::VecDeque::new();
             deque.push_back(s);
-            while !deque.is_empty() {
-                let v = deque.pop_front().unwrap();
-                for e in &self.g[v] {
-                    if e.cap > 0 && self.level[e.to] < 0 {
-                        self.level[e.to] = self.level[v] + 1;
+            while let Some(v) = deque.pop_front() {
+                for e in self.g[v].iter() {
+                    if e.cap > 0 && level[e.to] < 0 {
+                        level[e.to] = level[v] + 1;
                         deque.push_back(e.to);
                     }
                 }
             }
+            level
         }
 
         pub fn max_flow(&mut self, s: usize, t: usize) -> i64 {
-            let v = self.level.len();
+            let v = self.g.len();
             let mut flow: i64 = 0;
             loop {
-                self.bfs(s);
-                if self.level[t] < 0 {
+                let level = self.bfs(s);
+                if level[t] < 0 {
                     return flow;
                 }
-                self.iter = vec![0; v];
+                let mut iter = vec![0; v];
                 loop {
-                    let f = self.dfs(s, t, i64::MAX);
+                    let f = self.dfs(s, t, std::i64::MAX, &level, &mut iter);
                     if f == 0 {
                         break;
                     }
