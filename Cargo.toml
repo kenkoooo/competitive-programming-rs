@@ -11,5 +11,5 @@ homepage = "https://docs.rs/competitive-programming-rs"
 exclude = ["assets/*"]
 edition = "2018"
 
-[dependencies]
+[dev-dependencies]
 rand = "0.7.3"
