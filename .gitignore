@@ -5,3 +5,5 @@
 **/*.iml
 /rls/
 **/.vscode/
+
+src/bin/
