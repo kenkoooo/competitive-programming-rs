@@ -1,13 +1,13 @@
 pub mod dinitz {
-
-    struct Edge {
+    pub struct Edge {
         pub to: usize,
         pub rev: usize,
+        pub is_reversed: bool,
         pub cap: i64,
     }
 
     pub struct Dinitz {
-        g: Vec<Vec<Edge>>,
+        pub g: Vec<Vec<Edge>>,
     }
 
     impl Dinitz {
@@ -25,11 +25,13 @@ pub mod dinitz {
             self.g[from].push(Edge {
                 to,
                 rev: to_len,
+                is_reversed: false,
                 cap,
             });
             self.g[to].push(Edge {
                 to: from,
                 rev: from_len,
+                is_reversed: true,
                 cap: 0,
             });
         }
