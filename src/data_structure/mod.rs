@@ -1,8 +1,8 @@
 pub mod bitset;
 pub mod fenwick_tree;
 pub mod fibonacci_heap;
+pub mod lazy_segment_tree;
 pub mod persistent_array;
-pub mod range_add_segment_tree;
 pub mod segment_tree;
 pub mod sparse_table;
 pub mod suffix_array;
