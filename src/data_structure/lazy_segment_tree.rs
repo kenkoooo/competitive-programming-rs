@@ -184,7 +184,7 @@ pub mod lazy_segment_tree {
 #[cfg(test)]
 mod test {
     use super::lazy_segment_tree::*;
-    use rand::Rng;
+    use rand::{distributions::Uniform, thread_rng, Rng};
     use std::cmp::{max, min};
 
     const INF: i64 = 1 << 60;
@@ -231,6 +231,7 @@ mod test {
 
     #[test]
     fn random_add() {
+        let mut rng = thread_rng();
         let n = 32;
         let mut array = vec![0; n];
         let mut seg_min = LazySegmentTree::new(
@@ -250,7 +251,7 @@ mod test {
             || 0,
         );
         for i in 0..n {
-            let value = rand::thread_rng().gen::<i16>() as i64;
+            let value = rng.sample(Uniform::from(-1000..=1000));
             array[i] = value;
             seg_min.set(i, value);
             seg_max.set(i, value);
@@ -258,7 +259,7 @@ mod test {
 
         for l in 0..n {
             for r in (l + 1)..n {
-                let value = rand::thread_rng().gen::<i16>() as i64;
+                let value = rng.sample(Uniform::from(-1000..=1000));
                 seg_min.apply_range(l..r, value);
                 seg_max.apply_range(l..r, value);
 
@@ -280,6 +281,69 @@ mod test {
                     }
                 }
             }
+        }
+    }
+
+    #[test]
+    fn random_update() {
+        let mut rng = thread_rng();
+        #[derive(Clone)]
+        struct Num {
+            len: u32,
+            value: i64,
+        }
+        let n = 15;
+        let mut array = vec![0; n];
+        let mut seg_update = LazySegmentTree::new(
+            n,
+            || Num { len: 0, value: 0 },
+            |left: &Num, right: &Num| Num {
+                value: left.value * 10i64.pow(right.len) + right.value,
+                len: left.len + right.len,
+            },
+            |f: &Option<i64>, x: &Num| {
+                if let &Some(f) = f {
+                    let mut value = 0;
+                    for _ in 0..x.len {
+                        value = value * 10 + f;
+                    }
+                    Num { len: x.len, value }
+                } else {
+                    Num {
+                        len: x.len,
+                        value: x.value,
+                    }
+                }
+            },
+            |f: &Option<i64>, g: &Option<i64>| {
+                if f.is_some() {
+                    f.clone()
+                } else {
+                    g.clone()
+                }
+            },
+            || None,
+        );
+        for i in 0..n {
+            array[i] = 1;
+            seg_update.set(i, Num { len: 1, value: 1 });
+        }
+
+        for _ in 0..1000 {
+            let digit = rng.sample(Uniform::from(0..=9));
+            let left = rng.sample(Uniform::from(0..n));
+            let right = rng.sample(Uniform::from((left + 1)..=n));
+            for i in left..right {
+                array[i] = digit;
+            }
+            seg_update.apply_range(left..right, Some(digit));
+
+            let mut sum = 0;
+            for i in 0..n {
+                sum = sum * 10 + array[i];
+            }
+
+            assert_eq!(sum, seg_update.all_prod().value);
         }
     }
 }
