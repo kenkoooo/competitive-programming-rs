@@ -23,6 +23,9 @@ impl<R: std::io::Read, W: std::io::Write> IO<R, W> {
             .ok()
             .expect("Parse error.")
     }
+    pub fn usize0(&mut self) -> usize {
+        self.read::<usize>() - 1
+    }
     pub fn vec<T: std::str::FromStr>(&mut self, n: usize) -> Vec<T> {
         (0..n).map(|_| self.read()).collect()
     }
