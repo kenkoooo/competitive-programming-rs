@@ -50,12 +50,12 @@ mod tests {
     use rand::distributions::Uniform;
     use rand::{thread_rng, Rng};
 
-    const MOD: u64 = 1_000_000_007;
+    const MOD: i64 = 1_000_000_007;
 
     #[test]
     fn test_lagrange_interpolation() {
         set_mod_int(MOD);
-        let range = Uniform::from(0..std::u64::MAX);
+        let range = Uniform::from(0..std::i64::MAX);
         let mut rng = thread_rng();
 
         let n = 500;
@@ -67,13 +67,13 @@ mod tests {
                 ys.push(ModInt::new(rng.sample(range)));
             }
 
-            let c = lagrange_interpolation(&xs, &ys, ModInt::new(1u64), ModInt::new(0u64));
+            let c = lagrange_interpolation(&xs, &ys, ModInt::new(1), ModInt::new(0));
 
             for i in 0..n {
-                let mut y = ModInt::new(0u64);
+                let mut y = ModInt::new(0);
                 let x = xs[i];
                 for i in 0..n {
-                    y += x.pow(i as u64) * c[i];
+                    y += x.pow(i as i64) * c[i];
                 }
                 assert_eq!(y.value(), ys[i].value());
             }

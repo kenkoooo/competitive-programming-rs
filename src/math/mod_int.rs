@@ -2,7 +2,7 @@ pub mod mod_int {
     use std::cell::RefCell;
     use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-    type InternalNum = u64;
+    type InternalNum = i64;
     thread_local!(
         static MOD: RefCell<InternalNum> = RefCell::new(0);
     );
@@ -189,14 +189,14 @@ mod test {
     use rand::distributions::Uniform;
     use rand::Rng;
 
-    const PRIME_MOD: [u64; 3] = [1_000_000_007, 1_000_000_009, 998244353];
+    const PRIME_MOD: [i64; 3] = [1_000_000_007, 1_000_000_009, 998244353];
 
-    fn random_add_sub(prime_mod: u64) {
+    fn random_add_sub(prime_mod: i64) {
         let mut rng = rand::thread_rng();
         set_mod_int(prime_mod);
         for _ in 0..10000 {
-            let x: u64 = rng.sample(Uniform::from(0..prime_mod));
-            let y: u64 = rng.sample(Uniform::from(0..prime_mod));
+            let x: i64 = rng.sample(Uniform::from(0..prime_mod));
+            let y: i64 = rng.sample(Uniform::from(0..prime_mod));
 
             let mx = ModInt::new(x);
             let my = ModInt::new(y);
@@ -241,12 +241,12 @@ mod test {
         random_add_sub(PRIME_MOD[2]);
     }
 
-    fn random_mul(prime_mod: u64) {
+    fn random_mul(prime_mod: i64) {
         let mut rng = rand::thread_rng();
         set_mod_int(prime_mod);
         for _ in 0..10000 {
-            let x: u64 = rng.sample(Uniform::from(0..prime_mod));
-            let y: u64 = rng.sample(Uniform::from(0..prime_mod));
+            let x: i64 = rng.sample(Uniform::from(0..prime_mod));
+            let y: i64 = rng.sample(Uniform::from(0..prime_mod));
 
             let mx = ModInt::new(x);
             let my = ModInt::new(y);
@@ -270,26 +270,26 @@ mod test {
 
     #[test]
     fn zero_test() {
-        set_mod_int(1_000_000_007u64);
-        let a = ModInt::new(1_000_000_000u64);
-        let b = ModInt::new(7u64);
+        set_mod_int(1_000_000_007i64);
+        let a = ModInt::new(1_000_000_000i64);
+        let b = ModInt::new(7i64);
         let c = a + b;
         assert_eq!(c.value(), 0);
     }
 
     #[test]
     fn pow_test() {
-        set_mod_int(1_000_000_007u64);
-        let a = ModInt::new(3u64);
-        let a = a.pow(4u64);
+        set_mod_int(1_000_000_007i64);
+        let a = ModInt::new(3i64);
+        let a = a.pow(4i64);
         assert_eq!(a.value(), 81);
     }
 
     #[test]
     fn div_test() {
-        set_mod_int(1_000_000_007u64);
-        for i in 1..100000u64 {
-            let mut a = ModInt::new(1u64);
+        set_mod_int(1_000_000_007i64);
+        for i in 1..100000i64 {
+            let mut a = ModInt::new(1i64);
             a /= i;
             a *= i;
             assert_eq!(a.value(), 1);
@@ -298,60 +298,60 @@ mod test {
 
     #[test]
     fn edge_cases() {
-        const MOD: u128 = 1_000_000_007;
-        set_mod_int(1_000_000_007u64);
+        const MOD: i128 = 1_000_000_007;
+        set_mod_int(1_000_000_007i64);
 
-        let a = ModInt::new(1_000_000_000u64) * std::u64::MAX;
+        let a = ModInt::new(1_000_000_000i64) * std::i64::MAX;
         assert_eq!(
             a.value(),
-            ((1_000_000_000u128 * u128::from(std::u64::MAX)) % MOD) as u64
+            ((1_000_000_000i128 * i128::from(std::i64::MAX)) % MOD) as i64
         );
 
-        let mut a = ModInt::new(1_000_000_000u64);
-        a *= std::u64::MAX;
+        let mut a = ModInt::new(1_000_000_000i64);
+        a *= std::i64::MAX;
         assert_eq!(
             a.value(),
-            ((1_000_000_000u128 * u128::from(std::u64::MAX)) % MOD) as u64
+            ((1_000_000_000i128 * i128::from(std::i64::MAX)) % MOD) as i64
         );
 
-        let a = ModInt::new(1_000_000_000u64) + std::u64::MAX;
+        let a = ModInt::new(1_000_000_000i64) + std::i64::MAX;
         assert_eq!(
             a.value(),
-            ((1_000_000_000u128 + u128::from(std::u64::MAX)) % MOD) as u64
+            ((1_000_000_000i128 + i128::from(std::i64::MAX)) % MOD) as i64
         );
 
-        let mut a = ModInt::new(1_000_000_000u64);
-        a += std::u64::MAX;
+        let mut a = ModInt::new(1_000_000_000i64);
+        a += std::i64::MAX;
         assert_eq!(
             a.value(),
-            ((1_000_000_000u128 + u128::from(std::u64::MAX)) % MOD) as u64
+            ((1_000_000_000i128 + i128::from(std::i64::MAX)) % MOD) as i64
         );
 
-        let a = ModInt::new(1_000_000_000u64) - std::u64::MAX;
+        let a = ModInt::new(1_000_000_000i64) - std::i64::MAX;
         assert_eq!(
             a.value(),
-            ((1_000_000_000u128 + MOD - (std::u64::MAX as u128) % MOD) % MOD) as u64
+            ((1_000_000_000i128 + MOD - (std::i64::MAX as i128) % MOD) % MOD) as i64
         );
 
-        let mut a = ModInt::new(1_000_000_000u64);
-        a -= std::u64::MAX;
+        let mut a = ModInt::new(1_000_000_000i64);
+        a -= std::i64::MAX;
         assert_eq!(
             a.value(),
-            ((1_000_000_000u128 + MOD - (std::u64::MAX as u128) % MOD) % MOD) as u64
+            ((1_000_000_000i128 + MOD - (std::i64::MAX as i128) % MOD) % MOD) as i64
         );
 
-        let a = ModInt::new(1_000_000_000u64) / std::u64::MAX;
-        assert_eq!(a.value(), 605455209);
+        let a = ModInt::new(1_000_000_000i64) / std::i64::MAX;
+        assert_eq!(a.value(), 468036877);
 
-        let mut a = ModInt::new(1_000_000_000u64);
-        a /= std::u64::MAX;
-        assert_eq!(a.value(), 605455209);
+        let mut a = ModInt::new(1_000_000_000i64);
+        a /= std::i64::MAX;
+        assert_eq!(a.value(), 468036877);
     }
 
     #[test]
     fn overflow_guard() {
-        set_mod_int(1_000_000_007u64);
-        let a = ModInt::new(1_000_000_007u64 * 10);
+        set_mod_int(1_000_000_007i64);
+        let a = ModInt::new(1_000_000_007i64 * 10);
         assert_eq!(a.value(), 0);
     }
 }
