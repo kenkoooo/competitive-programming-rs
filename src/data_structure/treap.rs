@@ -75,15 +75,13 @@ pub mod treap {
     }
 
     fn find<T: PartialOrd>(node: &Option<BNode<T>>, key: &T) -> Option<usize> {
-        match node {
-            None => None,
-            Some(node) => match node.key.partial_cmp(key).unwrap() {
-                Equal => Some(count(&node.left)),
-                Greater => find(&node.left, key),
-                Less => match find(&node.right, key) {
-                    None => None,
-                    Some(pos) => Some(count(&node.left) + 1 + pos),
-                },
+        let node = node.as_ref()?;
+        match node.key.partial_cmp(key).unwrap() {
+            Equal => Some(count(&node.left)),
+            Greater => find(&node.left, key),
+            Less => match find(&node.right, key) {
+                None => None,
+                Some(pos) => Some(count(&node.left) + 1 + pos),
             },
         }
     }
@@ -95,22 +93,22 @@ pub mod treap {
         }
     }
 
-    fn rotate_left<T>(node: Option<BNode<T>>) -> Option<BNode<T>> {
-        let mut node = node.unwrap();
+    fn rotate_left<T>(node: BNode<T>) -> BNode<T> {
+        let mut node = node;
         let mut r = node.right.take().unwrap();
         node.right = r.left.take();
         node.update();
         r.left = Some(node);
-        Some(r)
+        r
     }
 
-    fn rotate_right<T>(node: Option<BNode<T>>) -> Option<BNode<T>> {
-        let mut node = node.unwrap();
+    fn rotate_right<T>(node: BNode<T>) -> BNode<T> {
+        let mut node = node;
         let mut l = node.left.take().unwrap();
         node.left = l.right.take();
         node.update();
         l.right = Some(node);
-        Some(l)
+        l
     }
 
     fn insert<T: PartialOrd>(
@@ -125,13 +123,13 @@ pub mod treap {
                     Less => {
                         node.right = insert(node.right.take(), key, rand);
                         if priority(&node.right) < node.priority {
-                            node = rotate_left(Some(node)).unwrap();
+                            node = rotate_left(node);
                         }
                     }
                     _ => {
                         node.left = insert(node.left.take(), key, rand);
                         if priority(&node.left) < node.priority {
-                            node = rotate_right(Some(node)).unwrap();
+                            node = rotate_right(node);
                         }
                     }
                 }
