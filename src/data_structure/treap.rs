@@ -70,7 +70,7 @@ pub mod treap {
 
     impl<T: PartialOrd + Clone> Treap<T> {
         pub fn erase(&mut self, key: &T) {
-            self.root = erase(self.root.take(), key);
+            self.root = erase(self.root.take().unwrap(), key);
         }
     }
 
@@ -135,38 +135,38 @@ pub mod treap {
         }
     }
 
-    fn min<T>(node: &Option<BNode<T>>) -> &Option<BNode<T>> {
-        let x = node.as_ref().unwrap();
-        match x.left {
-            Some(_) => min(&x.left),
-            None => node,
+    fn min<T>(node: &BNode<T>) -> &BNode<T> {
+        if let Some(left) = node.left.as_ref() {
+            min(left)
+        } else {
+            node
         }
     }
 
-    fn erase<T: PartialOrd + Clone>(node: Option<BNode<T>>, key: &T) -> Option<BNode<T>> {
-        let mut node = node.unwrap();
+    fn erase<T: PartialOrd + Clone>(mut node: BNode<T>, key: &T) -> Option<BNode<T>> {
         match node.key.partial_cmp(key).unwrap() {
-            Equal if node.left.is_none() => node.right,
-            Equal if node.right.is_none() => node.left,
-            Equal => {
-                node.key = match min(&node.right) {
-                    Some(m) => m.key.clone(),
-                    None => unreachable!(),
-                };
-                node.right = erase(node.right.take(), &node.key);
-                node.update_count();
-                Some(node)
-            }
             Less => {
-                node.right = erase(node.right.take(), key);
+                node.right = erase(node.right.take().unwrap(), key);
                 node.update_count();
                 Some(node)
             }
             Greater => {
-                node.left = erase(node.left.take(), key);
+                node.left = erase(node.left.take().unwrap(), key);
                 node.update_count();
                 Some(node)
             }
+            Equal => match (node.left.take(), node.right.take()) {
+                (Some(left), Some(right)) => {
+                    node.left = Some(left);
+                    node.key = min(&right).key.clone();
+                    node.right = erase(right, &node.key);
+                    node.update_count();
+                    Some(node)
+                }
+                (None, Some(right)) => Some(right),
+                (Some(left), None) => Some(left),
+                (None, None) => None,
+            },
         }
     }
 
