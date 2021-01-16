@@ -205,7 +205,7 @@ pub mod treap {
 
 #[cfg(test)]
 mod test {
-    use super::treap::{self, *};
+    use super::treap::*;
 
     #[test]
     fn test_treap_insert_erase() {
