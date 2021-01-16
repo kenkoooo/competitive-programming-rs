@@ -76,13 +76,10 @@ pub mod treap {
 
     fn find<T: PartialOrd>(node: &Option<BNode<T>>, key: &T) -> Option<usize> {
         let node = node.as_ref()?;
-        match node.key.partial_cmp(key).unwrap() {
+        match cmp_key(&node.key, key) {
             Equal => Some(count(&node.left)),
             Greater => find(&node.left, key),
-            Less => match find(&node.right, key) {
-                None => None,
-                Some(pos) => Some(count(&node.left) + 1 + pos),
-            },
+            Less => find(&node.right, key).map(|pos| count(&node.left) + 1 + pos),
         }
     }
 
@@ -111,7 +108,7 @@ pub mod treap {
         match node {
             None => Node::new(key, rand.next()),
             Some(mut node) => {
-                match node.key.partial_cmp(&key).unwrap() {
+                match cmp_key(&node.key, &key) {
                     Less => {
                         let next_right = insert(node.right.take(), key, rand);
                         if next_right.priority < node.priority {
@@ -144,7 +141,7 @@ pub mod treap {
     }
 
     fn erase<T: PartialOrd + Clone>(mut node: BNode<T>, key: &T) -> Option<BNode<T>> {
-        match node.key.partial_cmp(key).unwrap() {
+        match cmp_key(&node.key, key) {
             Less => {
                 node.right = erase(node.right.take().unwrap(), key);
                 node.update_count();
@@ -178,6 +175,11 @@ pub mod treap {
             Less => rank(&c.right, r - left - 1),
             Greater => rank(&c.left, r),
         }
+    }
+
+    fn cmp_key<T: PartialOrd>(key1: &T, key2: &T) -> std::cmp::Ordering {
+        key1.partial_cmp(key2)
+            .expect("Unsortable data is not supported.")
     }
 
     #[derive(Debug)]
