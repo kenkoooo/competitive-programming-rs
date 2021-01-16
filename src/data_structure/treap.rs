@@ -88,10 +88,7 @@ pub mod treap {
     }
 
     fn count<T>(node: &Option<BNode<T>>) -> usize {
-        match node {
-            None => 0,
-            Some(node) => node.count,
-        }
+        node.as_ref().map(|node| node.count).unwrap_or(0)
     }
 
     fn rotate_left<T>(mut node: BNode<T>, mut right_child: BNode<T>) -> BNode<T> {
