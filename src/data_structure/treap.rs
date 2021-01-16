@@ -13,17 +13,17 @@ pub mod treap {
     }
 
     impl<T> Node<T> {
-        fn new(key: T, priority: u32) -> Option<BNode<T>> {
-            Some(Box::new(Node {
+        fn new(key: T, priority: u32) -> BNode<T> {
+            Box::new(Node {
                 left: None,
                 right: None,
                 key,
                 priority,
                 count: 1,
-            }))
+            })
         }
 
-        fn update(&mut self) {
+        fn update_count(&mut self) {
             self.count = 1 + count(&self.left) + count(&self.right);
         }
     }
@@ -59,7 +59,7 @@ pub mod treap {
     impl<T: PartialOrd> Treap<T> {
         pub fn insert(&mut self, key: T) {
             if !self.contains(&key) {
-                self.root = insert(self.root.take(), key, &mut self.random_state);
+                self.root = Some(insert(self.root.take(), key, &mut self.random_state));
             }
         }
 
@@ -93,54 +93,46 @@ pub mod treap {
         }
     }
 
-    fn rotate_left<T>(node: BNode<T>) -> BNode<T> {
-        let mut node = node;
-        let mut r = node.right.take().unwrap();
-        node.right = r.left.take();
-        node.update();
-        r.left = Some(node);
-        r
+    fn rotate_left<T>(mut node: BNode<T>, mut right_child: BNode<T>) -> BNode<T> {
+        node.right = right_child.left.take();
+        node.update_count();
+        right_child.left = Some(node);
+        right_child
     }
 
-    fn rotate_right<T>(node: BNode<T>) -> BNode<T> {
-        let mut node = node;
-        let mut l = node.left.take().unwrap();
-        node.left = l.right.take();
-        node.update();
-        l.right = Some(node);
-        l
+    fn rotate_right<T>(mut node: BNode<T>, mut left_child: BNode<T>) -> BNode<T> {
+        node.left = left_child.right.take();
+        node.update_count();
+        left_child.right = Some(node);
+        left_child
     }
 
-    fn insert<T: PartialOrd>(
-        node: Option<BNode<T>>,
-        key: T,
-        rand: &mut XorShift,
-    ) -> Option<BNode<T>> {
+    fn insert<T: PartialOrd>(node: Option<BNode<T>>, key: T, rand: &mut XorShift) -> BNode<T> {
         match node {
             None => Node::new(key, rand.next()),
             Some(mut node) => {
                 match node.key.partial_cmp(&key).unwrap() {
                     Less => {
-                        node.right = insert(node.right.take(), key, rand);
-                        if priority(&node.right) < node.priority {
-                            node = rotate_left(node);
+                        let next_right = insert(node.right.take(), key, rand);
+                        if next_right.priority < node.priority {
+                            node = rotate_left(node, next_right);
+                        } else {
+                            node.right = Some(next_right);
                         }
                     }
                     _ => {
-                        node.left = insert(node.left.take(), key, rand);
-                        if priority(&node.left) < node.priority {
-                            node = rotate_right(node);
+                        let next_left = insert(node.left.take(), key, rand);
+                        if next_left.priority < node.priority {
+                            node = rotate_right(node, next_left);
+                        } else {
+                            node.left = Some(next_left);
                         }
                     }
                 }
-                node.update();
-                Some(node)
+                node.update_count();
+                node
             }
         }
-    }
-
-    fn priority<T>(node: &Option<BNode<T>>) -> u32 {
-        node.as_ref().unwrap().priority
     }
 
     fn min<T>(node: &Option<BNode<T>>) -> &Option<BNode<T>> {
@@ -162,17 +154,17 @@ pub mod treap {
                     None => unreachable!(),
                 };
                 node.right = erase(node.right.take(), &node.key);
-                node.update();
+                node.update_count();
                 Some(node)
             }
             Less => {
                 node.right = erase(node.right.take(), key);
-                node.update();
+                node.update_count();
                 Some(node)
             }
             Greater => {
                 node.left = erase(node.left.take(), key);
-                node.update();
+                node.update_count();
                 Some(node)
             }
         }
@@ -216,7 +208,7 @@ mod test {
     #[test]
     fn test_treap_insert_erase() {
         let mut treap = treap::Treap::new(71);
-        let max = 1000000;
+        let max = 10_000_000;
 
         for i in 0..max {
             assert!(!treap.contains(&i));
@@ -235,7 +227,7 @@ mod test {
     fn test_treap_nth() {
         let mut treap = treap::Treap::new(71);
 
-        let max = 100000;
+        let max = 10_000_000;
         for i in 0..max {
             treap.insert(i * 2);
         }
