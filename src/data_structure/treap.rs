@@ -104,10 +104,7 @@ pub mod treap {
     }
 
     fn count<T>(node: &Option<BNode<T>>) -> usize {
-        match node {
-            None => 0,
-            Some(node) => node.count,
-        }
+        node.as_ref().map(|node| node.count).unwrap_or(0)
     }
 
     fn rotate_left<T>(mut node: BNode<T>, mut right: BNode<T>) -> BNode<T> {
@@ -158,9 +155,9 @@ pub mod treap {
         }
     }
 
-    fn min<T>(node: &BNode<T>) -> &BNode<T> {
+    fn min_node<T>(node: &BNode<T>) -> &BNode<T> {
         if let Some(left) = node.left.as_ref() {
-            min(left)
+            min_node(left)
         } else {
             node
         }
@@ -190,7 +187,7 @@ pub mod treap {
             }
             Equal => match (node.left.take(), node.right.take()) {
                 (Some(left), Some(right)) => {
-                    let right_min_key = min(&right).key.clone();
+                    let right_min_key = min_node(&right).key.clone();
                     let (right, removed) = erase(right, &right_min_key);
                     assert!(removed);
                     node.key = right_min_key;
