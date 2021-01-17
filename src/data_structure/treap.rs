@@ -65,10 +65,10 @@ pub mod treap {
     }
 
     impl<T: PartialOrd> Treap<T> {
-        pub fn insert(&mut self, key: T) {
-            if !self.contains(&key) {
-                self.root = Some(insert(self.root.take(), key, &mut self.random_state));
-            }
+        pub fn insert(&mut self, key: T) -> bool {
+            let (root, inserted) = insert(self.root.take(), key, &mut self.random_state);
+            self.root = Some(root);
+            inserted
         }
         pub fn contains(&self, key: &T) -> bool {
             self.index_of(key).is_some()
@@ -124,30 +124,37 @@ pub mod treap {
         left
     }
 
-    fn insert<T: PartialOrd>(node: Option<BNode<T>>, key: T, rand: &mut XorShift) -> BNode<T> {
+    fn insert<T: PartialOrd>(
+        node: Option<BNode<T>>,
+        key: T,
+        rand: &mut XorShift,
+    ) -> (BNode<T>, bool) {
         if let Some(mut node) = node {
             match cmp(&node.key, &key) {
                 Less => {
-                    let right = insert(node.right.take(), key, rand);
+                    let (right, inserted) = insert(node.right.take(), key, rand);
                     if right.priority < node.priority {
                         node = rotate_left(node, right);
                     } else {
                         node.right = Some(right);
                     }
+                    node.update_count();
+                    (node, inserted)
                 }
-                _ => {
-                    let left = insert(node.left.take(), key, rand);
+                Greater => {
+                    let (left, inserted) = insert(node.left.take(), key, rand);
                     if left.priority < node.priority {
                         node = rotate_right(node, left);
                     } else {
                         node.left = Some(left);
                     }
+                    node.update_count();
+                    (node, inserted)
                 }
+                Equal => (node, false),
             }
-            node.update_count();
-            node
         } else {
-            Node::new(key, rand.next())
+            (Node::new(key, rand.next()), true)
         }
     }
 
@@ -260,7 +267,8 @@ mod test {
 
         for i in 0..max {
             assert!(!treap.contains(&i));
-            treap.insert(i);
+            assert!(treap.insert(i));
+            assert!(!treap.insert(i));
             assert!(treap.contains(&i));
         }
 
@@ -278,7 +286,8 @@ mod test {
 
         let max = 100000;
         for i in 0..max {
-            treap.insert(i * 2);
+            assert!(treap.insert(i * 2));
+            assert!(!treap.insert(i * 2));
         }
 
         for i in 0..max {
@@ -311,7 +320,8 @@ mod test {
                     assert!(treap.contains(&x));
                 } else {
                     assert!(!treap.contains(&x));
-                    treap.insert(x);
+                    assert!(treap.insert(x));
+                    assert!(!treap.insert(x));
                     set.insert(x);
                     assert!(treap.contains(&x));
                 }
