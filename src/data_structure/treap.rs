@@ -47,9 +47,11 @@ pub mod treap {
         pub fn clear(&mut self) {
             self.root = None
         }
+
         pub fn len(&self) -> usize {
             count(&self.root)
         }
+
         pub fn is_empty(&self) -> bool {
             self.len() == 0
         }
@@ -68,6 +70,9 @@ pub mod treap {
         pub fn contains(&self, key: &T) -> bool {
             find(&self.root, key).is_some()
         }
+    }
+
+    impl<T: PartialOrd + Clone> Treap<T> {
         pub fn erase(&mut self, key: &T) -> bool {
             if let Some(root) = self.root.take() {
                 let (root, removed) = erase(root, key);
@@ -133,6 +138,14 @@ pub mod treap {
         }
     }
 
+    fn min<T>(node: &BNode<T>) -> &BNode<T> {
+        if let Some(left) = node.left.as_ref() {
+            min(left)
+        } else {
+            node
+        }
+    }
+
     fn erase_min<T>(mut node: BNode<T>) -> (Option<BNode<T>>, T) {
         if let Some(left) = node.left.take() {
             let (left, removed_value) = erase_min(left);
@@ -144,7 +157,7 @@ pub mod treap {
         }
     }
 
-    fn erase<T: PartialOrd>(mut node: BNode<T>, key: &T) -> (Option<BNode<T>>, bool) {
+    fn erase<T: PartialOrd + Clone>(mut node: BNode<T>, key: &T) -> (Option<BNode<T>>, bool) {
         match cmp_key(&node.key, key) {
             Less => {
                 if let Some(right) = node.right.take() {
@@ -169,8 +182,9 @@ pub mod treap {
             Equal => match (node.left.take(), node.right.take()) {
                 (Some(left), Some(right)) => {
                     node.left = Some(left);
-                    let (right, min_key) = erase_min(right);
-                    node.key = min_key;
+                    node.key = min(&right).key.clone();
+                    let (right, removed) = erase(right, &node.key);
+                    assert!(removed);
                     node.right = right;
                     node.update_count();
                     (Some(node), true)
@@ -293,34 +307,6 @@ mod test {
                 set.insert(x);
             }
             assert_eq!(treap.len(), set.len());
-        }
-    }
-
-    #[test]
-    fn test_random_nth() {
-        let mut treap = Treap::new(81);
-        let mut rng = thread_rng();
-        let mut set = BTreeSet::new();
-        for _ in 0..1000 {
-            let x = rng.sample(Uniform::from(0..100000000));
-
-            if rng.sample(Uniform::from(0..10)) == 0 {
-                if set.contains(&x) {
-                    set.remove(&x);
-                    assert!(treap.erase(&x));
-                    assert!(!treap.erase(&x));
-                } else {
-                    assert!(!treap.contains(&x));
-                    assert!(!treap.erase(&x));
-                }
-            } else {
-                treap.insert(x);
-                set.insert(x);
-            }
-
-            for (i, &x) in set.iter().enumerate() {
-                assert_eq!(treap.nth(i), Some(&x));
-            }
         }
     }
 }
