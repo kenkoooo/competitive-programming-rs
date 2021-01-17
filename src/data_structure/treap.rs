@@ -55,11 +55,8 @@ pub mod treap {
         pub fn len(&self) -> usize {
             count(&self.root)
         }
-        pub fn nth(&self, n: usize) -> &T {
-            match rank(&self.root, n) {
-                Some(r) => &r.key,
-                None => panic!(),
-            }
+        pub fn nth(&self, n: usize) -> Option<&T> {
+            rank(&self.root, n).as_ref().map(|node| &node.key)
         }
     }
 
@@ -70,7 +67,10 @@ pub mod treap {
             }
         }
         pub fn contains(&self, key: &T) -> bool {
-            find(&self.root, key).is_some()
+            self.index_of(key).is_some()
+        }
+        pub fn index_of(&self, key: &T) -> Option<usize> {
+            find(&self.root, key)
         }
     }
     impl<T: PartialOrd + Clone> Treap<T> {
@@ -271,7 +271,7 @@ mod test {
         }
 
         for i in 0..max {
-            assert_eq!(treap.nth(i), &(i * 2));
+            assert_eq!(treap.nth(i), Some(&(i * 2)));
         }
     }
 
@@ -306,6 +306,10 @@ mod test {
             }
 
             assert_eq!(treap.len(), set.len());
+            for (i, x) in set.iter().enumerate() {
+                assert_eq!(treap.nth(i), Some(x));
+                assert_eq!(treap.index_of(x), Some(i));
+            }
         }
     }
 }
