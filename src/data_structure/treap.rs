@@ -48,12 +48,8 @@ pub mod treap {
             self.root = None
         }
 
-        pub fn len(&self) -> usize {
-            count(&self.root)
-        }
-
         pub fn is_empty(&self) -> bool {
-            self.len() == 0
+            count(&self.root) == 0
         }
         pub fn nth(&self, n: usize) -> Option<&T> {
             rank(&self.root, n).as_ref().map(|r| &r.key)
@@ -109,29 +105,30 @@ pub mod treap {
     }
 
     fn insert<T: PartialOrd>(node: Option<BNode<T>>, key: T, rand: &mut XorShift) -> BNode<T> {
-        if let Some(mut node) = node {
-            match cmp_key(&node.key, &key) {
-                Less => {
-                    let next_right = insert(node.right.take(), key, rand);
-                    if next_right.priority < node.priority {
-                        node = rotate_left(node, next_right);
-                    } else {
-                        node.right = Some(next_right);
+        match node {
+            None => Node::new(key, rand.next()),
+            Some(mut node) => {
+                match cmp_key(&node.key, &key) {
+                    Less => {
+                        let next_right = insert(node.right.take(), key, rand);
+                        if next_right.priority < node.priority {
+                            node = rotate_left(node, next_right);
+                        } else {
+                            node.right = Some(next_right);
+                        }
+                    }
+                    _ => {
+                        let next_left = insert(node.left.take(), key, rand);
+                        if next_left.priority < node.priority {
+                            node = rotate_right(node, next_left);
+                        } else {
+                            node.left = Some(next_left);
+                        }
                     }
                 }
-                _ => {
-                    let next_left = insert(node.left.take(), key, rand);
-                    if next_left.priority < node.priority {
-                        node = rotate_right(node, next_left);
-                    } else {
-                        node.left = Some(next_left);
-                    }
-                }
+                node.update_count();
+                node
             }
-            node.update_count();
-            node
-        } else {
-            Node::new(key, rand.next())
         }
     }
 
@@ -208,33 +205,29 @@ pub mod treap {
 
 #[cfg(test)]
 mod test {
-    use super::treap::{self, *};
+    use super::*;
 
     #[test]
     fn test_treap_insert_erase() {
-        let mut treap = Treap::new(71);
+        let mut treap = treap::Treap::new(71);
         let max = 10_000_000;
 
         for i in 0..max {
             assert!(!treap.contains(&i));
-            assert_eq!(treap.len(), i);
             treap.insert(i);
             assert!(treap.contains(&i));
-            assert_eq!(treap.len(), i + 1);
         }
 
         for i in 0..max {
             assert!(treap.contains(&i));
-            assert_eq!(treap.len(), max - i);
             treap.erase(&i);
             assert!(!treap.contains(&i));
-            assert_eq!(treap.len(), max - i - 1);
         }
     }
 
     #[test]
     fn test_treap_nth() {
-        let mut treap = Treap::new(71);
+        let mut treap = treap::Treap::new(71);
 
         let max = 10_000_000;
         for i in 0..max {
@@ -244,14 +237,5 @@ mod test {
         for i in 0..max {
             assert_eq!(treap.nth(i).unwrap(), &(i * 2));
         }
-    }
-
-    #[test]
-    fn test_edge_case() {
-        let mut treap = Treap::new(10);
-        treap.insert(0);
-        assert_eq!(treap.len(), 1);
-        treap.insert(0);
-        assert_eq!(treap.len(), 1);
     }
 }
