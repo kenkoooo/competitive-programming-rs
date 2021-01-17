@@ -108,12 +108,11 @@ pub mod treap {
         Some(r)
     }
 
-    fn rotate_right<T>(mut node: BNode<T>) -> Option<BNode<T>> {
-        let mut l = node.left.take().unwrap();
-        node.left = l.right.take();
+    fn rotate_right<T>(mut node: BNode<T>, mut left: BNode<T>) -> BNode<T> {
+        node.left = left.right.take();
         node.update();
-        l.right = Some(node);
-        Some(l)
+        left.right = Some(node);
+        left
     }
 
     fn insert<T: PartialOrd>(node: Option<BNode<T>>, key: T, rand: &mut XorShift) -> BNode<T> {
@@ -126,9 +125,11 @@ pub mod treap {
                     }
                 }
                 _ => {
-                    node.left = Some(insert(node.left.take(), key, rand));
-                    if priority(&node.left) < node.priority {
-                        node = rotate_right(node).unwrap();
+                    let left = insert(node.left.take(), key, rand);
+                    if left.priority < node.priority {
+                        node = rotate_right(node, left);
+                    } else {
+                        node.left = Some(left);
                     }
                 }
             }
