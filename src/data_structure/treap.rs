@@ -54,28 +54,27 @@ pub mod treap {
         pub fn len(&self) -> usize {
             count(&self.root)
         }
-    }
-
-    impl<T: PartialOrd + Clone> Treap<T> {
-        pub fn insert(&mut self, key: T) {
-            if !self.contains(&key) {
-                self.root = insert(self.root.take(), key, &mut self.random_state);
-            }
-        }
-
-        pub fn contains(&self, key: &T) -> bool {
-            find(&self.root, key).is_some()
-        }
-
-        pub fn erase(&mut self, key: &T) {
-            self.root = erase(self.root.take(), key);
-        }
-
         pub fn nth(&self, n: usize) -> &T {
             match rank(&self.root, n) {
                 Some(r) => &r.key,
                 None => panic!(),
             }
+        }
+    }
+
+    impl<T: PartialOrd> Treap<T> {
+        pub fn insert(&mut self, key: T) {
+            if !self.contains(&key) {
+                self.root = insert(self.root.take(), key, &mut self.random_state);
+            }
+        }
+        pub fn contains(&self, key: &T) -> bool {
+            find(&self.root, key).is_some()
+        }
+    }
+    impl<T: PartialOrd + Clone> Treap<T> {
+        pub fn erase(&mut self, key: &T) {
+            self.root = erase(self.root.take(), key);
         }
     }
 
@@ -163,10 +162,7 @@ pub mod treap {
         }
     }
 
-    fn erase<T: PartialOrd>(node: Option<BNode<T>>, key: &T) -> Option<BNode<T>>
-    where
-        T: Clone,
-    {
+    fn erase<T: PartialOrd + Clone>(node: Option<BNode<T>>, key: &T) -> Option<BNode<T>> {
         match node {
             None => panic!(),
             Some(mut node) => match node.key.partial_cmp(key).unwrap() {
