@@ -141,13 +141,6 @@ pub mod treap {
         }
     }
 
-    fn priority<T>(node: &Option<BNode<T>>) -> u32 {
-        match *node {
-            None => panic!(),
-            Some(ref node) => node.priority,
-        }
-    }
-
     fn min<T>(node: &BNode<T>) -> &BNode<T> {
         if let Some(left) = node.left.as_ref() {
             min(left)
