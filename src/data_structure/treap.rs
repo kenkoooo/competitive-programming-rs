@@ -56,7 +56,11 @@ pub mod treap {
             count(&self.root)
         }
         pub fn nth(&self, n: usize) -> Option<&T> {
-            rank(&self.root, n).as_ref().map(|node| &node.key)
+            if let Some(root) = self.root.as_ref() {
+                rank(root, n).as_ref().map(|node| &node.key)
+            } else {
+                None
+            }
         }
     }
 
@@ -195,17 +199,24 @@ pub mod treap {
         }
     }
 
-    fn rank<T>(node: &Option<BNode<T>>, r: usize) -> &Option<BNode<T>> {
-        match node {
-            Some(c) => {
-                let left = count(&c.left);
-                match left.cmp(&r) {
-                    Equal => node,
-                    Less => rank(&c.right, r - left - 1),
-                    Greater => rank(&c.left, r),
+    fn rank<T>(node: &BNode<T>, nth: usize) -> Option<&BNode<T>> {
+        let left_count = node.left.as_ref().map(|left| left.count).unwrap_or(0);
+        match left_count.cmp(&nth) {
+            Equal => Some(node),
+            Less => {
+                if let Some(right) = node.right.as_ref() {
+                    rank(right, nth - left_count - 1)
+                } else {
+                    None
                 }
             }
-            None => panic!(),
+            Greater => {
+                if let Some(left) = node.left.as_ref() {
+                    rank(left, nth)
+                } else {
+                    unreachable!()
+                }
+            }
         }
     }
 
