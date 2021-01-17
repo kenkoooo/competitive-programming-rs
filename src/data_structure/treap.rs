@@ -1,6 +1,7 @@
 pub mod treap {
     use std::cmp::Ordering;
     use std::cmp::Ordering::*;
+    use std::mem::swap;
 
     type BNode<T> = Box<Node<T>>;
 
@@ -77,14 +78,14 @@ pub mod treap {
             find(&self.root, key)
         }
     }
-    impl<T: PartialOrd + Clone> Treap<T> {
-        pub fn erase(&mut self, key: &T) -> bool {
+    impl<T: PartialOrd> Treap<T> {
+        pub fn erase(&mut self, key: &T) -> Option<T> {
             if let Some(root) = self.root.take() {
-                let (root, removed) = erase(root, key);
+                let (root, removed) = erase(root, EraseOp::ByKey(key));
                 self.root = root;
                 removed
             } else {
-                false
+                None
             }
         }
     }
@@ -155,50 +156,51 @@ pub mod treap {
         }
     }
 
-    fn min_node<T>(node: &BNode<T>) -> &BNode<T> {
-        if let Some(left) = node.left.as_ref() {
-            min_node(left)
-        } else {
-            node
-        }
+    enum EraseOp<'a, T> {
+        ByKey(&'a T),
+        Minimum,
     }
 
-    fn erase<T: PartialOrd + Clone>(mut node: BNode<T>, key: &T) -> (Option<BNode<T>>, bool) {
-        match cmp(&node.key, key) {
+    fn erase<T: PartialOrd>(mut node: BNode<T>, op: EraseOp<T>) -> (Option<BNode<T>>, Option<T>) {
+        let cmp = match op {
+            EraseOp::ByKey(key) => cmp(&node.key, key),
+            EraseOp::Minimum => Less,
+        };
+        match cmp {
             Less => {
                 if let Some(right) = node.right.take() {
-                    let (right, removed) = erase(right, key);
+                    let (right, removed) = erase(right, op);
                     node.right = right;
                     node.update_count();
                     (Some(node), removed)
                 } else {
-                    (Some(node), false)
+                    (Some(node), None)
                 }
             }
             Greater => {
                 if let Some(left) = node.left.take() {
-                    let (left, removed) = erase(left, key);
+                    let (left, removed) = erase(left, op);
                     node.left = left;
                     node.update_count();
                     (Some(node), removed)
                 } else {
-                    (Some(node), false)
+                    (Some(node), None)
                 }
             }
             Equal => match (node.left.take(), node.right.take()) {
                 (Some(left), Some(right)) => {
-                    let right_min_key = min_node(&right).key.clone();
-                    let (right, removed) = erase(right, &right_min_key);
-                    assert!(removed);
-                    node.key = right_min_key;
+                    let (right, removed) = erase(right, EraseOp::Minimum);
+                    let mut right_min_key = removed.expect("");
+                    swap(&mut right_min_key, &mut node.key);
+                    let removed_value = right_min_key;
                     node.right = right;
                     node.left = Some(left);
                     node.update_count();
-                    (Some(node), true)
+                    (Some(node), Some(removed_value))
                 }
-                (None, Some(right)) => (Some(right), true),
-                (Some(left), None) => (Some(left), true),
-                _ => (None, true),
+                (None, Some(right)) => (Some(right), Some(node.key)),
+                (Some(left), None) => (Some(left), Some(node.key)),
+                _ => (None, Some(node.key)),
             },
         }
     }
@@ -271,8 +273,8 @@ mod test {
 
         for i in 0..max {
             assert!(treap.contains(&i));
-            assert!(treap.erase(&i));
-            assert!(!treap.erase(&i));
+            assert_eq!(treap.erase(&i), Some(i));
+            assert_eq!(treap.erase(&i), None);
             assert!(!treap.contains(&i));
         }
     }
@@ -305,8 +307,8 @@ mod test {
                 if set.contains(&x) {
                     assert!(treap.contains(&x));
                     set.remove(&x);
-                    assert!(treap.erase(&x));
-                    assert!(!treap.erase(&x));
+                    assert_eq!(treap.erase(&x), Some(x));
+                    assert_eq!(treap.erase(&x), None);
                     assert!(!treap.contains(&x));
                 } else {
                     assert!(!treap.contains(&x));
