@@ -100,12 +100,11 @@ pub mod treap {
         }
     }
 
-    fn rotate_left<T>(mut node: BNode<T>) -> Option<BNode<T>> {
-        let mut r = node.right.take().unwrap();
-        node.right = r.left.take();
+    fn rotate_left<T>(mut node: BNode<T>, mut right: BNode<T>) -> BNode<T> {
+        node.right = right.left.take();
         node.update();
-        r.left = Some(node);
-        Some(r)
+        right.left = Some(node);
+        right
     }
 
     fn rotate_right<T>(mut node: BNode<T>, mut left: BNode<T>) -> BNode<T> {
@@ -119,9 +118,11 @@ pub mod treap {
         if let Some(mut node) = node {
             match cmp(&node.key, &key) {
                 Less => {
-                    node.right = Some(insert(node.right.take(), key, rand));
-                    if priority(&node.right) < node.priority {
-                        node = rotate_left(node).unwrap();
+                    let right = insert(node.right.take(), key, rand);
+                    if right.priority < node.priority {
+                        node = rotate_left(node, right);
+                    } else {
+                        node.right = Some(right);
                     }
                 }
                 _ => {
