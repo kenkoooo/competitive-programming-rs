@@ -1,4 +1,5 @@
 pub mod treap {
+    use std::cmp::Ordering;
     use std::cmp::Ordering::*;
 
     type BNode<T> = Box<Node<T>>;
@@ -200,13 +201,18 @@ pub mod treap {
             Some(c) => {
                 let left = count(&c.left);
                 match left.cmp(&r) {
-                    std::cmp::Ordering::Equal => node,
-                    std::cmp::Ordering::Less => rank(&c.right, r - left - 1),
-                    std::cmp::Ordering::Greater => rank(&c.left, r),
+                    Equal => node,
+                    Less => rank(&c.right, r - left - 1),
+                    Greater => rank(&c.left, r),
                 }
             }
             None => panic!(),
         }
+    }
+
+    fn cmp<T: PartialOrd>(key1: &T, key2: &T) -> Ordering {
+        key1.partial_cmp(key2)
+            .expect("unsortable data is not supported")
     }
 
     #[derive(Debug)]
