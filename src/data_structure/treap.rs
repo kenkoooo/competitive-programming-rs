@@ -51,8 +51,11 @@ pub mod treap {
         pub fn is_empty(&self) -> bool {
             count(&self.root) == 0
         }
-        pub fn nth(&self, n: usize) -> Option<&T> {
-            rank(&self.root, n).as_ref().map(|r| &r.key)
+        pub fn nth(&self, n: usize) -> &T {
+            match rank(&self.root, n) {
+                Some(r) => &r.key,
+                None => panic!(),
+            }
         }
     }
 
@@ -243,7 +246,7 @@ mod test {
         }
 
         for i in 0..max {
-            assert_eq!(treap.nth(i).unwrap(), &(i * 2));
+            assert_eq!(treap.nth(i), &(i * 2));
         }
     }
 }
