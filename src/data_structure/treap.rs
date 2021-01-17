@@ -82,7 +82,7 @@ pub mod treap {
     fn find<T: PartialOrd>(node: &Option<BNode<T>>, key: &T) -> Option<usize> {
         match node {
             None => None,
-            Some(node) => match node.key.partial_cmp(key).unwrap() {
+            Some(node) => match cmp(&node.key, key) {
                 Equal => Some(count(&node.left)),
                 Greater => find(&node.left, key),
                 Less => match find(&node.right, key) {
