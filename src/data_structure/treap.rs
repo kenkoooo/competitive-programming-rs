@@ -53,7 +53,11 @@ pub mod treap {
         }
 
         pub fn is_empty(&self) -> bool {
-            count(&self.root) == 0
+            self.len() == 0
+        }
+
+        pub fn len(&self) -> usize {
+            count(&self.root)
         }
 
         pub fn insert(&mut self, key: T) {
@@ -231,11 +235,14 @@ pub mod treap {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use super::treap::*;
+    use rand::distributions::Uniform;
+    use rand::{thread_rng, Rng};
+    use std::collections::BTreeSet;
 
     #[test]
     fn test_treap_insert_erase() {
-        let mut treap = treap::Treap::new(71);
+        let mut treap = Treap::new(71);
         let max = 1000000;
 
         for i in 0..max {
@@ -253,7 +260,7 @@ mod test {
 
     #[test]
     fn test_treap_nth() {
-        let mut treap = treap::Treap::new(71);
+        let mut treap = Treap::new(71);
 
         let max = 100000;
         for i in 0..max {
@@ -262,6 +269,40 @@ mod test {
 
         for i in 0..max {
             assert_eq!(treap.nth(i), &(i * 2));
+        }
+    }
+
+    #[test]
+    fn test_random_insertion() {
+        let mut rng = thread_rng();
+        let mut set = BTreeSet::new();
+        let mut treap = Treap::new(42);
+        for _ in 0..2000 {
+            let x = rng.gen::<i64>();
+
+            if rng.sample(Uniform::from(0..10)) == 0 {
+                // remove
+                if set.contains(&x) {
+                    assert!(treap.contains(&x));
+                    set.remove(&x);
+                    treap.erase(&x);
+                    assert!(!treap.contains(&x));
+                } else {
+                    assert!(!treap.contains(&x));
+                }
+            } else {
+                // insert
+                if set.contains(&x) {
+                    assert!(treap.contains(&x));
+                } else {
+                    assert!(!treap.contains(&x));
+                    treap.insert(x);
+                    set.insert(x);
+                    assert!(treap.contains(&x));
+                }
+            }
+
+            assert_eq!(treap.len(), set.len());
         }
     }
 }
