@@ -14,14 +14,14 @@ pub mod treap {
     }
 
     impl<T> Node<T> {
-        fn new(key: T, priority: u32) -> Option<BNode<T>> {
-            Some(Box::new(Node {
+        fn new(key: T, priority: u32) -> BNode<T> {
+            Box::new(Node {
                 left: None,
                 right: None,
                 key,
                 priority,
                 count: 1,
-            }))
+            })
         }
 
         fn update(&mut self) {
@@ -121,26 +121,25 @@ pub mod treap {
         key: T,
         rand: &mut XorShift,
     ) -> Option<BNode<T>> {
-        match node {
-            None => Node::new(key, rand.next()),
-            Some(mut node) => {
-                match cmp(&node.key, &key) {
-                    Less => {
-                        node.right = insert(node.right.take(), key, rand);
-                        if priority(&node.right) < node.priority {
-                            node = rotate_left(node).unwrap();
-                        }
-                    }
-                    _ => {
-                        node.left = insert(node.left.take(), key, rand);
-                        if priority(&node.left) < node.priority {
-                            node = rotate_right(node).unwrap();
-                        }
+        if let Some(mut node) = node {
+            match cmp(&node.key, &key) {
+                Less => {
+                    node.right = insert(node.right.take(), key, rand);
+                    if priority(&node.right) < node.priority {
+                        node = rotate_left(node).unwrap();
                     }
                 }
-                node.update();
-                Some(node)
+                _ => {
+                    node.left = insert(node.left.take(), key, rand);
+                    if priority(&node.left) < node.priority {
+                        node = rotate_right(node).unwrap();
+                    }
+                }
             }
+            node.update();
+            Some(node)
+        } else {
+            Some(Node::new(key, rand.next()))
         }
     }
 
