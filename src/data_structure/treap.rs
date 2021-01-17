@@ -1,19 +1,19 @@
 pub mod treap {
     use std::cmp::Ordering::*;
 
-    type Link<T> = Option<Box<Node<T>>>;
+    type BNode<T> = Box<Node<T>>;
 
     #[derive(Debug)]
     struct Node<T> {
-        left: Link<T>,
-        right: Link<T>,
+        left: Option<BNode<T>>,
+        right: Option<BNode<T>>,
         key: T,
         priority: u32,
         count: usize,
     }
 
     impl<T> Node<T> {
-        fn new(key: T, priority: u32) -> Link<T> {
+        fn new(key: T, priority: u32) -> Option<BNode<T>> {
             Some(Box::new(Node {
                 left: None,
                 right: None,
@@ -34,7 +34,7 @@ pub mod treap {
     #[derive(Debug)]
     pub struct Treap<T> {
         random_state: XorShift,
-        root: Link<T>,
+        root: Option<BNode<T>>,
     }
 
     impl<T> Treap<T> {
@@ -79,7 +79,7 @@ pub mod treap {
         }
     }
 
-    fn find<T: PartialOrd>(node: &Link<T>, key: &T) -> Option<usize> {
+    fn find<T: PartialOrd>(node: &Option<BNode<T>>, key: &T) -> Option<usize> {
         match node {
             None => None,
             Some(node) => match node.key.partial_cmp(key).unwrap() {
@@ -93,14 +93,14 @@ pub mod treap {
         }
     }
 
-    fn count<T>(node: &Link<T>) -> usize {
+    fn count<T>(node: &Option<BNode<T>>) -> usize {
         match node {
             None => 0,
             Some(node) => node.count,
         }
     }
 
-    fn rotate_left<T>(node: Link<T>) -> Link<T> {
+    fn rotate_left<T>(node: Option<BNode<T>>) -> Option<BNode<T>> {
         let mut node = node.unwrap();
         let mut r = node.right.take().unwrap();
         node.right = r.left.take();
@@ -109,7 +109,7 @@ pub mod treap {
         Some(r)
     }
 
-    fn rotate_right<T>(node: Link<T>) -> Link<T> {
+    fn rotate_right<T>(node: Option<BNode<T>>) -> Option<BNode<T>> {
         let mut node = node.unwrap();
         let mut l = node.left.take().unwrap();
         node.left = l.right.take();
@@ -118,7 +118,11 @@ pub mod treap {
         Some(l)
     }
 
-    fn insert<T: PartialOrd>(node: Link<T>, key: T, rand: &mut XorShift) -> Link<T> {
+    fn insert<T: PartialOrd>(
+        node: Option<BNode<T>>,
+        key: T,
+        rand: &mut XorShift,
+    ) -> Option<BNode<T>> {
         match node {
             None => Node::new(key, rand.next()),
             Some(mut node) => {
@@ -142,14 +146,14 @@ pub mod treap {
         }
     }
 
-    fn priority<T>(node: &Link<T>) -> u32 {
+    fn priority<T>(node: &Option<BNode<T>>) -> u32 {
         match *node {
             None => panic!(),
             Some(ref node) => node.priority,
         }
     }
 
-    fn min<T>(node: &Link<T>) -> &Link<T> {
+    fn min<T>(node: &Option<BNode<T>>) -> &Option<BNode<T>> {
         match node {
             Some(x) => match x.left {
                 Some(_) => min(&x.left),
@@ -159,7 +163,7 @@ pub mod treap {
         }
     }
 
-    fn erase<T: PartialOrd>(node: Link<T>, key: &T) -> Link<T>
+    fn erase<T: PartialOrd>(node: Option<BNode<T>>, key: &T) -> Option<BNode<T>>
     where
         T: Clone,
     {
@@ -195,7 +199,7 @@ pub mod treap {
         }
     }
 
-    fn rank<T>(node: &Link<T>, r: usize) -> &Link<T> {
+    fn rank<T>(node: &Option<BNode<T>>, r: usize) -> &Option<BNode<T>> {
         match node {
             Some(c) => {
                 let left = count(&c.left);
