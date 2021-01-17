@@ -73,14 +73,8 @@ pub mod treap {
     }
 
     impl<T: PartialOrd + Clone> Treap<T> {
-        pub fn erase(&mut self, key: &T) -> bool {
-            if let Some(root) = self.root.take() {
-                let (root, removed) = erase(root, key);
-                self.root = root;
-                removed
-            } else {
-                false
-            }
+        pub fn erase(&mut self, key: &T) {
+            self.root = erase(self.root.take().unwrap(), key);
         }
     }
 
@@ -146,52 +140,29 @@ pub mod treap {
         }
     }
 
-    fn erase_min<T>(mut node: BNode<T>) -> (Option<BNode<T>>, T) {
-        if let Some(left) = node.left.take() {
-            let (left, removed_value) = erase_min(left);
-            node.left = left;
-            node.update_count();
-            (Some(node), removed_value)
-        } else {
-            (None, node.key)
-        }
-    }
-
-    fn erase<T: PartialOrd + Clone>(mut node: BNode<T>, key: &T) -> (Option<BNode<T>>, bool) {
+    fn erase<T: PartialOrd + Clone>(mut node: BNode<T>, key: &T) -> Option<BNode<T>> {
         match cmp_key(&node.key, key) {
             Less => {
-                if let Some(right) = node.right.take() {
-                    let (right, removed) = erase(right, key);
-                    node.right = right;
-                    node.update_count();
-                    (Some(node), removed)
-                } else {
-                    (Some(node), false)
-                }
+                node.right = erase(node.right.take().unwrap(), key);
+                node.update_count();
+                Some(node)
             }
             Greater => {
-                if let Some(left) = node.left.take() {
-                    let (left, removed) = erase(left, key);
-                    node.left = left;
-                    node.update_count();
-                    (Some(node), removed)
-                } else {
-                    (Some(node), false)
-                }
+                node.left = erase(node.left.take().unwrap(), key);
+                node.update_count();
+                Some(node)
             }
             Equal => match (node.left.take(), node.right.take()) {
                 (Some(left), Some(right)) => {
                     node.left = Some(left);
                     node.key = min(&right).key.clone();
-                    let (right, removed) = erase(right, &node.key);
-                    assert!(removed);
-                    node.right = right;
+                    node.right = erase(right, &node.key);
                     node.update_count();
-                    (Some(node), true)
+                    Some(node)
                 }
-                (None, Some(right)) => (Some(right), true),
-                (Some(left), None) => (Some(left), true),
-                (None, None) => (None, true),
+                (None, Some(right)) => Some(right),
+                (Some(left), None) => Some(left),
+                (None, None) => None,
             },
         }
     }
@@ -208,7 +179,7 @@ pub mod treap {
 
     fn cmp_key<T: PartialOrd>(key1: &T, key2: &T) -> std::cmp::Ordering {
         key1.partial_cmp(key2)
-            .expect("non-sortable data is not supported.")
+            .expect("Unsortable data is not supported.")
     }
 
     #[derive(Debug)]
@@ -235,14 +206,11 @@ pub mod treap {
 #[cfg(test)]
 mod test {
     use super::treap::*;
-    use rand::distributions::Uniform;
-    use rand::{thread_rng, Rng};
-    use std::collections::BTreeSet;
 
     #[test]
     fn test_treap_insert_erase() {
         let mut treap = Treap::new(71);
-        let max = 100_000;
+        let max = 10_000_000;
 
         for i in 0..max {
             assert!(!treap.contains(&i));
@@ -255,8 +223,7 @@ mod test {
         for i in 0..max {
             assert!(treap.contains(&i));
             assert_eq!(treap.len(), max - i);
-            assert!(treap.erase(&i));
-            assert!(!treap.erase(&i));
+            treap.erase(&i);
             assert!(!treap.contains(&i));
             assert_eq!(treap.len(), max - i - 1);
         }
@@ -266,7 +233,7 @@ mod test {
     fn test_treap_nth() {
         let mut treap = Treap::new(71);
 
-        let max = 100_000;
+        let max = 10_000_000;
         for i in 0..max {
             treap.insert(i * 2);
         }
@@ -283,30 +250,5 @@ mod test {
         assert_eq!(treap.len(), 1);
         treap.insert(0);
         assert_eq!(treap.len(), 1);
-    }
-
-    #[test]
-    fn test_random_insertion() {
-        let mut treap = Treap::new(81);
-        let mut rng = thread_rng();
-        let mut set = BTreeSet::new();
-        for _ in 0..100_000 {
-            let x = rng.sample(Uniform::from(0..100000000));
-
-            if rng.sample(Uniform::from(0..10)) == 0 {
-                if set.contains(&x) {
-                    set.remove(&x);
-                    assert!(treap.erase(&x));
-                    assert!(!treap.erase(&x));
-                } else {
-                    assert!(!treap.contains(&x));
-                    assert!(!treap.erase(&x));
-                }
-            } else {
-                treap.insert(x);
-                set.insert(x);
-            }
-            assert_eq!(treap.len(), set.len());
-        }
     }
 }
