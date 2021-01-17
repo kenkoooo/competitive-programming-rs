@@ -24,7 +24,7 @@ pub mod treap {
             })
         }
 
-        fn update(&mut self) {
+        fn update_count(&mut self) {
             self.count = 1 + count(&self.left) + count(&self.right);
         }
     }
@@ -102,14 +102,14 @@ pub mod treap {
 
     fn rotate_left<T>(mut node: BNode<T>, mut right: BNode<T>) -> BNode<T> {
         node.right = right.left.take();
-        node.update();
+        node.update_count();
         right.left = Some(node);
         right
     }
 
     fn rotate_right<T>(mut node: BNode<T>, mut left: BNode<T>) -> BNode<T> {
         node.left = left.right.take();
-        node.update();
+        node.update_count();
         left.right = Some(node);
         left
     }
@@ -134,7 +134,7 @@ pub mod treap {
                     }
                 }
             }
-            node.update();
+            node.update_count();
             node
         } else {
             Node::new(key, rand.next())
@@ -169,18 +169,18 @@ pub mod treap {
                         let right_min_key = min(node.right.as_ref().unwrap()).key.clone();
                         node.key = right_min_key;
                         node.right = erase(node.right.take(), &node.key);
-                        node.update();
+                        node.update_count();
                         Some(node)
                     }
                 }
                 Less => {
                     node.right = erase(node.right.take(), key);
-                    node.update();
+                    node.update_count();
                     Some(node)
                 }
                 Greater => {
                     node.left = erase(node.left.take(), key);
-                    node.update();
+                    node.update_count();
                     Some(node)
                 }
             },
