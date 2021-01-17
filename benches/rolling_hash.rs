@@ -2,20 +2,16 @@
 extern crate test;
 
 use competitive_programming_rs::string::rolling_hash::rolling_hash;
-use rand::distributions::{IndependentSample, Range};
-use rand::{SeedableRng, StdRng};
+use rand::distributions::Uniform;
+use rand::prelude::*;
 use test::Bencher;
 
 const BASE: u64 = 1_000_000_007;
 
 #[bench]
 fn bench_rolling_hash_construction(b: &mut Bencher) {
-    let seed: &[_] = &[1, 2, 3, 4];
-    let mut rng: StdRng = SeedableRng::from_seed(seed);
+    let mut rng = StdRng::seed_from_u64(1234);
     let n = 100000;
-    let between = Range::new(0, 26);
-    let t = (0..n)
-        .map(|_| between.ind_sample(&mut rng) as u8 + 'a' as u8)
-        .collect::<Vec<_>>();
+    let t: Vec<u8> = (0..n).map(|_| rng.sample(Uniform::from(0..26))).collect();
     b.iter(|| rolling_hash::RollingHash::new(&t, BASE));
 }
