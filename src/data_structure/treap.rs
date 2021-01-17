@@ -151,30 +151,26 @@ pub mod treap {
         }
     }
 
-    fn min<T>(node: &Option<BNode<T>>) -> &Option<BNode<T>> {
-        match node {
-            Some(x) => match x.left {
-                Some(_) => min(&x.left),
-                None => node,
-            },
-            None => panic!(),
+    fn min<T>(node: &BNode<T>) -> &BNode<T> {
+        if let Some(left) = node.left.as_ref() {
+            min(left)
+        } else {
+            node
         }
     }
 
     fn erase<T: PartialOrd + Clone>(node: Option<BNode<T>>, key: &T) -> Option<BNode<T>> {
         match node {
             None => panic!(),
-            Some(mut node) => match node.key.partial_cmp(key).unwrap() {
+            Some(mut node) => match cmp(&node.key, key) {
                 Equal => {
                     if node.left.is_none() {
                         node.right
                     } else if node.right.is_none() {
                         node.left
                     } else {
-                        node.key = match min(&node.right) {
-                            Some(m) => m.key.clone(),
-                            None => panic!(),
-                        };
+                        let right_min_key = min(node.right.as_ref().unwrap()).key.clone();
+                        node.key = right_min_key;
                         node.right = erase(node.right.take(), &node.key);
                         node.update();
                         Some(node)
