@@ -1,19 +1,19 @@
 pub mod treap {
     use std::cmp::Ordering::*;
 
-    type BNode<T> = Box<Node<T>>;
+    type Link<T> = Option<Box<Node<T>>>;
 
     #[derive(Debug)]
     struct Node<T> {
-        left: Option<BNode<T>>,
-        right: Option<BNode<T>>,
+        left: Link<T>,
+        right: Link<T>,
         key: T,
         priority: u32,
         count: usize,
     }
 
     impl<T> Node<T> {
-        fn new(key: T, priority: u32) -> Option<BNode<T>> {
+        fn new(key: T, priority: u32) -> Link<T> {
             Some(Box::new(Node {
                 left: None,
                 right: None,
@@ -34,16 +34,20 @@ pub mod treap {
     #[derive(Debug)]
     pub struct Treap<T> {
         random_state: XorShift,
-        root: Option<BNode<T>>,
+        root: Link<T>,
     }
 
-    impl<T> Treap<T> {
+    impl<T: PartialOrd> Treap<T>
+    where
+        T: Clone,
+    {
         pub fn new(seed: u32) -> Self {
             Treap {
                 random_state: XorShift { state: seed },
                 root: None,
             }
         }
+
         pub fn clear(&mut self) {
             self.root = None
         }
@@ -51,15 +55,7 @@ pub mod treap {
         pub fn is_empty(&self) -> bool {
             count(&self.root) == 0
         }
-        pub fn nth(&self, n: usize) -> &T {
-            match rank(&self.root, n) {
-                Some(r) => &r.key,
-                None => panic!(),
-            }
-        }
-    }
 
-    impl<T: PartialOrd> Treap<T> {
         pub fn insert(&mut self, key: T) {
             if !self.contains(&key) {
                 self.root = insert(self.root.take(), key, &mut self.random_state);
@@ -69,15 +65,20 @@ pub mod treap {
         pub fn contains(&self, key: &T) -> bool {
             find(&self.root, key).is_some()
         }
-    }
 
-    impl<T: PartialOrd + Clone> Treap<T> {
         pub fn erase(&mut self, key: &T) {
             self.root = erase(self.root.take(), key);
         }
+
+        pub fn nth(&self, n: usize) -> &T {
+            match rank(&self.root, n) {
+                Some(r) => &r.key,
+                None => panic!(),
+            }
+        }
     }
 
-    fn find<T: PartialOrd>(node: &Option<BNode<T>>, key: &T) -> Option<usize> {
+    fn find<T: PartialOrd>(node: &Link<T>, key: &T) -> Option<usize> {
         match node {
             None => None,
             Some(node) => match node.key.partial_cmp(key).unwrap() {
@@ -91,14 +92,14 @@ pub mod treap {
         }
     }
 
-    fn count<T>(node: &Option<BNode<T>>) -> usize {
+    fn count<T>(node: &Link<T>) -> usize {
         match node {
             None => 0,
             Some(node) => node.count,
         }
     }
 
-    fn rotate_left<T>(node: Option<BNode<T>>) -> Option<BNode<T>> {
+    fn rotate_left<T>(node: Link<T>) -> Link<T> {
         let mut node = node.unwrap();
         let mut r = node.right.take().unwrap();
         node.right = r.left.take();
@@ -107,7 +108,7 @@ pub mod treap {
         Some(r)
     }
 
-    fn rotate_right<T>(node: Option<BNode<T>>) -> Option<BNode<T>> {
+    fn rotate_right<T>(node: Link<T>) -> Link<T> {
         let mut node = node.unwrap();
         let mut l = node.left.take().unwrap();
         node.left = l.right.take();
@@ -116,11 +117,7 @@ pub mod treap {
         Some(l)
     }
 
-    fn insert<T: PartialOrd>(
-        node: Option<BNode<T>>,
-        key: T,
-        rand: &mut XorShift,
-    ) -> Option<BNode<T>> {
+    fn insert<T: PartialOrd>(node: Link<T>, key: T, rand: &mut XorShift) -> Link<T> {
         match node {
             None => Node::new(key, rand.next()),
             Some(mut node) => {
@@ -144,52 +141,70 @@ pub mod treap {
         }
     }
 
-    fn priority<T>(node: &Option<BNode<T>>) -> u32 {
-        node.as_ref().unwrap().priority
-    }
-
-    fn min<T>(node: &Option<BNode<T>>) -> &Option<BNode<T>> {
-        let x = node.as_ref().unwrap();
-        match x.left {
-            Some(_) => min(&x.left),
-            None => node,
+    fn priority<T>(node: &Link<T>) -> u32 {
+        match *node {
+            None => panic!(),
+            Some(ref node) => node.priority,
         }
     }
 
-    fn erase<T: PartialOrd + Clone>(node: Option<BNode<T>>, key: &T) -> Option<BNode<T>> {
-        let mut node = node.unwrap();
-        match node.key.partial_cmp(key).unwrap() {
-            Equal if node.left.is_none() => node.right,
-            Equal if node.right.is_none() => node.left,
-            Equal => {
-                node.key = match min(&node.right) {
-                    Some(m) => m.key.clone(),
-                    None => unreachable!(),
-                };
-                node.right = erase(node.right.take(), &node.key);
-                node.update();
-                Some(node)
-            }
-            Less => {
-                node.right = erase(node.right.take(), key);
-                node.update();
-                Some(node)
-            }
-            Greater => {
-                node.left = erase(node.left.take(), key);
-                node.update();
-                Some(node)
-            }
+    fn min<T>(node: &Link<T>) -> &Link<T> {
+        match node {
+            Some(x) => match x.left {
+                Some(_) => min(&x.left),
+                None => node,
+            },
+            None => panic!(),
         }
     }
 
-    fn rank<T>(node: &Option<BNode<T>>, r: usize) -> &Option<BNode<T>> {
-        let c = node.as_ref().unwrap();
-        let left = count(&c.left);
-        match left.cmp(&r) {
-            Equal => node,
-            Less => rank(&c.right, r - left - 1),
-            Greater => rank(&c.left, r),
+    fn erase<T: PartialOrd>(node: Link<T>, key: &T) -> Link<T>
+    where
+        T: Clone,
+    {
+        match node {
+            None => panic!(),
+            Some(mut node) => match node.key.partial_cmp(key).unwrap() {
+                Equal => {
+                    if node.left.is_none() {
+                        node.right
+                    } else if node.right.is_none() {
+                        node.left
+                    } else {
+                        node.key = match min(&node.right) {
+                            Some(m) => m.key.clone(),
+                            None => panic!(),
+                        };
+                        node.right = erase(node.right.take(), &node.key);
+                        node.update();
+                        Some(node)
+                    }
+                }
+                Less => {
+                    node.right = erase(node.right.take(), key);
+                    node.update();
+                    Some(node)
+                }
+                Greater => {
+                    node.left = erase(node.left.take(), key);
+                    node.update();
+                    Some(node)
+                }
+            },
+        }
+    }
+
+    fn rank<T>(node: &Link<T>, r: usize) -> &Link<T> {
+        match node {
+            Some(c) => {
+                let left = count(&c.left);
+                match left.cmp(&r) {
+                    std::cmp::Ordering::Equal => node,
+                    std::cmp::Ordering::Less => rank(&c.right, r - left - 1),
+                    std::cmp::Ordering::Greater => rank(&c.left, r),
+                }
+            }
+            None => panic!(),
         }
     }
 
