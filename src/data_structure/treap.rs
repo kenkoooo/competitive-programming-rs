@@ -74,8 +74,14 @@ pub mod treap {
         }
     }
     impl<T: PartialOrd + Clone> Treap<T> {
-        pub fn erase(&mut self, key: &T) {
-            self.root = erase(self.root.take().unwrap(), key);
+        pub fn erase(&mut self, key: &T) -> bool {
+            if let Some(root) = self.root.take() {
+                let (root, removed) = erase(root, key);
+                self.root = root;
+                removed
+            } else {
+                false
+            }
         }
     }
 
@@ -149,30 +155,42 @@ pub mod treap {
         }
     }
 
-    fn erase<T: PartialOrd + Clone>(mut node: BNode<T>, key: &T) -> Option<BNode<T>> {
+    fn erase<T: PartialOrd + Clone>(mut node: BNode<T>, key: &T) -> (Option<BNode<T>>, bool) {
         match cmp(&node.key, key) {
             Less => {
-                node.right = erase(node.right.take().unwrap(), key);
-                node.update_count();
-                Some(node)
+                if let Some(right) = node.right.take() {
+                    let (right, removed) = erase(right, key);
+                    node.right = right;
+                    node.update_count();
+                    (Some(node), removed)
+                } else {
+                    (Some(node), false)
+                }
             }
             Greater => {
-                node.left = erase(node.left.take().unwrap(), key);
-                node.update_count();
-                Some(node)
+                if let Some(left) = node.left.take() {
+                    let (left, removed) = erase(left, key);
+                    node.left = left;
+                    node.update_count();
+                    (Some(node), removed)
+                } else {
+                    (Some(node), false)
+                }
             }
             Equal => match (node.left.take(), node.right.take()) {
                 (Some(left), Some(right)) => {
                     let right_min_key = min(&right).key.clone();
+                    let (right, removed) = erase(right, &right_min_key);
+                    assert!(removed);
                     node.key = right_min_key;
-                    node.right = erase(right, &node.key);
+                    node.right = right;
                     node.left = Some(left);
                     node.update_count();
-                    Some(node)
+                    (Some(node), true)
                 }
-                (None, Some(right)) => Some(right),
-                (Some(left), None) => Some(left),
-                _ => None,
+                (None, Some(right)) => (Some(right), true),
+                (Some(left), None) => (Some(left), true),
+                _ => (None, true),
             },
         }
     }
@@ -237,7 +255,8 @@ mod test {
 
         for i in 0..max {
             assert!(treap.contains(&i));
-            treap.erase(&i);
+            assert!(treap.erase(&i));
+            assert!(!treap.erase(&i));
             assert!(!treap.contains(&i));
         }
     }
@@ -269,7 +288,8 @@ mod test {
                 if set.contains(&x) {
                     assert!(treap.contains(&x));
                     set.remove(&x);
-                    treap.erase(&x);
+                    assert!(treap.erase(&x));
+                    assert!(!treap.erase(&x));
                     assert!(!treap.contains(&x));
                 } else {
                     assert!(!treap.contains(&x));
