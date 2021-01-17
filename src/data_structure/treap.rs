@@ -37,17 +37,13 @@ pub mod treap {
         root: Link<T>,
     }
 
-    impl<T: PartialOrd> Treap<T>
-    where
-        T: Clone,
-    {
+    impl<T> Treap<T> {
         pub fn new(seed: u32) -> Self {
             Treap {
                 random_state: XorShift { state: seed },
                 root: None,
             }
         }
-
         pub fn clear(&mut self) {
             self.root = None
         }
@@ -55,11 +51,12 @@ pub mod treap {
         pub fn is_empty(&self) -> bool {
             self.len() == 0
         }
-
         pub fn len(&self) -> usize {
             count(&self.root)
         }
+    }
 
+    impl<T: PartialOrd + Clone> Treap<T> {
         pub fn insert(&mut self, key: T) {
             if !self.contains(&key) {
                 self.root = insert(self.root.take(), key, &mut self.random_state);
