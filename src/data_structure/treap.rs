@@ -75,7 +75,7 @@ pub mod treap {
     }
     impl<T: PartialOrd + Clone> Treap<T> {
         pub fn erase(&mut self, key: &T) {
-            self.root = erase(self.root.take(), key);
+            self.root = erase(self.root.take().unwrap(), key);
         }
     }
 
@@ -149,33 +149,30 @@ pub mod treap {
         }
     }
 
-    fn erase<T: PartialOrd + Clone>(node: Option<BNode<T>>, key: &T) -> Option<BNode<T>> {
-        match node {
-            None => panic!(),
-            Some(mut node) => match cmp(&node.key, key) {
-                Equal => {
-                    if node.left.is_none() {
-                        node.right
-                    } else if node.right.is_none() {
-                        node.left
-                    } else {
-                        let right_min_key = min(node.right.as_ref().unwrap()).key.clone();
-                        node.key = right_min_key;
-                        node.right = erase(node.right.take(), &node.key);
-                        node.update_count();
-                        Some(node)
-                    }
-                }
-                Less => {
-                    node.right = erase(node.right.take(), key);
+    fn erase<T: PartialOrd + Clone>(mut node: BNode<T>, key: &T) -> Option<BNode<T>> {
+        match cmp(&node.key, key) {
+            Less => {
+                node.right = erase(node.right.take().unwrap(), key);
+                node.update_count();
+                Some(node)
+            }
+            Greater => {
+                node.left = erase(node.left.take().unwrap(), key);
+                node.update_count();
+                Some(node)
+            }
+            Equal => match (node.left.take(), node.right.take()) {
+                (Some(left), Some(right)) => {
+                    let right_min_key = min(&right).key.clone();
+                    node.key = right_min_key;
+                    node.right = erase(right, &node.key);
+                    node.left = Some(left);
                     node.update_count();
                     Some(node)
                 }
-                Greater => {
-                    node.left = erase(node.left.take(), key);
-                    node.update_count();
-                    Some(node)
-                }
+                (None, Some(right)) => Some(right),
+                (Some(left), None) => Some(left),
+                _ => None,
             },
         }
     }
