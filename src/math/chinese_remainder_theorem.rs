@@ -1,20 +1,16 @@
-pub fn extended_gcd(a: i64, b: i64, p: &mut i64, q: &mut i64) -> i64 {
+pub fn extended_gcd(a: i64, b: i64) -> (i64, i64, i64) {
     if b == 0 {
-        *p = 1;
-        *q = 0;
-        a
+        (a, 1, 0)
     } else {
-        let d = extended_gcd(b, a % b, q, p);
-        *q -= a / b * *p;
-        d
+        let (d, q, p) = extended_gcd(b, a % b);
+        (d, p, q - a / b * p)
     }
 }
 
 pub fn chinese_remainder_theorem(b: &[i64], modulo: &[i64]) -> Option<(i64, i64)> {
     let (mut result, mut m) = (0, 1);
     for i in 0..b.len() {
-        let (mut p, mut q) = (0, 0);
-        let d = extended_gcd(m, modulo[i], &mut p, &mut q);
+        let (d, p, _) = extended_gcd(m, modulo[i]);
         if (b[i] - result) % d != 0 {
             return None;
         }
@@ -30,6 +26,18 @@ mod tests {
     use super::*;
     use rand;
     use rand::Rng;
+
+    #[test]
+    fn test_extended_gcd() {
+        for i in 1..10000 {
+            for j in (i + 1)..10000 {
+                let (gcd, x, y) = extended_gcd(i, j);
+                assert_eq!(i % gcd, 0);
+                assert_eq!(j % gcd, 0);
+                assert_eq!(i * x + j * y, gcd);
+            }
+        }
+    }
 
     #[test]
     fn test_crt() {
