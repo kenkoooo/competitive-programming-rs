@@ -63,10 +63,18 @@ impl FastFourierTransform {
             for s in 0..w {
                 let offset = s << (h - ph + 1);
                 for i in 0..p {
-                    let l = a[i + offset] % self.modulo;
+                    let l = a[i + offset];
                     let r = (a[i + offset + p] * now) % self.modulo;
-                    a[i + offset] = (l + r) % self.modulo;
-                    a[i + offset + p] = (l + self.modulo - r) % self.modulo;
+
+                    a[i + offset] = l + r;
+                    if a[i + offset] >= self.modulo {
+                        a[i + offset] -= self.modulo;
+                    }
+
+                    a[i + offset + p] = l + self.modulo - r;
+                    if a[i + offset + p] >= self.modulo {
+                        a[i + offset + p] -= self.modulo;
+                    }
                 }
 
                 now = (self.sum_e[(!s).trailing_zeros() as usize] * now) % self.modulo;
@@ -83,11 +91,15 @@ impl FastFourierTransform {
             for s in 0..w {
                 let offset = s << (h - ph + 1);
                 for i in 0..p {
-                    let l = a[i + offset] % self.modulo;
-                    let r = a[i + offset + p] % self.modulo;
-                    a[i + offset] = (l + r) % self.modulo;
-                    a[i + offset + p] =
-                        (((l + self.modulo - r) % self.modulo) * inv_now) % self.modulo;
+                    let l = a[i + offset];
+                    let r = a[i + offset + p];
+
+                    a[i + offset] = l + r;
+                    if a[i + offset] >= self.modulo {
+                        a[i + offset] -= self.modulo;
+                    }
+
+                    a[i + offset + p] = ((l + self.modulo - r) * inv_now) % self.modulo;
                 }
 
                 inv_now = (self.sum_ie[(!s).trailing_zeros() as usize] * inv_now) % self.modulo;
@@ -104,11 +116,11 @@ impl FastFourierTransform {
         let m = b.len();
 
         let z = (n + m - 1).next_power_of_two();
-        let mut a = Vec::from(a);
+        let mut a = a.iter().map(|&v| v % self.modulo).collect::<Vec<_>>();
         a.resize(z, 0);
         self.butterfly(&mut a);
 
-        let mut b = Vec::from(b);
+        let mut b = b.iter().map(|&v| v % self.modulo).collect::<Vec<_>>();
         b.resize(z, 0);
         self.butterfly(&mut b);
 
@@ -222,8 +234,12 @@ mod tests {
         for _ in 0..10 {
             let n: usize = 5000 + rng.gen_range(0, 5000);
             let m: usize = 5000 + rng.gen_range(0, 5000);
-            let a = (0..n).map(|_| rng.gen_range(0, modulo)).collect::<Vec<_>>();
-            let b = (0..m).map(|_| rng.gen_range(0, modulo)).collect::<Vec<_>>();
+            let a = (0..n)
+                .map(|_| rng.gen_range(0, modulo * 2))
+                .collect::<Vec<_>>();
+            let b = (0..m)
+                .map(|_| rng.gen_range(0, modulo * 2))
+                .collect::<Vec<_>>();
             let c = fft.convolution(&a, &b);
 
             let mut check = vec![0; n + m - 1];
