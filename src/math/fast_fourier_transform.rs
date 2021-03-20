@@ -201,6 +201,8 @@ fn primitive_root(m: i64) -> i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rand::{thread_rng, Rng};
+
     #[test]
     fn test_fft() {
         let a = vec![1, 2, 3, 4];
@@ -209,6 +211,31 @@ mod tests {
         let fft = FastFourierTransform::new(m);
         let c = fft.convolution(&a, &b);
         assert_eq!(vec![5, 16, 34, 60, 70, 70, 59, 36], c);
+    }
+
+    #[test]
+    fn test_fft_rand() {
+        let mut rng = thread_rng();
+        let modulo = 998244353;
+        let fft = FastFourierTransform::new(modulo);
+
+        for _ in 0..10 {
+            let n: usize = 5000 + rng.gen_range(0, 5000);
+            let m: usize = 5000 + rng.gen_range(0, 5000);
+            let a = (0..n).map(|_| rng.gen_range(0, modulo)).collect::<Vec<_>>();
+            let b = (0..m).map(|_| rng.gen_range(0, modulo)).collect::<Vec<_>>();
+            let c = fft.convolution(&a, &b);
+
+            let mut check = vec![0; n + m - 1];
+            for i in 0..n {
+                for j in 0..m {
+                    check[i + j] += a[i] * b[j];
+                    check[i + j] %= modulo;
+                }
+            }
+
+            assert_eq!(check, c);
+        }
     }
 
     #[test]
