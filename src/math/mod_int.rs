@@ -1,23 +1,17 @@
 pub mod mod_int {
-    use std::cell::RefCell;
-    use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
-
-    type InternalNum = i64;
+    type ModInternalNum = i64;
     thread_local!(
-        static MOD: RefCell<InternalNum> = RefCell::new(0);
+        static MOD: std::cell::RefCell<ModInternalNum> = std::cell::RefCell::new(0);
     );
 
-    pub fn set_mod_int<T>(v: T)
-    where
-        InternalNum: From<T>,
-    {
-        MOD.with(|x| x.replace(InternalNum::from(v)));
+    pub fn set_mod_int<T: ToInternalNum>(v: T) {
+        MOD.with(|x| x.replace(v.to_internal_num()));
     }
-    fn modulo() -> InternalNum {
+    fn modulo() -> ModInternalNum {
         MOD.with(|x| *x.borrow())
     }
 
-    pub struct ModInt(InternalNum);
+    pub struct ModInt(ModInternalNum);
     impl Clone for ModInt {
         fn clone(&self) -> Self {
             Self(self.0)
@@ -26,11 +20,11 @@ pub mod mod_int {
     impl Copy for ModInt {}
 
     impl ModInt {
-        pub fn new<T>(v: T) -> Self
+        fn internal_new<T>(v: T) -> Self
         where
-            InternalNum: From<T>,
+            ModInternalNum: From<T>,
         {
-            let mut v = InternalNum::from(v);
+            let mut v = ModInternalNum::from(v);
             let m = modulo();
             if v >= m {
                 v %= m;
@@ -38,7 +32,7 @@ pub mod mod_int {
             Self(v)
         }
 
-        pub fn internal_pow(&self, mut e: InternalNum) -> Self {
+        pub fn internal_pow(&self, mut e: ModInternalNum) -> Self {
             let mut result = 1;
             let mut cur = self.0;
             let modulo = modulo();
@@ -55,27 +49,53 @@ pub mod mod_int {
 
         pub fn pow<T>(&self, e: T) -> Self
         where
-            InternalNum: From<T>,
+            ModInternalNum: From<T>,
         {
-            self.internal_pow(InternalNum::from(e))
+            self.internal_pow(ModInternalNum::from(e))
         }
 
-        pub fn value(&self) -> InternalNum {
+        pub fn value(&self) -> ModInternalNum {
             self.0
         }
     }
-    impl From<ModInt> for InternalNum {
-        fn from(m: ModInt) -> Self {
-            m.value()
+
+    pub trait ToInternalNum {
+        fn to_internal_num(&self) -> ModInternalNum;
+    }
+    impl ToInternalNum for ModInt {
+        fn to_internal_num(&self) -> ModInternalNum {
+            self.0
         }
     }
+    macro_rules! impl_primitive {
+        ($primitive:ident) => {
+            impl From<$primitive> for ModInt {
+                fn from(v: $primitive) -> Self {
+                    let v = v as ModInternalNum;
+                    Self::internal_new(v)
+                }
+            }
+            impl ToInternalNum for $primitive {
+                fn to_internal_num(&self) -> ModInternalNum {
+                    *self as ModInternalNum
+                }
+            }
+        };
+    }
+    impl_primitive!(u8);
+    impl_primitive!(u16);
+    impl_primitive!(u32);
+    impl_primitive!(u64);
+    impl_primitive!(usize);
+    impl_primitive!(i8);
+    impl_primitive!(i16);
+    impl_primitive!(i32);
+    impl_primitive!(i64);
+    impl_primitive!(isize);
 
-    impl<T> AddAssign<T> for ModInt
-    where
-        InternalNum: From<T>,
-    {
+    impl<T: ToInternalNum> std::ops::AddAssign<T> for ModInt {
         fn add_assign(&mut self, rhs: T) {
-            let mut rhs = InternalNum::from(rhs);
+            let mut rhs = rhs.to_internal_num();
             let m = modulo();
             if rhs >= m {
                 rhs %= m;
@@ -88,10 +108,7 @@ pub mod mod_int {
         }
     }
 
-    impl<T> Add<T> for ModInt
-    where
-        InternalNum: From<T>,
-    {
+    impl<T: ToInternalNum> std::ops::Add<T> for ModInt {
         type Output = ModInt;
         fn add(self, rhs: T) -> Self::Output {
             let mut res = self;
@@ -99,12 +116,9 @@ pub mod mod_int {
             res
         }
     }
-    impl<T> SubAssign<T> for ModInt
-    where
-        InternalNum: From<T>,
-    {
+    impl<T: ToInternalNum> std::ops::SubAssign<T> for ModInt {
         fn sub_assign(&mut self, rhs: T) {
-            let mut rhs = InternalNum::from(rhs);
+            let mut rhs = rhs.to_internal_num();
             let m = modulo();
             if rhs >= m {
                 rhs %= m;
@@ -117,10 +131,7 @@ pub mod mod_int {
             }
         }
     }
-    impl<T> Sub<T> for ModInt
-    where
-        InternalNum: From<T>,
-    {
+    impl<T: ToInternalNum> std::ops::Sub<T> for ModInt {
         type Output = Self;
         fn sub(self, rhs: T) -> Self::Output {
             let mut res = self;
@@ -128,12 +139,9 @@ pub mod mod_int {
             res
         }
     }
-    impl<T> MulAssign<T> for ModInt
-    where
-        InternalNum: From<T>,
-    {
+    impl<T: ToInternalNum> std::ops::MulAssign<T> for ModInt {
         fn mul_assign(&mut self, rhs: T) {
-            let mut rhs = InternalNum::from(rhs);
+            let mut rhs = rhs.to_internal_num();
             let m = modulo();
             if rhs >= m {
                 rhs %= m;
@@ -142,10 +150,7 @@ pub mod mod_int {
             self.0 %= m;
         }
     }
-    impl<T> Mul<T> for ModInt
-    where
-        InternalNum: From<T>,
-    {
+    impl<T: ToInternalNum> std::ops::Mul<T> for ModInt {
         type Output = Self;
         fn mul(self, rhs: T) -> Self::Output {
             let mut res = self;
@@ -154,12 +159,9 @@ pub mod mod_int {
         }
     }
 
-    impl<T> DivAssign<T> for ModInt
-    where
-        InternalNum: From<T>,
-    {
+    impl<T: ToInternalNum> std::ops::DivAssign<T> for ModInt {
         fn div_assign(&mut self, rhs: T) {
-            let mut rhs = InternalNum::from(rhs);
+            let mut rhs = rhs.to_internal_num();
             let m = modulo();
             if rhs >= m {
                 rhs %= m;
@@ -170,10 +172,7 @@ pub mod mod_int {
         }
     }
 
-    impl<T> Div<T> for ModInt
-    where
-        InternalNum: From<T>,
-    {
+    impl<T: ToInternalNum> std::ops::Div<T> for ModInt {
         type Output = Self;
         fn div(self, rhs: T) -> Self::Output {
             let mut res = self;
@@ -198,8 +197,8 @@ mod test {
             let x: i64 = rng.sample(Uniform::from(0..prime_mod));
             let y: i64 = rng.sample(Uniform::from(0..prime_mod));
 
-            let mx = ModInt::new(x);
-            let my = ModInt::new(y);
+            let mx = ModInt::from(x);
+            let my = ModInt::from(y);
 
             assert_eq!((mx + my).value(), (x + y) % prime_mod);
             assert_eq!((mx + y).value(), (x + y) % prime_mod);
@@ -248,8 +247,8 @@ mod test {
             let x: i64 = rng.sample(Uniform::from(0..prime_mod));
             let y: i64 = rng.sample(Uniform::from(0..prime_mod));
 
-            let mx = ModInt::new(x);
-            let my = ModInt::new(y);
+            let mx = ModInt::from(x);
+            let my = ModInt::from(y);
 
             assert_eq!((mx * my).value(), (x * y) % prime_mod);
             assert_eq!((mx * y).value(), (x * y) % prime_mod);
@@ -271,8 +270,8 @@ mod test {
     #[test]
     fn zero_test() {
         set_mod_int(1_000_000_007i64);
-        let a = ModInt::new(1_000_000_000i64);
-        let b = ModInt::new(7i64);
+        let a = ModInt::from(1_000_000_000i64);
+        let b = ModInt::from(7i64);
         let c = a + b;
         assert_eq!(c.value(), 0);
     }
@@ -280,7 +279,7 @@ mod test {
     #[test]
     fn pow_test() {
         set_mod_int(1_000_000_007i64);
-        let a = ModInt::new(3i64);
+        let a = ModInt::from(3i64);
         let a = a.pow(4i64);
         assert_eq!(a.value(), 81);
     }
@@ -289,7 +288,7 @@ mod test {
     fn div_test() {
         set_mod_int(1_000_000_007i64);
         for i in 1..100000i64 {
-            let mut a = ModInt::new(1i64);
+            let mut a = ModInt::from(1i64);
             a /= i;
             a *= i;
             assert_eq!(a.value(), 1);
@@ -301,49 +300,49 @@ mod test {
         const MOD: i128 = 1_000_000_007;
         set_mod_int(1_000_000_007i64);
 
-        let a = ModInt::new(1_000_000_000i64) * std::i64::MAX;
+        let a = ModInt::from(1_000_000_000i64) * std::i64::MAX;
         assert_eq!(
             a.value(),
             ((1_000_000_000i128 * i128::from(std::i64::MAX)) % MOD) as i64
         );
 
-        let mut a = ModInt::new(1_000_000_000i64);
+        let mut a = ModInt::from(1_000_000_000i64);
         a *= std::i64::MAX;
         assert_eq!(
             a.value(),
             ((1_000_000_000i128 * i128::from(std::i64::MAX)) % MOD) as i64
         );
 
-        let a = ModInt::new(1_000_000_000i64) + std::i64::MAX;
+        let a = ModInt::from(1_000_000_000i64) + std::i64::MAX;
         assert_eq!(
             a.value(),
             ((1_000_000_000i128 + i128::from(std::i64::MAX)) % MOD) as i64
         );
 
-        let mut a = ModInt::new(1_000_000_000i64);
+        let mut a = ModInt::from(1_000_000_000i64);
         a += std::i64::MAX;
         assert_eq!(
             a.value(),
             ((1_000_000_000i128 + i128::from(std::i64::MAX)) % MOD) as i64
         );
 
-        let a = ModInt::new(1_000_000_000i64) - std::i64::MAX;
+        let a = ModInt::from(1_000_000_000i64) - std::i64::MAX;
         assert_eq!(
             a.value(),
             ((1_000_000_000i128 + MOD - (std::i64::MAX as i128) % MOD) % MOD) as i64
         );
 
-        let mut a = ModInt::new(1_000_000_000i64);
+        let mut a = ModInt::from(1_000_000_000i64);
         a -= std::i64::MAX;
         assert_eq!(
             a.value(),
             ((1_000_000_000i128 + MOD - (std::i64::MAX as i128) % MOD) % MOD) as i64
         );
 
-        let a = ModInt::new(1_000_000_000i64) / std::i64::MAX;
+        let a = ModInt::from(1_000_000_000i64) / std::i64::MAX;
         assert_eq!(a.value(), 468036877);
 
-        let mut a = ModInt::new(1_000_000_000i64);
+        let mut a = ModInt::from(1_000_000_000i64);
         a /= std::i64::MAX;
         assert_eq!(a.value(), 468036877);
     }
@@ -351,7 +350,15 @@ mod test {
     #[test]
     fn overflow_guard() {
         set_mod_int(1_000_000_007i64);
-        let a = ModInt::new(1_000_000_007i64 * 10);
+        let a = ModInt::from(1_000_000_007i64 * 10);
         assert_eq!(a.value(), 0);
+    }
+
+    #[test]
+    fn initialize_from_various_primitives() {
+        set_mod_int(1_000_000_007);
+        let a = ModInt::from(100usize);
+        let b = ModInt::from(100i64);
+        assert_eq!(a.value(), b.value());
     }
 }

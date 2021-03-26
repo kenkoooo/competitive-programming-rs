@@ -63,14 +63,14 @@ mod tests {
             let mut xs = vec![];
             let mut ys = vec![];
             for _ in 0..n {
-                xs.push(ModInt::new(rng.sample(range)));
-                ys.push(ModInt::new(rng.sample(range)));
+                xs.push(ModInt::from(rng.sample(range)));
+                ys.push(ModInt::from(rng.sample(range)));
             }
 
-            let c = lagrange_interpolation(&xs, &ys, ModInt::new(1), ModInt::new(0));
+            let c = lagrange_interpolation(&xs, &ys, ModInt::from(1), ModInt::from(0));
 
             for i in 0..n {
-                let mut y = ModInt::new(0);
+                let mut y = ModInt::from(0);
                 let x = xs[i];
                 for i in 0..n {
                     y += x.pow(i as i64) * c[i];
