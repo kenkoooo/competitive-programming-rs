@@ -20,11 +20,7 @@ pub mod mod_int {
     impl Copy for ModInt {}
 
     impl ModInt {
-        fn internal_new<T>(v: T) -> Self
-        where
-            ModInternalNum: From<T>,
-        {
-            let mut v = ModInternalNum::from(v);
+        fn internal_new(mut v: ModInternalNum) -> Self {
             let m = modulo();
             if v >= m {
                 v %= m;
@@ -49,9 +45,9 @@ pub mod mod_int {
 
         pub fn pow<T>(&self, e: T) -> Self
         where
-            ModInternalNum: From<T>,
+            T: ToInternalNum,
         {
-            self.internal_pow(ModInternalNum::from(e))
+            self.internal_pow(e.to_internal_num())
         }
 
         pub fn value(&self) -> ModInternalNum {
