@@ -1,6 +1,7 @@
 pub mod chinese_remainder_theorem;
 pub mod combination;
 pub mod cumulative_sum;
+pub mod determinant;
 pub mod fast_fourier_transform;
 pub mod floor_sum;
 pub mod lagrange_interpolation;
