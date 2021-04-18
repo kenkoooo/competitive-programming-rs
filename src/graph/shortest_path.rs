@@ -44,7 +44,7 @@ pub mod bellman_ford {
 mod tests {
     use super::*;
     use crate::utils::test_helper::Tester;
-    use std;
+    const INF: i64 = 1 << 60;
 
     #[test]
     fn solve_grl_1_b() {
@@ -63,9 +63,7 @@ mod tests {
                 graph[s].push((t, d));
             }
 
-            let inf = std::i64::MAX;
-
-            let (dist, negative) = bellman_ford::shortest_path(&graph, r, inf);
+            let (dist, negative) = bellman_ford::shortest_path(&graph, r, INF);
             let mut neg = false;
             for &b in &negative {
                 neg = neg || b;
@@ -75,7 +73,7 @@ mod tests {
                 sc.write("NEGATIVE CYCLE\n");
             } else {
                 for i in 0..v {
-                    if dist[i] == inf {
+                    if dist[i] == INF {
                         sc.write("INF\n");
                     } else {
                         sc.write(format!("{}\n", dist[i]));

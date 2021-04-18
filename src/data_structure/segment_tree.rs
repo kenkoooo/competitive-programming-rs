@@ -65,6 +65,8 @@ mod test {
     use rand::Rng;
     use std::cmp;
 
+    const INF: i64 = 1 << 60;
+
     #[test]
     fn random_array() {
         let n = 1000;
@@ -74,9 +76,9 @@ mod test {
             })
             .collect::<Vec<_>>();
 
-        let mut seg = SegmentTree::new(n, |a, b| cmp::min(a, b), || i64::MAX);
+        let mut seg = SegmentTree::new(n, |a, b| cmp::min(a, b), || INF);
         for i in 0..n {
-            let mut minimum = i64::MAX;
+            let mut minimum = INF;
             for j in 0..(i + 1) {
                 minimum = cmp::min(minimum, arr[j]);
             }
@@ -90,8 +92,8 @@ mod test {
     fn random_array_online_update() {
         let n = 1000;
 
-        let mut arr = vec![i64::MAX; n];
-        let mut seg = SegmentTree::new(n, |a, b| cmp::min(a, b), || i64::MAX);
+        let mut arr = vec![INF; n];
+        let mut seg = SegmentTree::new(n, |a, b| cmp::min(a, b), || INF);
 
         for _ in 0..n {
             let value = rand::thread_rng().gen::<i64>();
@@ -99,7 +101,7 @@ mod test {
             seg.update(k, value);
 
             arr[k] = value;
-            let mut minimum = i64::MAX;
+            let mut minimum = INF;
             for i in 0..n {
                 minimum = cmp::min(minimum, arr[i]);
             }

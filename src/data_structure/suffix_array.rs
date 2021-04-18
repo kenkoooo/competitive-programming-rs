@@ -101,6 +101,8 @@ mod test {
     use std;
     use std::cmp;
 
+    const INF: i64 = 1 << 60;
+
     #[test]
     fn small_test() {
         let string = "abcdeabcde".to_owned().bytes().collect::<Vec<_>>();
@@ -149,8 +151,8 @@ mod test {
             let sa = SuffixArray::new(&s);
             let reverse_sa = SuffixArray::new(&reverse_s);
 
-            let mut rmq = SegmentTree::new(n + 1, |a, b| cmp::min(a, b), || i64::MAX);
-            let mut reverse_rmq = SegmentTree::new(n + 1, |a, b| cmp::min(a, b), || i64::MAX);
+            let mut rmq = SegmentTree::new(n + 1, |a, b| cmp::min(a, b), || INF);
+            let mut reverse_rmq = SegmentTree::new(n + 1, |a, b| cmp::min(a, b), || INF);
             for i in 0..(n + 1) {
                 rmq.update(i, sa.array[i] as i64);
                 reverse_rmq.update(i, reverse_sa.array[i] as i64);

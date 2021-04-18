@@ -3,7 +3,7 @@ pub mod primal_dual {
     use std::collections::BinaryHeap;
     type Flow = i64;
     type Cost = i64;
-    const INF: Cost = i64::MAX >> 3;
+    const INF: Cost = 1 << 60;
     struct Edge {
         to: usize,
         capacity: Flow,

@@ -47,7 +47,6 @@ where
 mod tests {
     use super::*;
     use crate::math::mod_int::mod_int::{set_mod_int, ModInt};
-    use rand::distributions::Uniform;
     use rand::{thread_rng, Rng};
 
     const MOD: i64 = 1_000_000_007;
@@ -55,7 +54,6 @@ mod tests {
     #[test]
     fn test_lagrange_interpolation() {
         set_mod_int(MOD);
-        let range = Uniform::from(0..std::i64::MAX);
         let mut rng = thread_rng();
 
         let n = 500;
@@ -63,8 +61,8 @@ mod tests {
             let mut xs = vec![];
             let mut ys = vec![];
             for _ in 0..n {
-                xs.push(ModInt::from(rng.sample(range)));
-                ys.push(ModInt::from(rng.sample(range)));
+                xs.push(ModInt::from(rng.gen_range(0, MOD)));
+                ys.push(ModInt::from(rng.gen_range(0, MOD)));
             }
 
             let c = lagrange_interpolation(&xs, &ys, ModInt::from(1), ModInt::from(0));
