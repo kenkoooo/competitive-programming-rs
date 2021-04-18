@@ -35,7 +35,7 @@ pub mod persistent_array {
         } else {
             let child = match node
                 .as_ref()
-                .and_then(|node| node.children[index % N].as_ref())
+                .and_then::<&Rc<Node<T>>, _>(|node| node.children[index % N].as_ref())
             {
                 Some(next_node) => set(index / N, data, Some(next_node.clone())),
                 None => set(index / N, data, None),
@@ -63,7 +63,7 @@ pub mod persistent_array {
 
 #[cfg(test)]
 mod tests {
-    use crate::data_structure::persistent_array::persistent_array::{get, set, Node};
+    use super::persistent_array::{get, set, Node};
     use rand::distributions::Uniform;
     use rand::{thread_rng, Rng};
     use std::rc::Rc;

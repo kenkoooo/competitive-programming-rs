@@ -185,6 +185,7 @@ mod test {
     use rand::Rng;
 
     const PRIME_MOD: [i64; 3] = [1_000_000_007, 1_000_000_009, 998244353];
+    const INF: i64 = 1 << 60;
 
     fn random_add_sub(prime_mod: i64) {
         let mut rng = rand::thread_rng();
@@ -296,51 +297,51 @@ mod test {
         const MOD: i128 = 1_000_000_007;
         set_mod_int(1_000_000_007i64);
 
-        let a = ModInt::from(1_000_000_000i64) * std::i64::MAX;
+        let a = ModInt::from(1_000_000_000i64) * INF;
         assert_eq!(
             a.value(),
-            ((1_000_000_000i128 * i128::from(std::i64::MAX)) % MOD) as i64
+            ((1_000_000_000i128 * i128::from(INF)) % MOD) as i64
         );
 
         let mut a = ModInt::from(1_000_000_000i64);
-        a *= std::i64::MAX;
+        a *= INF;
         assert_eq!(
             a.value(),
-            ((1_000_000_000i128 * i128::from(std::i64::MAX)) % MOD) as i64
+            ((1_000_000_000i128 * i128::from(INF)) % MOD) as i64
         );
 
-        let a = ModInt::from(1_000_000_000i64) + std::i64::MAX;
+        let a = ModInt::from(1_000_000_000i64) + INF;
         assert_eq!(
             a.value(),
-            ((1_000_000_000i128 + i128::from(std::i64::MAX)) % MOD) as i64
-        );
-
-        let mut a = ModInt::from(1_000_000_000i64);
-        a += std::i64::MAX;
-        assert_eq!(
-            a.value(),
-            ((1_000_000_000i128 + i128::from(std::i64::MAX)) % MOD) as i64
-        );
-
-        let a = ModInt::from(1_000_000_000i64) - std::i64::MAX;
-        assert_eq!(
-            a.value(),
-            ((1_000_000_000i128 + MOD - (std::i64::MAX as i128) % MOD) % MOD) as i64
+            ((1_000_000_000i128 + i128::from(INF)) % MOD) as i64
         );
 
         let mut a = ModInt::from(1_000_000_000i64);
-        a -= std::i64::MAX;
+        a += INF;
         assert_eq!(
             a.value(),
-            ((1_000_000_000i128 + MOD - (std::i64::MAX as i128) % MOD) % MOD) as i64
+            ((1_000_000_000i128 + i128::from(INF)) % MOD) as i64
         );
 
-        let a = ModInt::from(1_000_000_000i64) / std::i64::MAX;
-        assert_eq!(a.value(), 468036877);
+        let a = ModInt::from(1_000_000_000i64) - INF;
+        assert_eq!(
+            a.value(),
+            ((1_000_000_000i128 + MOD - (INF as i128) % MOD) % MOD) as i64
+        );
 
         let mut a = ModInt::from(1_000_000_000i64);
-        a /= std::i64::MAX;
-        assert_eq!(a.value(), 468036877);
+        a -= INF;
+        assert_eq!(
+            a.value(),
+            ((1_000_000_000i128 + MOD - (INF as i128) % MOD) % MOD) as i64
+        );
+
+        let a = ModInt::from(1_000_000_000i64) / INF;
+        assert_eq!(a.value(), 961239577);
+
+        let mut a = ModInt::from(1_000_000_000i64);
+        a /= INF;
+        assert_eq!(a.value(), 961239577);
     }
 
     #[test]

@@ -1,4 +1,5 @@
 pub mod dinitz {
+    const INF: i64 = 1 << 60;
     pub struct Edge {
         pub to: usize,
         pub rev: usize,
@@ -91,7 +92,7 @@ pub mod dinitz {
                 }
                 let mut iter = vec![0; v];
                 loop {
-                    let f = self.dfs(s, t, std::i64::MAX, &level, &mut iter);
+                    let f = self.dfs(s, t, INF, &level, &mut iter);
                     if f == 0 {
                         break;
                     }
