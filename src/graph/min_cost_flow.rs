@@ -1,7 +1,6 @@
 pub mod primal_dual {
     use std::cmp;
     use std::collections::BinaryHeap;
-    use std::i64;
     type Flow = i64;
     type Cost = i64;
     const INF: Cost = i64::MAX >> 3;
@@ -11,7 +10,6 @@ pub mod primal_dual {
         flow: Flow,
         cost: Cost,
         reverse_to: usize,
-        is_reversed: bool,
     }
     impl Edge {
         fn residue(&self) -> Flow {
@@ -41,7 +39,6 @@ pub mod primal_dual {
                 flow: 0,
                 cost,
                 reverse_to: reverse_from,
-                is_reversed: false,
             });
             self.graph[to].push(Edge {
                 to: from,
@@ -49,10 +46,10 @@ pub mod primal_dual {
                 flow: capacity,
                 cost: -cost,
                 reverse_to,
-                is_reversed: true,
             });
         }
 
+        /// Find the minimum cost to send `flow` through a flow network from `source` to `sink`.
         pub fn solve(&mut self, source: usize, sink: usize, mut flow: Flow) -> Option<Flow> {
             let n = self.graph.len();
             let mut result = 0;
@@ -106,6 +103,8 @@ pub mod primal_dual {
             Some(result)
         }
 
+        /// Find the minimum cost to send `flow` through a flow network, which contains edges of
+        /// negative cost, from `source` to `sink`.
         pub fn neg_solve(&mut self, source: usize, sink: usize, mut flow: Flow) -> Option<Flow> {
             let n = self.graph.len();
             let mut result = 0;

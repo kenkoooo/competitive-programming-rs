@@ -1,25 +1,27 @@
 /// Segment Tree for range queries
-pub struct SegmentTree<T, F> {
+pub struct SegmentTree<T, Op, Init> {
     seg: Vec<T>,
     n: usize,
-    f: F,
-    initial_value: T,
+    op: Op,
+    initialize: Init,
 }
 
-impl<T: Copy, F> SegmentTree<T, F>
+impl<T, Op, Init> SegmentTree<T, Op, Init>
 where
-    F: Fn(T, T) -> T,
+    T: Copy,
+    Op: Fn(T, T) -> T,
+    Init: Fn() -> T,
 {
-    pub fn new(size: usize, initial_value: T, f: F) -> SegmentTree<T, F> {
+    pub fn new(size: usize, op: Op, initialize: Init) -> SegmentTree<T, Op, Init> {
         let mut m = 1;
         while m <= size {
             m <<= 1;
         }
         SegmentTree {
-            seg: vec![initial_value; m * 2],
+            seg: vec![initialize(); m * 2],
             n: m,
-            f,
-            initial_value,
+            op,
+            initialize,
         }
     }
 
@@ -29,7 +31,7 @@ where
         self.seg[k] = value;
         while k > 0 {
             k = (k - 1) >> 1;
-            self.seg[k] = (self.f)(self.seg[k * 2 + 1], self.seg[k * 2 + 2]);
+            self.seg[k] = (self.op)(self.seg[k * 2 + 1], self.seg[k * 2 + 2]);
         }
     }
 
@@ -45,25 +47,23 @@ where
         seg_range: std::ops::Range<usize>,
     ) -> T {
         if seg_range.end <= range.start || range.end <= seg_range.start {
-            self.initial_value
+            (self.initialize)()
         } else if range.start <= seg_range.start && seg_range.end <= range.end {
             self.seg[k]
         } else {
             let mid = (seg_range.start + seg_range.end) >> 1;
             let x = self.query_range(range.clone(), k * 2 + 1, seg_range.start..mid);
             let y = self.query_range(range, k * 2 + 2, mid..seg_range.end);
-            (self.f)(x, y)
+            (self.op)(x, y)
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-
     use super::*;
     use rand::Rng;
     use std::cmp;
-    use std::i64::MAX;
 
     #[test]
     fn random_array() {
@@ -74,9 +74,9 @@ mod test {
             })
             .collect::<Vec<_>>();
 
-        let mut seg = SegmentTree::new(n, MAX, |a, b| cmp::min(a, b));
+        let mut seg = SegmentTree::new(n, |a, b| cmp::min(a, b), || i64::MAX);
         for i in 0..n {
-            let mut minimum = MAX;
+            let mut minimum = i64::MAX;
             for j in 0..(i + 1) {
                 minimum = cmp::min(minimum, arr[j]);
             }
@@ -90,8 +90,8 @@ mod test {
     fn random_array_online_update() {
         let n = 1000;
 
-        let mut arr = vec![MAX; n];
-        let mut seg = SegmentTree::new(n, MAX, |a, b| cmp::min(a, b));
+        let mut arr = vec![i64::MAX; n];
+        let mut seg = SegmentTree::new(n, |a, b| cmp::min(a, b), || i64::MAX);
 
         for _ in 0..n {
             let value = rand::thread_rng().gen::<i64>();
@@ -99,7 +99,7 @@ mod test {
             seg.update(k, value);
 
             arr[k] = value;
-            let mut minimum = MAX;
+            let mut minimum = i64::MAX;
             for i in 0..n {
                 minimum = cmp::min(minimum, arr[i]);
             }

@@ -1,5 +1,4 @@
 pub mod sparse_table {
-
     pub struct SparseTable<T, F> {
         data: Vec<Vec<T>>,
         op: F,
