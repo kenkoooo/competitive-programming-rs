@@ -255,16 +255,26 @@ mod test {
 
     #[test]
     fn test_treap_nth() {
-        let mut treap = Treap::new(71);
+        let mut rng = StdRng::seed_from_u64(141);
 
-        let max = 100000;
-        for i in 0..max {
-            assert!(treap.insert(i * 2));
-            assert!(!treap.insert(i * 2));
-        }
+        for _ in 0..10 {
+            let mut treap = Treap::new(71);
+            let max = 100000;
+            let mut v = (0..max)
+                .map(|_| rng.gen_range(0, 1_000_000_000))
+                .collect::<Vec<_>>();
+            v.sort();
+            v.dedup();
+            v.shuffle(&mut rng);
+            for &i in v.iter() {
+                assert!(treap.insert(i));
+                assert!(!treap.insert(i));
+            }
+            v.sort();
 
-        for i in 0..max {
-            assert_eq!(treap.nth(i), &(i * 2));
+            for (i, v) in v.into_iter().enumerate() {
+                assert_eq!(treap.nth(i), &v);
+            }
         }
     }
 
