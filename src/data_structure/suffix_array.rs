@@ -8,8 +8,8 @@ fn compare_node(i: usize, j: usize, k: usize, rank: &[i32]) -> std::cmp::Orderin
     if rank[i] != rank[j] {
         rank[i].cmp(&rank[j])
     } else {
-        let ri = if i + k <= rank.len() { rank[i + k] } else { -1 };
-        let rj = if j + k <= rank.len() { rank[j + k] } else { -1 };
+        let ri = if i + k < rank.len() { rank[i + k] } else { -1 };
+        let rj = if j + k < rank.len() { rank[j + k] } else { -1 };
         ri.cmp(&rj)
     }
 }
@@ -40,7 +40,7 @@ impl SuffixArray {
                         0
                     }
             }
-            rank[..(n + 1)].clone_from_slice(&tmp[..(n + 1)]);
+            std::mem::swap(&mut rank, &mut tmp);
             k *= 2;
         }
 
