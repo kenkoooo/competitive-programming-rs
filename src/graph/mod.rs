@@ -6,3 +6,4 @@ pub mod min_cost_flow;
 pub mod re_rooting;
 pub mod shortest_path;
 pub mod strongly_connected_components;
+pub mod topological_sort;

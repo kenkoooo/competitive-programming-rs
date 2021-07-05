@@ -34,6 +34,7 @@ This is a repository of a set of algorithms implemented in Rust.
 - [Shortest Path (Bellman-Ford)](./src/graph/shortest_path.rs)
 - [Strongly Connected Components](./src/graph/strongly_connected_components.rs)
 - [ReRooting](./src/graph/re_rooting.rs)
+- [Topological Sort](./src/graph/topological_sort.rs)
 
 ## [Mathematics](./src/math)
 - [Chinese Remainder Theorem](./src/math/chinese_remainder_theorem.rs)
