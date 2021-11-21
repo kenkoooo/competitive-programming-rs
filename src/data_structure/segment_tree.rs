@@ -8,7 +8,7 @@ pub struct SegmentTree<T, Op> {
 impl<T, Op> SegmentTree<T, Op>
 where
     T: Copy,
-    Op: Fn(Option<T>, Option<T>) -> Option<T>,
+    Op: Fn(T, T) -> T + Copy,
 {
     pub fn new(size: usize, op: Op) -> SegmentTree<T, Op> {
         let mut m = size.next_power_of_two();
@@ -28,7 +28,9 @@ where
         self.seg[k] = Some(value);
         while k > 0 {
             k = (k - 1) >> 1;
-            self.seg[k] = (self.op)(self.seg[k * 2 + 1], self.seg[k * 2 + 2]);
+            let left = self.seg[k * 2 + 1];
+            let right = self.seg[k * 2 + 2];
+            self.seg[k] = left.into_iter().chain(right).reduce(self.op);
         }
     }
 
@@ -51,7 +53,7 @@ where
             let mid = (seg_range.start + seg_range.end) >> 1;
             let x = self.query_range(range.clone(), k * 2 + 1, seg_range.start..mid);
             let y = self.query_range(range, k * 2 + 2, mid..seg_range.end);
-            (self.op)(x, y)
+            x.into_iter().chain(y).reduce(self.op)
         }
     }
 }
@@ -74,13 +76,7 @@ mod test {
                 arr[i] = rng.gen_range(0, INF);
             }
 
-            let mut seg = SegmentTree::new(N, |a: Option<i64>, b: Option<i64>| {
-                if let (Some(a), Some(b)) = (a, b) {
-                    Some(a.min(b))
-                } else {
-                    a.or(b)
-                }
-            });
+            let mut seg = SegmentTree::new(N, |a: i64, b: i64| a.min(b));
             for i in 0..N {
                 let mut minimum = INF;
                 for j in 0..=i {
@@ -100,13 +96,7 @@ mod test {
 
         for _ in 0..5 {
             let mut arr = vec![INF; N];
-            let mut seg = SegmentTree::new(N, |a: Option<i64>, b: Option<i64>| {
-                if let (Some(a), Some(b)) = (a, b) {
-                    Some(a.min(b))
-                } else {
-                    a.or(b)
-                }
-            });
+            let mut seg = SegmentTree::new(N, |a: i64, b: i64| a.min(b));
 
             for _ in 0..N {
                 let value = rng.gen_range(0, INF);

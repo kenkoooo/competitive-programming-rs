@@ -214,13 +214,7 @@ mod test {
             let sa = SuffixArray::new(&s);
             let reverse_sa = SuffixArray::new(&reverse_s);
 
-            let op = |a: Option<i64>, b: Option<i64>| {
-                if let (Some(a), Some(b)) = (a, b) {
-                    Some(a.min(b))
-                } else {
-                    a.or(b)
-                }
-            };
+            let op = |a: i64, b: i64| a.min(b);
 
             let mut rmq = SegmentTree::new(n + 1, op);
             let mut reverse_rmq = SegmentTree::new(n + 1, op);
