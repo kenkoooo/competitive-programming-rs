@@ -130,11 +130,7 @@ mod test {
     use super::suffix_array::*;
     use crate::data_structure::segment_tree::SegmentTree;
     use crate::utils::test_helper::Tester;
-    use rand::{thread_rng, Rng};
-    use std;
-    use std::cmp;
-
-    const INF: i64 = 1 << 60;
+    use rand::prelude::*;
 
     #[test]
     fn small_test() {
@@ -218,8 +214,16 @@ mod test {
             let sa = SuffixArray::new(&s);
             let reverse_sa = SuffixArray::new(&reverse_s);
 
-            let mut rmq = SegmentTree::new(n + 1, |a, b| cmp::min(a, b), || INF);
-            let mut reverse_rmq = SegmentTree::new(n + 1, |a, b| cmp::min(a, b), || INF);
+            let op = |a: Option<i64>, b: Option<i64>| {
+                if let (Some(a), Some(b)) = (a, b) {
+                    Some(a.min(b))
+                } else {
+                    a.or(b)
+                }
+            };
+
+            let mut rmq = SegmentTree::new(n + 1, op);
+            let mut reverse_rmq = SegmentTree::new(n + 1, op);
             for i in 0..=n {
                 rmq.update(i, sa.array[i] as i64);
                 reverse_rmq.update(i, reverse_sa.array[i] as i64);
@@ -252,8 +256,8 @@ mod test {
                     sc.write("0\n");
                 }
 
-                let s = rmq.query(low..up) as usize;
-                let t = n - reverse_rmq.query(reverse_low..reverse_up) as usize;
+                let s = rmq.query(low..up).unwrap() as usize;
+                let t = n - reverse_rmq.query(reverse_low..reverse_up).unwrap() as usize;
                 if s + x.len() <= t && s <= t - y.len() {
                     sc.write(format!("{}\n", t - s));
                 } else {
