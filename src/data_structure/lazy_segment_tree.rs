@@ -184,8 +184,7 @@ pub mod lazy_segment_tree {
 #[cfg(test)]
 mod test {
     use super::lazy_segment_tree::*;
-    use rand::{distributions::Uniform, thread_rng, Rng};
-    use std::cmp::{max, min};
+    use rand::prelude::*;
 
     const INF: i64 = 1 << 60;
 
@@ -195,9 +194,9 @@ mod test {
         let mut seg_min = LazySegmentTree::new(
             n,
             || INF,
-            |s, t| min(*s, *t),
-            |f, x| *f + *x,
-            |f, g| *f + *g,
+            |&s, &t| s.min(t),
+            |&f, &x| f + x,
+            |&f, &g| f + g,
             || 0,
         );
         let mut values = vec![0; n];
@@ -237,21 +236,21 @@ mod test {
         let mut seg_min = LazySegmentTree::new(
             n,
             || INF,
-            |s, t| min(*s, *t),
-            |f, x| *f + *x,
-            |f, g| *f + *g,
+            |&s, &t| s.min(t),
+            |&f, &x| f + x,
+            |&f, &g| f + g,
             || 0,
         );
         let mut seg_max = LazySegmentTree::new(
             n,
             || -INF,
-            |s, t| max(*s, *t),
-            |f, x| *f + *x,
-            |f, g| *f + *g,
+            |&s, &t| s.max(t),
+            |&f, &x| f + x,
+            |&f, &g| f + g,
             || 0,
         );
         for i in 0..n {
-            let value = rng.sample(Uniform::from(-1000..=1000));
+            let value = rng.gen_range(-1000, 1000);
             array[i] = value;
             seg_min.set(i, value);
             seg_max.set(i, value);
@@ -259,7 +258,7 @@ mod test {
 
         for l in 0..n {
             for r in (l + 1)..n {
-                let value = rng.sample(Uniform::from(-1000..=1000));
+                let value = rng.gen_range(-1000, 1000);
                 seg_min.apply_range(l..r, value);
                 seg_max.apply_range(l..r, value);
 
@@ -330,9 +329,9 @@ mod test {
         }
 
         for _ in 0..1000 {
-            let digit = rng.sample(Uniform::from(0..=9));
-            let left = rng.sample(Uniform::from(0..n));
-            let right = rng.sample(Uniform::from((left + 1)..=n));
+            let digit = rng.gen_range(0, 10);
+            let left = rng.gen_range(0, n);
+            let right = rng.gen_range(left + 1, n + 1);
             for i in left..right {
                 array[i] = digit;
             }

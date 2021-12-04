@@ -11,6 +11,7 @@ pub mod mod_int {
         MOD.with(|x| *x.borrow())
     }
 
+    #[derive(Debug)]
     pub struct ModInt(ModInternalNum);
     impl Clone for ModInt {
         fn clone(&self) -> Self {
