@@ -1,6 +1,6 @@
 [package]
 name = "competitive-programming-rs"
-version = "37.0.1"
+version = "38.0.0"
 authors = ["kenkoooo"]
 description = "Competitive Programming Library in Rust"
 license-file = "LICENSE"

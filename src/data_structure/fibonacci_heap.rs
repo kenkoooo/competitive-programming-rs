@@ -1,109 +1,152 @@
 pub mod fibonacci_heap {
+    use std::collections::{HashMap, LinkedList};
 
-    fn store_to_map<T, F>(
-        map: &mut std::collections::HashMap<usize, Node<T>>,
-        mut node: Node<T>,
-        ordering: F,
-    ) where
-        T: Copy + PartialEq,
-        F: Fn(T, T) -> T,
-    {
-        let d = node.children.len();
-        match map.remove(&d) {
-            Some(mut other) => {
-                let node = if (ordering)(node.key, other.key) == node.key {
-                    node.children.push(other);
-                    node
-                } else {
-                    other.children.push(node);
-                    other
-                };
-                store_to_map(map, node, ordering);
-            }
-            None => {
-                map.insert(d, node);
-            }
-        }
-    }
-
-    pub struct FibonacciHeap<T, F> {
-        pub nodes: Vec<Node<T>>,
-        min_index: usize,
-        ordering: F,
-    }
-
-    impl<T, F> FibonacciHeap<T, F>
-    where
-        T: Copy + PartialEq,
-        F: Fn(T, T) -> T + Copy,
-    {
-        pub fn new(ordering: F) -> Self {
-            Self {
-                nodes: Vec::new(),
-                min_index: 0,
-                ordering,
-            }
-        }
-        pub fn push(&mut self, x: T) {
-            let node = Node::new(x);
-            self.nodes.push(node);
-            let cur_min = self.nodes[self.min_index].key;
-            if (self.ordering)(cur_min, x) == x {
-                self.min_index = self.nodes.len() - 1;
-            }
-        }
-        pub fn pop(&mut self) -> Option<T> {
-            let mut map = std::collections::HashMap::<usize, Node<T>>::new();
-            let mut popped = None;
-
-            let mut nodes = Vec::new();
-            std::mem::swap(&mut self.nodes, &mut nodes);
-            for (i, node) in nodes.into_iter().enumerate() {
-                if i == self.min_index {
-                    popped = Some(node.key);
-                    for node in node.children.into_iter() {
-                        store_to_map(&mut map, node, self.ordering);
-                    }
-                } else {
-                    store_to_map(&mut map, node, self.ordering);
-                }
-            }
-
-            self.nodes = map.into_iter().map(|(_, node)| node).collect();
-            if !self.nodes.is_empty() {
-                let mut min = self.nodes[0].key;
-                for i in 0..self.nodes.len() {
-                    if (self.ordering)(min, self.nodes[i].key) == self.nodes[i].key {
-                        min = self.nodes[i].key;
-                    }
-                }
-
-                self.min_index = self
-                    .nodes
-                    .iter()
-                    .enumerate()
-                    .find(|(_, node)| node.key == min)
-                    .unwrap()
-                    .0;
-            } else {
-                self.min_index = 0;
-            }
-            popped
-        }
+    #[derive(Debug)]
+    struct Node<T> {
+        value: T,
+        children: Vec<Node<T>>,
     }
 
     #[derive(Debug)]
-    pub struct Node<T> {
-        pub key: T,
-        pub children: Vec<Node<T>>,
+    pub struct FibonacciHeap<T> {
+        nodes: LinkedList<Node<T>>,
+        size: usize,
     }
 
-    impl<T> Node<T> {
-        fn new(x: T) -> Self {
+    impl<T> FibonacciHeap<T> {
+        pub fn new() -> Self {
             Self {
-                key: x,
-                children: Vec::new(),
+                nodes: LinkedList::new(),
+                size: 0,
             }
+        }
+    }
+
+    impl<T> FibonacciHeap<T> {
+        pub fn len(&self) -> usize {
+            self.size
+        }
+    }
+
+    impl<T: PartialOrd> FibonacciHeap<T> {
+        pub fn push(&mut self, value: T) {
+            let node = Node {
+                value,
+                children: vec![],
+            };
+            self.push_node(node);
+            self.size += 1;
+        }
+
+        fn push_node(&mut self, node: Node<T>) {
+            match self.nodes.iter().next() {
+                Some(first) => {
+                    if first.value > node.value {
+                        self.nodes.push_front(node);
+                    } else {
+                        self.nodes.push_back(node);
+                    }
+                }
+                None => {
+                    self.nodes.push_back(node);
+                }
+            }
+        }
+
+        pub fn pop(&mut self) -> Option<T> {
+            let min = match self.nodes.pop_front() {
+                Some(min) => min,
+                None => {
+                    assert_eq!(self.size, 0);
+                    return None;
+                }
+            };
+
+            let mut node_by_deg = HashMap::new();
+            let popped = min.value;
+            for node in min.children {
+                consolidate(node, &mut node_by_deg);
+            }
+
+            while let Some(node) = self.nodes.pop_front() {
+                consolidate(node, &mut node_by_deg);
+            }
+            assert!(self.nodes.is_empty());
+            for (_, node) in node_by_deg {
+                self.push_node(node);
+            }
+            assert!(self.size > 0);
+            self.size -= 1;
+            Some(popped)
+        }
+
+        pub fn peek(&self) -> Option<&T> {
+            self.nodes.iter().next().map(|node| &node.value)
+        }
+
+        pub fn merge(self, other: Self) -> Self {
+            let FibonacciHeap {
+                nodes: mut a_nodes,
+                size: a_size,
+            } = self;
+            let FibonacciHeap {
+                nodes: mut b_nodes,
+                size: b_size,
+            } = other;
+
+            let size = a_size + b_size;
+
+            match (a_nodes.pop_front(), b_nodes.pop_front()) {
+                (Some(a), Some(b)) => {
+                    let (small, large) = if a.value < b.value { (a, b) } else { (b, a) };
+                    a_nodes.append(&mut b_nodes);
+                    a_nodes.push_front(large);
+                    a_nodes.push_front(small);
+                    Self {
+                        nodes: a_nodes,
+                        size,
+                    }
+                }
+                (Some(a), None) => {
+                    assert_eq!(a_size, size);
+                    a_nodes.push_front(a);
+                    Self {
+                        nodes: a_nodes,
+                        size,
+                    }
+                }
+                (None, Some(b)) => {
+                    assert_eq!(b_size, size);
+                    b_nodes.push_front(b);
+                    Self {
+                        nodes: b_nodes,
+                        size,
+                    }
+                }
+                (None, None) => {
+                    assert_eq!(size, 0);
+                    Self {
+                        nodes: LinkedList::new(),
+                        size,
+                    }
+                }
+            }
+        }
+    }
+
+    fn consolidate<T: PartialOrd>(node: Node<T>, node_by_deg: &mut HashMap<usize, Node<T>>) {
+        let degree = node.children.len();
+        if let Some(same_degree_node) = node_by_deg.remove(&degree) {
+            assert_eq!(same_degree_node.children.len(), degree);
+            let (mut small, large) = if same_degree_node.value < node.value {
+                (same_degree_node, node)
+            } else {
+                (node, same_degree_node)
+            };
+            small.children.push(large);
+            consolidate(small, node_by_deg);
+        } else {
+            node_by_deg.insert(degree, node);
         }
     }
 }
@@ -111,22 +154,33 @@ pub mod fibonacci_heap {
 #[cfg(test)]
 mod tests {
     use super::fibonacci_heap::*;
-    use rand::Rng;
-    use std::cmp;
+    use rand::prelude::*;
+    use std::cmp::Reverse;
     use std::collections::BinaryHeap;
 
     #[test]
     fn test_fibonacci_heap() {
-        let mut min_heap = FibonacciHeap::new(cmp::min);
+        let mut min_heap = FibonacciHeap::new();
+
+        assert_eq!(min_heap.len(), 0);
         min_heap.push(1);
+        assert_eq!(min_heap.len(), 1);
         assert_eq!(min_heap.pop(), Some(1));
+        assert_eq!(min_heap.len(), 0);
 
         min_heap.push(1);
+        assert_eq!(min_heap.len(), 1);
         min_heap.push(2);
+        assert_eq!(min_heap.len(), 2);
         min_heap.push(3);
+        assert_eq!(min_heap.len(), 3);
+
         assert_eq!(min_heap.pop(), Some(1));
+        assert_eq!(min_heap.len(), 2);
         assert_eq!(min_heap.pop(), Some(2));
+        assert_eq!(min_heap.len(), 1);
         assert_eq!(min_heap.pop(), Some(3));
+        assert_eq!(min_heap.len(), 0);
 
         min_heap.push(3);
         min_heap.push(2);
@@ -138,20 +192,50 @@ mod tests {
 
     #[test]
     fn compare_to_binary_heap() {
-        let mut rng = rand::thread_rng();
-        let mut max_heap = FibonacciHeap::new(cmp::max);
+        let mut rng = thread_rng();
+        let mut max_heap = FibonacciHeap::new();
         let mut binary_heap = BinaryHeap::new();
 
         for _ in 0..2000 {
             let x = rng.gen::<usize>() % 10;
 
             if x == 0 {
-                assert_eq!(max_heap.pop(), binary_heap.pop());
+                assert_eq!(max_heap.pop().map(|x: Reverse<u8>| x.0), binary_heap.pop());
             } else {
                 let v = rng.gen::<u8>();
-                max_heap.push(v);
+                max_heap.push(Reverse(v));
                 binary_heap.push(v);
             }
+
+            assert_eq!(max_heap.len(), binary_heap.len());
+        }
+    }
+
+    #[test]
+    fn merge_heaps() {
+        let mut rng = thread_rng();
+        let mut check = vec![];
+
+        let mut a_heap = FibonacciHeap::new();
+        for _ in 0..2000 {
+            let x = rng.gen_range(0, 100);
+            a_heap.push(x);
+            check.push(x);
+        }
+        let mut b_heap = FibonacciHeap::new();
+        for _ in 0..2000 {
+            let x = rng.gen_range(0, 100);
+            b_heap.push(x);
+            check.push(x);
+        }
+        a_heap = a_heap.merge(b_heap);
+
+        assert_eq!(a_heap.len(), check.len());
+        check.sort();
+        check.reverse();
+        while let Some(v) = check.pop() {
+            let head = a_heap.pop().unwrap();
+            assert_eq!(head, v);
         }
     }
 }
