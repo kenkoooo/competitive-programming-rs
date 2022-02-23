@@ -54,9 +54,9 @@ pub mod bitset {
             let (data_index, bit_index) = get_bit_position(index);
             assert!(self.data.len() > data_index);
             if value {
-                self.data[data_index] |= (1 << bit_index) as u64;
+                self.data[data_index] |= 1 << (bit_index as u64);
             } else {
-                let tmp = MAXIMUM ^ (1 << bit_index) as u64;
+                let tmp = MAXIMUM ^ 1 << (bit_index as u64);
                 self.data[data_index] &= tmp;
             }
         }
