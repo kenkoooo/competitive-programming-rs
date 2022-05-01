@@ -3,9 +3,60 @@ pub mod convex_hull;
 pub mod minimum_bounding_circle;
 
 pub mod basic {
+    #[derive(Copy, Clone, Debug)]
     pub struct Point<T> {
         pub x: T,
         pub y: T,
+    }
+
+    impl<T> Point<T>
+    where
+        T: std::ops::Mul<T, Output = T> + std::ops::Sub<T, Output = T> + Copy,
+    {
+        pub fn det(&self, p: Point<T>) -> T {
+            self.x * p.y - self.y * p.x
+        }
+    }
+
+    impl<T> std::ops::Add for Point<T>
+    where
+        T: std::ops::Add<T, Output = T>,
+    {
+        type Output = Self;
+
+        fn add(self, rhs: Self) -> Self::Output {
+            Point {
+                x: self.x + rhs.x,
+                y: self.y + rhs.y,
+            }
+        }
+    }
+
+    impl<T> std::ops::Sub for Point<T>
+    where
+        T: std::ops::Sub<T, Output = T>,
+    {
+        type Output = Self;
+
+        fn sub(self, rhs: Self) -> Self::Output {
+            Point {
+                x: self.x - rhs.x,
+                y: self.y - rhs.y,
+            }
+        }
+    }
+    impl<T> std::ops::Mul<T> for Point<T>
+    where
+        T: std::ops::Mul<T, Output = T> + Copy,
+    {
+        type Output = Self;
+
+        fn mul(self, rhs: T) -> Self::Output {
+            Point {
+                x: self.x * rhs,
+                y: self.y * rhs,
+            }
+        }
     }
 
     pub struct Segment<T> {
@@ -24,29 +75,16 @@ pub mod basic {
             + std::ops::Div<T, Output = T>,
     {
         pub fn cross_point(&self, seg: &Segment<T>) -> Option<Point<T>> {
-            if (self.to.x - self.from.x) * (seg.to.y - seg.from.y)
-                == (self.to.y - self.from.y) * (seg.to.x - seg.from.x)
-            {
+            let (a, b) = (self.from, self.to);
+            let (c, d) = (seg.from, seg.to);
+            let dc = d - c;
+            let ba = b - a;
+            if dc.x * ba.y == dc.y * ba.x {
                 return None;
             }
-            let c = (self.to.x - self.from.x) * (seg.to.y - seg.from.y)
-                - (self.to.y - self.from.y) * (seg.to.x - seg.from.x);
 
-            let ac = Point {
-                x: seg.from.x - self.from.x,
-                y: seg.from.y - self.from.y,
-            };
-
-            let r = ((seg.to.y - seg.from.y) * ac.x - (seg.to.x - seg.from.x) * ac.y) / c;
-            let distance = Point {
-                x: (self.to.x - self.from.x) * r,
-                y: (self.to.y - self.from.y) * r,
-            };
-            let cross_point = Point {
-                x: self.from.x + distance.x,
-                y: self.from.y + distance.y,
-            };
-            Some(cross_point)
+            let p = a + (b - a) * ((a - c).det(d - c) / (d - c).det(b - a));
+            Some(p)
         }
     }
 }
