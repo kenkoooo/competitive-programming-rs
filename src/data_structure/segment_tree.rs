@@ -35,8 +35,20 @@ where
     }
 
     /// Get the result in the array of the range
-    pub fn query(&self, range: std::ops::Range<usize>) -> Option<T> {
-        self.query_range(range, 0, 0..self.n)
+    pub fn query<R: std::ops::RangeBounds<usize>>(&self, range: R) -> Option<T> {
+        let start = match range.start_bound() {
+            std::ops::Bound::Included(t) => *t,
+            std::ops::Bound::Excluded(t) => *t+1,
+            std::ops::Bound::Unbounded => 0,
+        };
+
+        let end = match range.end_bound() {
+            std::ops::Bound::Included(t) => *t+1,
+            std::ops::Bound::Excluded(t) => *t,
+            std::ops::Bound::Unbounded => self.n,
+        };
+
+        self.query_range(start..end, 0, 0..self.n)
     }
 
     fn query_range(
