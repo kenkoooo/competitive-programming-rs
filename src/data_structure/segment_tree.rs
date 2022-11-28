@@ -216,7 +216,11 @@ mod test {
                     minimum = minimum.min(arr[i]);
                 }
                 assert_eq!(seg.query(0..N), Some(minimum));
+                assert_eq!(seg.query(0..=(N-1)), Some(minimum));
             }
+
+            assert_eq!(seg.query(0..N), seg.query(0..=(N-1)));
+            assert_eq!(seg.query(0..N), seg.query(..));
         }
     }
 
@@ -247,9 +251,13 @@ mod test {
                         }
 
                         assert_eq!(seg.query(i1..i2, j1..j2), Some(minimum));
+                        assert_eq!(seg.query(i1..=(i2-1), j1..j2), Some(minimum));
                     }
                 }
             }
         }
+
+        assert_eq!(seg.query(0..N, ..), seg.query(.., 0..N));
+        assert_ne!(seg.query(0..N, ..), seg.query(0..=N, ..));
     }
 }
