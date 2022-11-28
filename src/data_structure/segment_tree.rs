@@ -114,8 +114,29 @@ where
         }
     }
 
-    pub fn query(&self, r: std::ops::Range<usize>, c: std::ops::Range<usize>) -> Option<T> {
-        self.query_range(r, 0, 0..self.n, c)
+    pub fn query<C, R>(&self, r: R, c: C) -> Option<T>
+    where
+        C: std::ops::RangeBounds<usize>,
+        R: std::ops::RangeBounds<usize>,
+    {
+        let start = |s: std::ops::Bound<&usize>| match s {
+            std::ops::Bound::Included(t) => *t,
+            std::ops::Bound::Excluded(t) => *t+1,
+            std::ops::Bound::Unbounded => 0,
+        };
+
+        let end = |e: std::ops::Bound<&usize>| match e {
+            std::ops::Bound::Included(t) => *t+1,
+            std::ops::Bound::Excluded(t) => *t,
+            std::ops::Bound::Unbounded => self.n,
+        };
+
+        let r_start = start(r.start_bound());
+        let c_start = start(c.start_bound());
+        let r_end = end(r.end_bound());
+        let c_end = end(c.end_bound());
+
+        self.query_range(r_start..r_end, 0, 0..self.n, c_start..c_end)
     }
 
     fn query_range(
