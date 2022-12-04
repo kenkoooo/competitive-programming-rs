@@ -258,6 +258,6 @@ mod test {
         }
 
         assert_eq!(seg.query(0..N, ..), seg.query(.., 0..N));
-        assert_ne!(seg.query(0..N, ..), seg.query(0..=N, ..));
+        assert_eq!(seg.query(0..N, ..), seg.query(0..=N, ..));
     }
 }
