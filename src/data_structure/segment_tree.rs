@@ -35,8 +35,20 @@ where
     }
 
     /// Get the result in the array of the range
-    pub fn query(&self, range: std::ops::Range<usize>) -> Option<T> {
-        self.query_range(range, 0, 0..self.n)
+    pub fn query<R: std::ops::RangeBounds<usize>>(&self, range: R) -> Option<T> {
+        let start = match range.start_bound() {
+            std::ops::Bound::Included(t) => *t,
+            std::ops::Bound::Excluded(t) => *t+1,
+            std::ops::Bound::Unbounded => 0,
+        };
+
+        let end = match range.end_bound() {
+            std::ops::Bound::Included(t) => *t+1,
+            std::ops::Bound::Excluded(t) => *t,
+            std::ops::Bound::Unbounded => self.n,
+        };
+
+        self.query_range(start..end, 0, 0..self.n)
     }
 
     fn query_range(
@@ -102,8 +114,29 @@ where
         }
     }
 
-    pub fn query(&self, r: std::ops::Range<usize>, c: std::ops::Range<usize>) -> Option<T> {
-        self.query_range(r, 0, 0..self.n, c)
+    pub fn query<C, R>(&self, r: R, c: C) -> Option<T>
+    where
+        C: std::ops::RangeBounds<usize>,
+        R: std::ops::RangeBounds<usize>,
+    {
+        let start = |s: std::ops::Bound<&usize>| match s {
+            std::ops::Bound::Included(t) => *t,
+            std::ops::Bound::Excluded(t) => *t+1,
+            std::ops::Bound::Unbounded => 0,
+        };
+
+        let end = |e: std::ops::Bound<&usize>| match e {
+            std::ops::Bound::Included(t) => *t+1,
+            std::ops::Bound::Excluded(t) => *t,
+            std::ops::Bound::Unbounded => self.n,
+        };
+
+        let r_start = start(r.start_bound());
+        let c_start = start(c.start_bound());
+        let r_end = end(r.end_bound());
+        let c_end = end(c.end_bound());
+
+        self.query_range(r_start..r_end, 0, 0..self.n, c_start..c_end)
     }
 
     fn query_range(
@@ -183,7 +216,11 @@ mod test {
                     minimum = minimum.min(arr[i]);
                 }
                 assert_eq!(seg.query(0..N), Some(minimum));
+                assert_eq!(seg.query(0..=(N-1)), Some(minimum));
             }
+
+            assert_eq!(seg.query(0..N), seg.query(0..=(N-1)));
+            assert_eq!(seg.query(0..N), seg.query(..));
         }
     }
 
@@ -214,9 +251,13 @@ mod test {
                         }
 
                         assert_eq!(seg.query(i1..i2, j1..j2), Some(minimum));
+                        assert_eq!(seg.query(i1..=(i2-1), j1..j2), Some(minimum));
                     }
                 }
             }
         }
+
+        assert_eq!(seg.query(0..N, ..), seg.query(.., 0..N));
+        assert_eq!(seg.query(0..N, ..), seg.query(0..=N, ..));
     }
 }
