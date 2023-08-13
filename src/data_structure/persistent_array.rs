@@ -1,41 +1,44 @@
 pub mod persistent_array {
-    use std::rc::Rc;
+    use std::{convert::TryInto, rc::Rc};
 
-    const N: usize = 20;
     #[derive(Clone)]
-    pub struct Node<T: Clone> {
+    pub struct Node<T: Clone, const N: usize> {
         data: Option<T>,
-        children: [Option<Rc<Node<T>>>; N],
+        children: [Option<Rc<Node<T, N>>>; N],
     }
 
-    impl<T: Clone> Node<T> {
-        pub fn new(data: Option<T>, children: [Option<Rc<Node<T>>>; N]) -> Self {
+    impl<T: Clone, const N: usize> Node<T, N> {
+        pub fn new(data: Option<T>, children: [Option<Rc<Node<T, N>>>; N]) -> Self {
             Self { data, children }
         }
     }
 
-    impl<T: Clone> Default for Node<T> {
+    impl<T: Clone, const N: usize> Default for Node<T, N> {
         fn default() -> Self {
             Self {
                 data: None,
-                children: Default::default(),
+                children: default_array(),
             }
         }
     }
 
-    pub fn set<T: Clone>(index: usize, data: T, node: Option<Rc<Node<T>>>) -> Rc<Node<T>> {
+    pub fn set<T: Clone, const N: usize>(
+        index: usize,
+        data: T,
+        node: Option<Rc<Node<T, N>>>,
+    ) -> Rc<Node<T, N>> {
         if index == 0 {
             match node {
                 Some(node) => {
                     let new_node = Node::new(Some(data), node.children.clone());
                     Rc::new(new_node)
                 }
-                None => Rc::new(Node::new(Some(data), Default::default())),
+                None => Rc::new(Node::new(Some(data), default_array())),
             }
         } else {
             let child = match node
                 .as_ref()
-                .and_then::<&Rc<Node<T>>, _>(|node| node.children[index % N].as_ref())
+                .and_then::<&Rc<Node<T, N>>, _>(|node| node.children[index % N].as_ref())
             {
                 Some(next_node) => set(index / N, data, Some(next_node.clone())),
                 None => set(index / N, data, None),
@@ -49,7 +52,7 @@ pub mod persistent_array {
         }
     }
 
-    pub fn get<T: Clone>(index: usize, node: &Rc<Node<T>>) -> Option<T> {
+    pub fn get<T: Clone, const N: usize>(index: usize, node: &Rc<Node<T, N>>) -> Option<T> {
         if index == 0 {
             node.data.clone()
         } else {
@@ -58,6 +61,14 @@ pub mod persistent_array {
                 None => None,
             }
         }
+    }
+
+    fn default_array<T: Clone, const N: usize>() -> [Option<Rc<Node<T, N>>>; N] {
+        let mut children = Vec::with_capacity(N);
+        for _ in 0..N {
+            children.push(None);
+        }
+        children.try_into().unwrap_or_else(|_| panic!())
     }
 }
 
@@ -73,7 +84,7 @@ mod tests {
         let mut rng = thread_rng();
         let n: usize = 20;
         let mut vs = vec![vec![None; n]];
-        let mut nodes = vec![Rc::new(Node::default())];
+        let mut nodes = vec![Rc::new(Node::<_, 20>::default())];
 
         for _ in 0..10000 {
             let pick = rng.sample(Uniform::from(0..vs.len()));
