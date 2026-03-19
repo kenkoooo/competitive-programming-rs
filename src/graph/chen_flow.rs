@@ -63,20 +63,23 @@ pub mod chen_flow {
             // Initialize strictly interior feasible circulation
             let mut flow = initialize_flow(n, &edge_from, &edge_to, &cap);
 
-            // IPM main loop
+            // IPM main loop with adaptive mu reduction
             let mut potential = vec![0.0_f64; n];
             let mut mu = 1.0_f64;
-            let target_mu = 1e-9;
-            let shrink = 1.0 - 0.4 / (m as f64).sqrt();
-            let theory_iters = ((mu / target_mu).ln() / (1.0 / shrink).ln()) as usize;
-            let max_iters = theory_iters + 500;
+            let target_mu = 1e-7;
 
-            for _ in 0..max_iters {
+            for _ in 0..3000 {
                 if mu < target_mu {
                     break;
                 }
-                ipm_step(n, &edge_from, &edge_to, &cap, &cost, &mut flow, &mut potential, mu);
-                mu *= shrink;
+                let alpha = ipm_step(n, &edge_from, &edge_to, &cap, &cost, &mut flow, &mut potential, mu);
+                if alpha > 0.8 {
+                    mu *= 0.85;
+                } else if alpha > 0.3 {
+                    mu *= 0.95;
+                } else {
+                    mu *= 0.995;
+                }
             }
 
             flow[return_idx].round() as i64
@@ -105,7 +108,8 @@ pub mod chen_flow {
 
         let m = edge_from.len();
         let nn = n - 1;
-        let mut mat = vec![vec![0.0_f64; nn + 1]; nn];
+        let stride = nn + 1;
+        let mut mat = vec![0.0_f64; nn * stride];
 
         // Build Laplacian matrix (skip row/col 0)
         for e in 0..m {
@@ -116,27 +120,27 @@ pub mod chen_flow {
                 continue;
             }
             if u > 0 {
-                mat[u - 1][u - 1] += w;
+                mat[(u - 1) * stride + (u - 1)] += w;
             }
             if v > 0 {
-                mat[v - 1][v - 1] += w;
+                mat[(v - 1) * stride + (v - 1)] += w;
             }
             if u > 0 && v > 0 {
-                mat[u - 1][v - 1] -= w;
-                mat[v - 1][u - 1] -= w;
+                mat[(u - 1) * stride + (v - 1)] -= w;
+                mat[(v - 1) * stride + (u - 1)] -= w;
             }
         }
 
         for i in 0..nn {
-            mat[i][nn] = rhs[i + 1];
+            mat[i * stride + nn] = rhs[i + 1];
         }
 
         // Gaussian elimination with partial pivoting
         for col in 0..nn {
-            let mut max_val = mat[col][col].abs();
+            let mut max_val = mat[col * stride + col].abs();
             let mut max_row = col;
             for row in (col + 1)..nn {
-                let val = mat[row][col].abs();
+                let val = mat[row * stride + col].abs();
                 if val > max_val {
                     max_val = val;
                     max_row = row;
@@ -148,37 +152,38 @@ pub mod chen_flow {
             }
 
             if max_row != col {
-                mat.swap(col, max_row);
+                for j in col..stride {
+                    let a = col * stride + j;
+                    let b = max_row * stride + j;
+                    let tmp = mat[a];
+                    mat[a] = mat[b];
+                    mat[b] = tmp;
+                }
             }
 
-            let pivot = mat[col][col];
+            let pivot = mat[col * stride + col];
             for row in (col + 1)..nn {
-                let factor = mat[row][col] / pivot;
-                mat[row][col] = 0.0;
-                for j in (col + 1)..=nn {
-                    mat[row][j] -= factor * mat[col][j];
+                let factor = mat[row * stride + col] / pivot;
+                mat[row * stride + col] = 0.0;
+                for j in (col + 1)..stride {
+                    mat[row * stride + j] -= factor * mat[col * stride + j];
                 }
             }
         }
 
         // Back substitution
-        let mut x_reduced = vec![0.0_f64; nn];
+        let mut result = vec![0.0_f64; n];
         for i in (0..nn).rev() {
-            if mat[i][i].abs() < 1e-15 {
-                x_reduced[i] = 0.0;
+            if mat[i * stride + i].abs() < 1e-15 {
                 continue;
             }
-            let mut sum = mat[i][nn];
+            let mut sum = mat[i * stride + nn];
             for j in (i + 1)..nn {
-                sum -= mat[i][j] * x_reduced[j];
+                sum -= mat[i * stride + j] * result[j + 1];
             }
-            x_reduced[i] = sum / mat[i][i];
+            result[i + 1] = sum / mat[i * stride + i];
         }
 
-        let mut result = vec![0.0_f64; n];
-        for i in 0..nn {
-            result[i + 1] = x_reduced[i];
-        }
         result
     }
 
